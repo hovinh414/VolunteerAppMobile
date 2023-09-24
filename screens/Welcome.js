@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import COLORS from '../constants/colors';
 import Button from '../components/Button';
 
+
 const Welcome = ({ navigation }) => {
 
     return (
@@ -16,7 +17,7 @@ const Welcome = ({ navigation }) => {
             <View style={{ flex: 1 }}>
                 <View>
                     <Image
-                        source={require("../assets/hero1.jpg")}
+                        source={require("../assets/tn4.jpg")}
                         style={{
                             height: 100,
                             width: 100,
@@ -32,7 +33,7 @@ const Welcome = ({ navigation }) => {
                     />
 
                     <Image
-                        source={require("../assets/hero3.jpg")}
+                        source={require("../assets/tn3.jpg")}
                         style={{
                             height: 100,
                             width: 100,
@@ -49,7 +50,7 @@ const Welcome = ({ navigation }) => {
                     />
 
                     <Image
-                        source={require("../assets/hero3.jpg")}
+                        source={require("../assets/tn2.jpg")}
                         style={{
                             width: 100,
                             height: 100,
@@ -66,7 +67,7 @@ const Welcome = ({ navigation }) => {
                     />
 
                     <Image
-                        source={require("../assets/hero2.jpg")}
+                        source={require("../assets/tn1.jpg")}
                         style={{
                             height: 200,
                             width: 200,

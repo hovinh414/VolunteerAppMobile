@@ -1,15 +1,53 @@
-import { View, Text, Image , Pressable, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, Image , Pressable, TextInput, TouchableOpacity, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from '../../constants/colors';
 import { Ionicons } from "@expo/vector-icons";
 import Checkbox from "expo-checkbox"
 import Button from '../../components/Button';
+import axios from 'axios';
+import {toast} from 'react-toastify';
+import { loginApi } from '../../services/UserService';
 
 const LoginScreen = ({ navigation }) => {
-    const [isPasswordShown, setIsPasswordShown] = useState(false);
+
+
+    const [isPasswordShown, setIsPasswordShown] = useState(true);
     const [isChecked, setIsChecked] = useState(false);
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
     
+    const handleLogin = async () => {
+        if (!username || !password) {
+            Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ tên đằng nhập và mật khẩu!', [
+                
+                {text: 'OK', onPress: () => console.log('OK Pressed')},
+              ]);
+            return;
+        }
+        await loginApi(username, password).then((res) => {
+            
+            if (res.status === 200 && res.data.data.accessToken !== 0) {
+                localStorage.setItem("token",res.data.data.accessToken);
+                navigation.navigate("Welcome");
+            } else  {
+                Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
+                
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                  ]);
+                return;
+            }
+
+        }).catch(error => {
+            Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
+                
+                {text: 'OK', onPress: () => console.log('OK Pressed')},
+              ]);
+            return;
+        });
+        
+    }
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
             <View style={{ flex: 1, marginHorizontal: 22 }}>
@@ -53,6 +91,9 @@ const LoginScreen = ({ navigation }) => {
                             style={{
                                 width: "100%"
                             }}
+                            
+                            value={username}
+                            onChange={(event) => setUsername(event.target.value)}
                         />
                     </View>
                 </View>
@@ -81,6 +122,9 @@ const LoginScreen = ({ navigation }) => {
                             style={{
                                 width: "100%"
                             }}
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+
                         />
 
                         <TouchableOpacity
@@ -113,7 +157,7 @@ const LoginScreen = ({ navigation }) => {
                         color={isChecked ? COLORS.primary : undefined}
                     />
 
-                    <Text>Remenber Me</Text>
+                    <Text>Remember Me</Text>
                 </View>
 
                 <Button
@@ -123,6 +167,7 @@ const LoginScreen = ({ navigation }) => {
                         marginTop: 18,
                         marginBottom: 4,
                     }}
+                    onPress={() => handleLogin()}
                 />
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
@@ -225,5 +270,6 @@ const LoginScreen = ({ navigation }) => {
         </SafeAreaView>
     )
 }
+
 
 export default LoginScreen
