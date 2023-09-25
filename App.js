@@ -2,7 +2,7 @@ import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator} from '@react-navigation/native-stack'
 import { LoginScreen, SignType, Signup, Welcome, SignupOrganisation } from './screens';
-
+import {Feed} from './screens/Home/Feed';
 
 const Stack = createNativeStackNavigator()
 export default function App() {
@@ -45,6 +45,13 @@ export default function App() {
         options={{
           headerShown: false
         }}
+        />
+        <Stack.Screen
+          name="Feed"
+          component={Feed}
+          options={{
+            headerShown: false,
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

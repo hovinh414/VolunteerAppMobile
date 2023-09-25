@@ -17,36 +17,84 @@ const LoginScreen = ({ navigation }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-    
-    const handleLogin = async () => {
-        if (!username || !password) {
-            Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ tên đằng nhập và mật khẩu!', [
+    const [response, setResponse] = useState("");
+    // const handleLogin = async () => {
+        
+    //     if (!username || !password) {
+    //         Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ tên đằng nhập và mật khẩu!', [
                 
-                {text: 'OK', onPress: () => console.log('OK Pressed')},
-              ]);
-            return;
-        }
-        await loginApi(username, password).then((res) => {
+    //             {text: 'OK', onPress: () => console.log('OK Pressed')},
+    //           ]);
+    //         return;
+    //     }
+    //     await loginApi(username, password).then((res) => {
             
-            if (res.status === 200 && res.data.data.accessToken !== 0) {
-                localStorage.setItem("token",res.data.data.accessToken);
-                navigation.navigate("Welcome");
-            } else  {
-                Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
+    //         if (res.status === 200 && res.data.data.accessToken !== null) {
+    //             localStorage.setItem("token",res.data.data.accessToken);
+    //             localStorage.setItem("user",res.data.data.userResult);
+    //             navigation.navigate("Welcome");
+    //         } 
+    //         else  {
+    //             Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
                 
+    //                 {text: 'OK', onPress: () => console.log('OK Pressed')},
+    //               ]);
+    //             return;
+    //         }
+
+    //     }).catch(error => {
+    //         Alert.alert('Thông báo', error, [
+                
+    //             {text: 'OK', onPress: () => console.log('OK Pressed')},
+    //           ]);
+    //         return;
+    //     });
+        
+    // }
+    const handleLogin = async () => {
+        
+        try {
+            if (!username || !password) {
+                Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ tên đaưng nhập và mật khẩu!', [
+                            
                     {text: 'OK', onPress: () => console.log('OK Pressed')},
-                  ]);
+                ]);
                 return;
             }
-
-        }).catch(error => {
-            Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
+            const res =  await axios( {
+                method : 'post',
+                url: 'http://localhost:3000/api/v1/login',
+                headers:{
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json'
+                },
+                data: {
+                    username,
+                    password
+                },
+            });
+            
+            
+            if (res.data.status === 'SUCCESS' && res.data.data.accessToken !== null) {
                 
-                {text: 'OK', onPress: () => console.log('OK Pressed')},
-              ]);
-            return;
-        });
-        
+                setResponse(JSON.stringify(res.data));
+                console.log(JSON.stringify(res.data));
+                // localStorage.setItem("token",res.data.data.accessToken);
+                // localStorage.setItem("user",res.data.data.userResult);
+                navigation.navigate("Welcome");
+                
+            } else if (res.data.status == 'ERROR') {
+                Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
+                            
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ]);
+                return;
+            }
+            
+        } catch (error) {
+            alert(error);
+            setResponse(JSON.stringify(error))
+        }
     }
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
@@ -91,9 +139,9 @@ const LoginScreen = ({ navigation }) => {
                             style={{
                                 width: "100%"
                             }}
-                            
-                            value={username}
-                            onChange={(event) => setUsername(event.target.value)}
+                            onChangeText={(username) => {
+                                setUsername(username);
+                            }}
                         />
                     </View>
                 </View>
@@ -122,8 +170,9 @@ const LoginScreen = ({ navigation }) => {
                             style={{
                                 width: "100%"
                             }}
-                            value={password}
-                            onChange={(event) => setPassword(event.target.value)}
+                            onChangeText={(password) => {
+                                setPassword(password);
+                            }}
 
                         />
 
@@ -256,7 +305,7 @@ const LoginScreen = ({ navigation }) => {
                 }}>
                     <Text style={{ fontSize: 16, color: COLORS.black }}>Bạn chưa có tài khoản ? </Text>
                     <Pressable
-                        onPress={() => navigation.navigate("SignType")}
+                        onPress={() => navigation.navigate("Feed")}
                     >
                         <Text style={{
                             fontSize: 16,

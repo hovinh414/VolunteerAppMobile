@@ -5,10 +5,51 @@ import COLORS from '../../constants/colors';
 import { Ionicons } from "@expo/vector-icons";
 import Checkbox from "expo-checkbox"
 import Button from '../../components/Button';
+import { signUpApi } from '../../services/UserService';
 
 const Signup = ({ navigation }) => {
-    const [isPasswordShown, setIsPasswordShown] = useState(false);
+    const [isPasswordShown, setIsPasswordShown] = useState(true);
     const [isChecked, setIsChecked] = useState(false);
+
+    const [type, setType] = useState("user");
+    const [fullname, setFullname] = useState("");
+    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [phone, setPhone] = useState("");
+
+    const handleSignup = async () => {
+        try {
+            if (!username || !password || !email || !phone || !fullname) {
+                Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ thông tin!', [
+                    
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                  ]);
+                return;
+            }
+            await signUpApi(type,fullname, email, username, password, phone).then((res) => {
+                
+                if (res.status === 201) {
+                    Alert.alert('Thông báo', 'Đăng ký thành công!', [
+                    
+                        {text: 'OK', onPress: () => console.log('OK Pressed')},
+                      ]);
+                    navigation.navigate("LoginScreen");
+                } else  {
+                    Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
+                    
+                        {text: 'OK', onPress: () => console.log('OK Pressed')},
+                      ]);
+                    return;
+                }
+    
+            })
+        } catch (error) {
+            alert(error);
+        }
+        
+    }
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
             <View style={{ flex: 1, marginHorizontal: 22 }}>
@@ -51,6 +92,8 @@ const Signup = ({ navigation }) => {
                             style={{
                                 width: "100%"
                             }}
+                            value={fullname}
+                            onChange={(event) => setFullname(event.target.value)}
                         />
                     </View>
                 </View>
@@ -78,6 +121,8 @@ const Signup = ({ navigation }) => {
                             style={{
                                 width: "100%"
                             }}
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
                         />
                     </View>
                 </View>
@@ -105,6 +150,8 @@ const Signup = ({ navigation }) => {
                             style={{
                                 width: "100%"
                             }}
+                            value={username}
+                            onChange={(event) => setUsername(event.target.value)}
                         />
                     </View>
                 </View>               
@@ -145,6 +192,8 @@ const Signup = ({ navigation }) => {
                             style={{
                                 width: "80%"
                             }}
+                            value={phone}
+                            onChange={(event) => setPhone(event.target.value)}
                         />
                     </View>
                 </View>
@@ -173,6 +222,8 @@ const Signup = ({ navigation }) => {
                             style={{
                                 width: "100%"
                             }}
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
                         />
 
                         <TouchableOpacity
@@ -215,6 +266,7 @@ const Signup = ({ navigation }) => {
                         marginTop: 18,
                         marginBottom: 4,
                     }}
+                    onPress={() => handleSignup()}
                 />
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
