@@ -55,7 +55,7 @@ const LoginScreen = ({ navigation }) => {
         
         try {
             if (!username || !password) {
-                Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ tên đaưng nhập và mật khẩu!', [
+                Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!', [
                             
                     {text: 'OK', onPress: () => console.log('OK Pressed')},
                 ]);
@@ -112,7 +112,7 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={{
                         fontSize: 16,
                         color: COLORS.black
-                    }}>Chào mừng bạn quay trở lại!</Text>
+                    }}>Đăng nhập để tiếp tục!</Text>
                 </View>
 
                 <View style={{ marginBottom: 12 }}>
@@ -305,7 +305,7 @@ const LoginScreen = ({ navigation }) => {
                 }}>
                     <Text style={{ fontSize: 16, color: COLORS.black }}>Bạn chưa có tài khoản ? </Text>
                     <Pressable
-                        onPress={() => navigation.navigate("Feed")}
+                        onPress={() => navigation.navigate("SignupType")}
                     >
                         <Text style={{
                             fontSize: 16,

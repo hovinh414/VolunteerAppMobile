@@ -1,153 +1,77 @@
-import { View, Text, Pressable, Image } from 'react-native'
-import React from 'react'
-import { LinearGradient } from "expo-linear-gradient";
-import COLORS from '../constants/colors';
-import Button from '../components/Button';
+import { View, Text, Image } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { COLORS, SIZES, images, FONTS } from '../constants'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useNavigation } from '@react-navigation/native'
+import DotsView from '../components/DotsView'
+const Welcome = () => {
+    const [progress, setProgress] = useState(0)
+    const navigation = useNavigation()
 
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setProgress((prevProgress) => {
+                if (prevProgress >= 1) {
+                    clearInterval(intervalId)
+                    return prevProgress
+                }
 
-const Welcome = ({ navigation }) => {
+                return prevProgress + 0.3
+            })
+        }, 1000)
+
+        return () => clearInterval(intervalId)
+    }, [])
+
+    useEffect(() => {
+        if (progress >= 1) {
+            // navigate to the Feed Screen
+            navigation.navigate('BottomTabNavigation', { name: 'Feed' })
+        }
+    }, [progress, navigation])
 
     return (
-        <LinearGradient
-            style={{
-                flex: 1
-            }}
-            colors={[COLORS.secondary, COLORS.primary]}
-        >
-            <View style={{ flex: 1 }}>
-                <View>
-                    <Image
-                        source={require("../assets/tn4.jpg")}
-                        style={{
-                            height: 100,
-                            width: 100,
-                            borderRadius: 20,
-                            position: "absolute",
-                            top: 10,
-                            transform: [
-                                { translateX: 20 },
-                                { translateY: 50 },
-                                { rotate: "-15deg" }
-                            ]
-                        }}
-                    />
+        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+            <View
+                style={{
+                    padding:100,
+                    flex: 1,
+                    marginHorizontal: 22,
+                    alignItems: 'center',
+                }}
+            >
+                <Image
+                    source={images.hero}
+                    resizeMode="contain"
+                    style={{
+                        width: SIZES.width * 0.8,
+                        marginVertical: SIZES.padding2,
+                    }}
+                />
 
-                    <Image
-                        source={require("../assets/tn3.jpg")}
-                        style={{
-                            height: 100,
-                            width: 100,
-                            borderRadius: 20,
-                            position: "absolute",
-                            top: -30,
-                            left: 100,
-                            transform: [
-                                { translateX: 50 },
-                                { translateY: 50 },
-                                { rotate: "-5deg" }
-                            ]
-                        }}
-                    />
-
-                    <Image
-                        source={require("../assets/tn2.jpg")}
-                        style={{
-                            width: 100,
-                            height: 100,
-                            borderRadius: 20,
-                            position: "absolute",
-                            top: 130,
-                            left: -50,
-                            transform: [
-                                { translateX: 50 },
-                                { translateY: 50 },
-                                { rotate: "15deg" }
-                            ]
-                        }}
-                    />
-
-                    <Image
-                        source={require("../assets/tn1.jpg")}
-                        style={{
-                            height: 200,
-                            width: 200,
-                            borderRadius: 20,
-                            position: "absolute",
-                            top: 110,
-                            left: 100,
-                            transform: [
-                                { translateX: 50 },
-                                { translateY: 50 },
-                                { rotate: "-15deg" }
-                            ]
-                        }}
-                    />
+                <View
+                    style={{
+                        alignItems: 'center',
+                    }}
+                >
+                    <Text style={{ ...FONTS.body2 }}>Chào mứng tới</Text>
+                    <Text
+                        style={{ ...FONTS.h1, marginVertical: SIZES.padding2 }}
+                    >
+                        VIỆC TỬ TẾ
+                    </Text>
                 </View>
-
-                {/* content  */}
-
-                <View style={{
-                    paddingHorizontal: 22,
-                    position: "absolute",
-                    top: 400,
-                    width: "100%"
-                }}>
-                    <Text style={{
-                        fontSize: 50,
-                        fontWeight: 800,
-                        color: COLORS.white
-                    }}>Bắt Đầu</Text>
-                    {/* <Text style={{
-                        fontSize: 46,
-                        fontWeight: 800,
-                        color: COLORS.white
-                    }}>Started</Text> */}
-
-                    <View style={{ marginVertical: 22 }}>
-                        <Text style={{
-                            fontSize: 16,
-                            color: COLORS.white,
-                            marginVertical: 4
-                        }}>Kết nối với nhau</Text>
-                        <Text style={{
-                            fontSize: 16,
-                            color: COLORS.white,
-                        }}>Để trao đi sự yêu thương!</Text>
-                    </View>
-
-                    <Button
-                        title="Tham Gia"
-                        onPress={() => navigation.navigate("SignType")}
-                        style={{
-                            marginTop: 22,
-                            width: "100%"
-                        }}
-                    />
-
-                    <View style={{
-                        flexDirection: "row",
-                        marginTop: 12,
-                        justifyContent: "center"
-                    }}>
-                        <Text style={{
-                            fontSize: 16,
-                            color: COLORS.white
-                        }}>Bạn đã có tài khoản ?</Text>
-                        <Pressable
-                            onPress={() => navigation.navigate("LoginScreen")}
-                        >
-                            <Text style={{
-                                fontSize: 16,
-                                color: COLORS.white,
-                                fontWeight: "bold",
-                                marginLeft: 4
-                            }}>Đăng Nhập</Text>
-                        </Pressable>
-
-                    </View>
+                <View
+                    style={{
+                        alignItems: 'center',
+                        position: 'absolute',
+                        bottom: 100,
+                    }}
+                >
+                    {progress < 1 && <DotsView progress={progress} />}
                 </View>
             </View>
-        </LinearGradient>
+        </SafeAreaView>
     )
 }
 
