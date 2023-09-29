@@ -8,7 +8,9 @@ import Button from '../../components/Button';
 import axios from 'axios';
 import {toast} from 'react-toastify';
 import { loginApi } from '../../services/UserService';
-
+import CustomInput from '../../components/CustomInput';
+import Auth from './Auth';
+import { shadow } from 'react-native-paper';
 const LoginScreen = ({ navigation }) => {
 
 
@@ -18,6 +20,7 @@ const LoginScreen = ({ navigation }) => {
     const [password, setPassword] = useState("");
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
     const [response, setResponse] = useState("");
+    const [usernameErrorMessage, setusernameErrorMessage] = useState('');
     // const handleLogin = async () => {
         
     //     if (!username || !password) {
@@ -51,6 +54,28 @@ const LoginScreen = ({ navigation }) => {
     //     });
         
     // }
+    const showEmailandPhoneErrorMessage = (_username) => {
+        if (_username.length === 0) {
+            setusernameErrorMessage('Tên đăng nhập không được trống');
+        }
+        
+        else {
+            setusernameErrorMessage('')
+        }
+    }
+    const showPasswordMessage = (_password) => {
+        if (_password.length === 0) {
+            setPasswordErrorMessage('Mật khẩu không được trống')
+        } else if (Auth.isValidPassword (_password) === false) {
+            setPasswordErrorMessage('Mật khẩu bao gồm 8 ký tự, chữ in hoa và chữ số')
+        }
+        
+        else {
+            setPasswordErrorMessage('')
+        }
+        
+    }
+    
     const handleLogin = async () => {
         
         try {
@@ -81,18 +106,21 @@ const LoginScreen = ({ navigation }) => {
                 console.log(JSON.stringify(res.data));
                 // localStorage.setItem("token",res.data.data.accessToken);
                 // localStorage.setItem("user",res.data.data.userResult);
-                navigation.navigate("Welcome");
+                navigation.navigate("Feed");
                 
             } else if (res.data.status == 'ERROR') {
-                Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
-                            
-                    {text: 'OK', onPress: () => console.log('OK Pressed')},
-                ]);
+                
                 return;
             }
             
         } catch (error) {
-            alert(error);
+            // if (error) {
+            //     Alert.alert('Thông báo', 'Sai thông tin đăng nhập vui lòng kiểm tra lại!', [
+                            
+            //         {text: 'OK', onPress: () => console.log('OK Pressed')},
+            //     ]);
+            // }
+            alert('Sai thông tin đăng nhập vui lòng kiểm tra lại!');
             setResponse(JSON.stringify(error))
         }
     }
@@ -115,35 +143,24 @@ const LoginScreen = ({ navigation }) => {
                     }}>Đăng nhập để tiếp tục!</Text>
                 </View>
 
-                <View style={{ marginBottom: 12 }}>
+                <View>
                     <Text style={{
                         fontSize: 16,
                         fontWeight: 400,
                         marginVertical: 8
                     }}>Tài khoản</Text>
 
-                    <View style={{
-                        width: "100%",
-                        height: 48,
-                        borderColor: COLORS.black,
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingLeft: 22
-                    }}>
-                        <TextInput
-                            placeholder='Nhập tài khoản của bạn'
-                            placeholderTextColor={COLORS.black}
-                            keyboardType='email-address'
-                            style={{
-                                width: "100%"
-                            }}
+                    
+                        <CustomInput
                             onChangeText={(username) => {
                                 setUsername(username);
+                                showEmailandPhoneErrorMessage(username);
                             }}
+                            placeholder='Nhập tài khoản của bạn'
+                            error={usernameErrorMessage.length !== 0}
+                            errorMessage={usernameErrorMessage}
                         />
-                    </View>
+                    
                 </View>
 
                 <View style={{ marginBottom: 12 }}>
@@ -153,29 +170,18 @@ const LoginScreen = ({ navigation }) => {
                         marginVertical: 8
                     }}>Mật khẩu</Text>
 
-                    <View style={{
-                        width: "100%",
-                        height: 48,
-                        borderColor: COLORS.black,
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingLeft: 22
-                    }}>
-                        <TextInput
-                            placeholder='Nhập mật khẩu của bạn'
-                            placeholderTextColor={COLORS.black}
-                            secureTextEntry={isPasswordShown}
-                            style={{
-                                width: "100%"
-                            }}
+                    
+                    <CustomInput
                             onChangeText={(password) => {
                                 setPassword(password);
+                                showPasswordMessage(password);
                             }}
-
+                            placeholder='Nhập mật khẩu của bạn'
+                            error={passwordErrorMessage.length !== 0}
+                            errorMessage={passwordErrorMessage}
+                            secureTextEntry={isPasswordShown}
+                            
                         />
-
                         <TouchableOpacity
                             onPress={() => setIsPasswordShown(!isPasswordShown)}
                             style={{
@@ -192,7 +198,9 @@ const LoginScreen = ({ navigation }) => {
                             }
 
                         </TouchableOpacity>
-                    </View>
+                        
+
+                        
                 </View>
 
                 <View style={{

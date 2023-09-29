@@ -100,22 +100,13 @@ const Profile = () => {
             <View
                 style={{
                     width: SIZES.width - 44,
-                    height: 260,
+                    height: 200,
                     marginHorizontal: 22,
                     paddingHorizontal: 6,
                     paddingVertical: 18,
-                    borderColor: '#F7F7F7',
-                    borderWidth: 1,
                     backgroundColor: '#FFFFFF',
-                    shadowColor: '#18274B',
-                    shadowOffset: {
-                        width: 0,
-                        height: 4.5,
-                    },
-                    shadowOpacity: 0.12,
-                    shadowRadius: 0.65,
-                    elevation: 2,
-                    borderRadius: 35,
+                    
+
                 }}
             >
                 <View
@@ -127,11 +118,11 @@ const Profile = () => {
                     {/* Profile image container */}
                     <View>
                         <Image
-                            source={images.user2}
+                            source={images.user3}
                             resizeMode="contain"
                             style={{
-                                height: 150,
-                                width: 96,
+                                height: 90,
+                                width: 90,
                                 borderRadius: 80,
                                 borderWidth: 4,
                                 borderColor: '#ffffff',
@@ -154,33 +145,17 @@ const Profile = () => {
                                 alignItems: 'center',
                             }}
                         >
-                            <View style={{ flexDirection: 'column' }}>
-                                <Text
-                                    style={{
-                                        ...FONTS.body3,
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    Anas Khan
-                                </Text>
-                                <Text style={{ ...FONTS.body3 }}>
-                                    Graphic Designer
-                                </Text>
-                            </View>
-
-                            <Feather
-                                name="edit"
-                                size={24}
-                                color={COLORS.black}
-                            />
+                            
                         </View>
 
                         <View
                             style={{
                                 flexDirection: 'row',
-                                justifyContent: 'space-between',
+                                justifyContent: 'center',
                             }}
                         >
+                            
+                            
                             <View
                                 style={{
                                     backgroundColor: '#FFF9E8',
@@ -188,46 +163,24 @@ const Profile = () => {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     borderRadius: 20,
-                                    padding: 8,
+                                    padding: 15,
                                 }}
                             >
-                                <Text style={{ ...FONTS.body4 }}>7</Text>
-                                <Text style={{ ...FONTS.body4 }}>Posts</Text>
+                                <Text style={{ ...FONTS.body4 }}>Đã tham gia 24 hoạt động</Text>
                             </View>
-
-                            <View
-                                style={{
-                                    backgroundColor: '#FFF9E8',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    borderRadius: 20,
-                                    padding: 8,
-                                }}
-                            >
-                                <Text style={{ ...FONTS.body4 }}>24</Text>
-                                <Text style={{ ...FONTS.body4 }}>
-                                    Followers
-                                </Text>
-                            </View>
-
-                            <View
-                                style={{
-                                    backgroundColor: '#FFF9E8',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    borderRadius: 20,
-                                    padding: 8,
-                                }}
-                            >
-                                <Text style={{ ...FONTS.body4 }}>7</Text>
-                                <Text style={{ ...FONTS.body4 }}>
-                                    Followings
-                                </Text>
-                            </View>
+                            
                         </View>
+                        
                     </View>
+                    <Feather
+                                style={{
+                                    
+                                    paddingLeft: 10,
+                                }}
+                                name="edit"
+                                size={24}
+                                color={COLORS.black}
+                            />
                 </View>
 
                 <View
@@ -236,11 +189,11 @@ const Profile = () => {
                         marginVertical: 12,
                     }}
                 >
-                    <Text style={{ ...FONTS.body4 }}>Jack of all</Text>
+                    <Text style={{ ...FONTS.body4 }}>Lê Đỗ Thành Đạt</Text>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ ...FONTS.body4 }}>Product Designer</Text>
+                        <Text style={{ ...FONTS.body4 }}>Hacker Hutech</Text>
                         <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
-                            @junio
+                            @thanhdatdev
                         </Text>
                     </View>
 

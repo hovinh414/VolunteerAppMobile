@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, Image, Pressable, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from '../../constants/colors';
@@ -6,6 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 import Checkbox from "expo-checkbox"
 import Button from '../../components/Button';
 import { signUpApi } from '../../services/UserService';
+import Auth from '../Login/Auth';
+import CustomInput from '../../components/CustomInput';
 
 const Signup = ({ navigation }) => {
     const [isPasswordShown, setIsPasswordShown] = useState(true);
@@ -17,7 +19,62 @@ const Signup = ({ navigation }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [phone, setPhone] = useState("");
-
+    const [usernameErrorMessage, setusernameErrorMessage] = useState('');
+    const [fullnameErrorMessage, setfullnameErrorMessage] = useState('');
+    const [emailErrorMessage, setEmailErrorMessage] = useState('');
+    const [phoneErrorMessage, setPhoneErrorMessage] = useState('');
+    const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+    const showFullNameError = (_fullname) => {
+        if (_fullname.length === 0) {
+            setfullnameErrorMessage('Tên không được trống');
+        }
+        
+        else {
+            setfullnameErrorMessage('')
+        }
+    }
+    const showEmailMessage = (_email) => {
+        if (_email.length === 0) {
+            setEmailErrorMessage('Email không được trống')
+        } else if (Auth.isValidEmail (_email) === false) {
+            setEmailErrorMessage('Email sai định dạng')
+        }
+        
+        else {
+            setEmailErrorMessage('')
+        }
+        
+    }
+    const showUsernameErrorMessage = (_username) => {
+        if (_username.length === 0) {
+            setusernameErrorMessage('Tên đăng nhập không được trống');
+        }
+        
+        else {
+            setusernameErrorMessage('')
+        }
+    }
+    const showPhonenumberErrorMessage = (_phone) => {
+        if (Auth.isValidPhone(_phone) === false) {
+            setPhoneErrorMessage('Số điện thoại phải đủ 10 số');
+        }
+        
+        else {
+            setPhoneErrorMessage('')
+        }
+    }
+    const showPasswordMessage = (_password) => {
+        if (_password.length === 0) {
+            setPasswordErrorMessage('Mật khẩu không được trống')
+        } else if (Auth.isValidPassword (_password) === false) {
+            setPasswordErrorMessage('Mật khẩu bao gồm 8 ký tự, chữ in hoa và chữ số')
+        }
+        
+        else {
+            setPasswordErrorMessage('')
+        }
+        
+    }
     const handleSignup = async () => {
         try {
             if (!username || !password || !email || !phone || !fullname) {
@@ -30,28 +87,24 @@ const Signup = ({ navigation }) => {
             await signUpApi(type,fullname, email, username, password, phone).then((res) => {
                 
                 if (res.status === 201) {
-                    Alert.alert('Thông báo', 'Đăng ký thành công!', [
+                    // Alert.alert('Thông báo', 'Đăng ký thành công!', [
                     
-                        {text: 'OK', onPress: () => console.log('OK Pressed')},
-                      ]);
-                    navigation.navigate("LoginScreen");
-                } else  {
-                    Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
+                    //     {text: 'OK', onPress: () => navigation.navigate("LoginScreen")},
+                    //   ]);
+                    alert('Đăng ký thành công vui lòng đăng nhập!');
+                    navigation.navigate("LoginScreen")
                     
-                        {text: 'OK', onPress: () => console.log('OK Pressed')},
-                      ]);
-                    return;
                 }
     
             })
         } catch (error) {
-            alert(error);
+            alert('Sai thông tin đăng ký vui lòng kiểm tra lại!');
         }
         
     }
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+        <ScrollView style={{ flex: 1, backgroundColor: COLORS.white, paddingTop:15, }}>
             <View style={{ flex: 1, marginHorizontal: 22 }}>
                 <View style={{ marginVertical: 22 }}>
                     <Text style={{
@@ -68,134 +121,73 @@ const Signup = ({ navigation }) => {
                         color: COLORS.black
                     }}>Vui lòng điền đầy đủ thông tin!</Text>
                 </View>
-                <View style={{ marginBottom: 12 }}>
+                <View>
                     <Text style={{
                         fontSize: 16,
                         fontWeight: 400,
                         marginVertical: 8
                     }}>Họ tên </Text>
-
-                    <View style={{
-                        width: "100%",
-                        height: 48,
-                        borderColor: COLORS.black,
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingLeft: 22
-                    }}>
-                        <TextInput
-                            placeholder='Nhập họ tên của bạn'
-                            placeholderTextColor={COLORS.black}
-                            keyboardType='email-address'
-                            style={{
-                                width: "100%"
+                     <CustomInput
+                            onChangeText={(fullname) => {
+                                setFullname(fullname);
+                                showFullNameError(fullname);
                             }}
-                            value={fullname}
-                            onChange={(event) => setFullname(event.target.value)}
+                            placeholder='Nhập họ tên của bạn'
+                            error={fullnameErrorMessage.length !== 0}
+                            errorMessage={fullnameErrorMessage}
                         />
-                    </View>
                 </View>
-                <View style={{ marginBottom: 12 }}>
+                <View>
                     <Text style={{
                         fontSize: 16,
                         fontWeight: 400,
                         marginVertical: 8
                     }}>Email</Text>
 
-                    <View style={{
-                        width: "100%",
-                        height: 48,
-                        borderColor: COLORS.black,
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingLeft: 22
-                    }}>
-                        <TextInput
-                            placeholder='Nhập địa chỉ email của bạn'
-                            placeholderTextColor={COLORS.black}
-                            keyboardType='email-address'
-                            style={{
-                                width: "100%"
+                        <CustomInput
+                            onChangeText={(email) => {
+                                setEmail(email);
+                                showEmailMessage(email);
                             }}
-                            value={email}
-                            onChange={(event) => setEmail(event.target.value)}
+                            placeholder='Nhập email của bạn'
+                            error={emailErrorMessage.length !== 0}
+                            errorMessage={emailErrorMessage}
                         />
-                    </View>
                 </View>
-                <View style={{ marginBottom: 12 }}>
+                <View>
                     <Text style={{
                         fontSize: 16,
                         fontWeight: 400,
                         marginVertical: 8
                     }}>Tài khoản</Text>
 
-                    <View style={{
-                        width: "100%",
-                        height: 48,
-                        borderColor: COLORS.black,
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingLeft: 22
-                    }}>
-                        <TextInput
-                            placeholder='Nhập tài khoản của bạn'
-                            placeholderTextColor={COLORS.black}
-                            keyboardType='email-address'
-                            style={{
-                                width: "100%"
+                        <CustomInput
+                            onChangeText={(username) => {
+                                setUsername(username);
+                                showUsernameErrorMessage(username);
                             }}
-                            value={username}
-                            onChange={(event) => setUsername(event.target.value)}
+                            placeholder='Nhập tên đăng nhập của bạn'
+                            error={usernameErrorMessage.length !== 0}
+                            errorMessage={usernameErrorMessage}
                         />
-                    </View>
                 </View>               
-                <View style={{ marginBottom: 12 }}>
+                <View>
                     <Text style={{
                         fontSize: 16,
                         fontWeight: 400,
                         marginVertical: 8
                     }}>Số điện thoại</Text>
 
-                    <View style={{
-                        width: "100%",
-                        height: 48,
-                        borderColor: COLORS.black,
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        alignItems: "center",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        paddingLeft: 22
-                    }}>
-                        <TextInput
-                            placeholder='+84'
-                            placeholderTextColor={COLORS.black}
-                            keyboardType='numeric'
-                            style={{
-                                width: "12%",
-                                borderRightWidth: 1,
-                                borderLeftColor: COLORS.grey,
-                                height: "100%"
+                        <CustomInput
+                            keyboardType={'numeric'}
+                            onChangeText={(phone) => {
+                                setPhone(phone);
+                                showPhonenumberErrorMessage(phone);
                             }}
-                        />
-
-                        <TextInput
                             placeholder='Nhập số điện thoại của bạn'
-                            placeholderTextColor={COLORS.black}
-                            keyboardType='numeric'
-                            style={{
-                                width: "80%"
-                            }}
-                            value={phone}
-                            onChange={(event) => setPhone(event.target.value)}
+                            error={phoneErrorMessage.length !== 0}
+                            errorMessage={phoneErrorMessage}
                         />
-                    </View>
                 </View>
 
                 <View style={{ marginBottom: 12 }}>
@@ -205,27 +197,17 @@ const Signup = ({ navigation }) => {
                         marginVertical: 8
                     }}>Mật khẩu</Text>
 
-                    <View style={{
-                        width: "100%",
-                        height: 48,
-                        borderColor: COLORS.black,
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingLeft: 22
-                    }}>
-                        <TextInput
-                            placeholder='Nhập mật khẩu của bạn'
-                            placeholderTextColor={COLORS.black}
-                            secureTextEntry={isPasswordShown}
-                            style={{
-                                width: "100%"
+                        <CustomInput
+                            onChangeText={(password) => {
+                                setPassword(password);
+                                showPasswordMessage(password);
                             }}
-                            value={password}
-                            onChange={(event) => setPassword(event.target.value)}
+                            placeholder='Nhập mật khẩu của bạn'
+                            error={passwordErrorMessage.length !== 0}
+                            errorMessage={passwordErrorMessage}
+                            secureTextEntry={isPasswordShown}
+                            
                         />
-
                         <TouchableOpacity
                             onPress={() => setIsPasswordShown(!isPasswordShown)}
                             style={{
@@ -242,7 +224,6 @@ const Signup = ({ navigation }) => {
                             }
 
                         </TouchableOpacity>
-                    </View>
                 </View>
 
                 <View style={{
@@ -266,6 +247,7 @@ const Signup = ({ navigation }) => {
                         marginTop: 18,
                         marginBottom: 4,
                     }}
+                    
                     onPress={() => handleSignup()}
                 />
 
@@ -366,7 +348,7 @@ const Signup = ({ navigation }) => {
                     </Pressable>
                 </View>
             </View>
-        </SafeAreaView>
+        </ScrollView>
     )
 }
 

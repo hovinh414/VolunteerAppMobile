@@ -114,9 +114,9 @@ const Feed = () => {
     function renderSuggestionsContainer() {
         return (
             <View style={{
-                paddingBottom:10,
+                paddingBottom:5,
                 borderBottomWidth:1,
-                borderBottomColor:'#FDF6ED',
+                borderBottomColor:'#fff',
             }}>
                 <View style={{ marginVertical: 8 }}>
                     
@@ -172,8 +172,8 @@ const Feed = () => {
                     backgroundColor: '#fff',
                     flexDirection: 'column',
                     width: '100%',
-                    borderRadius: 26,
                     borderWidth: 1,
+                    borderTopColor: '#FDF6ED',
                     borderColor: '#fff',
                     marginVertical: 12,
                 }}
@@ -184,7 +184,7 @@ const Feed = () => {
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginTop: 8,
+                        marginTop: 12,
                     }}
                 >
                     <View
@@ -339,7 +339,7 @@ const Feed = () => {
                             <Text
                                 style={{ ...FONTS.body4, fontWeight: 'bold' }}
                             >
-                                Thích bởi 340
+                                Tham gia 36/100
                             </Text>
                         </View>
                         <View
@@ -376,7 +376,7 @@ const Feed = () => {
                         marginHorizontal: 8,
                         paddingVertical: 18,
                         borderTopWidth: 1,
-                        borderTopColor: '#FDF6ED',
+                        borderTopColor: '#FFF',
                     }}
                 >
                     <Image
@@ -417,8 +417,8 @@ const Feed = () => {
                     backgroundColor: '#fff',
                     flexDirection: 'column',
                     width: '100%',
-                    borderRadius: 26,
                     borderWidth: 1,
+                    borderTopColor: '#FDF6ED',
                     borderColor: '#fff',
                     marginVertical: 12,
                 }}
@@ -429,7 +429,7 @@ const Feed = () => {
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginTop: 8,
+                        marginTop: 12,
                     }}
                 >
                     <View
@@ -583,7 +583,7 @@ const Feed = () => {
                             <Text
                                 style={{ ...FONTS.body4, fontWeight: 'bold' }}
                             >
-                                Thích bởi 340
+                                Tham gia 100/150
                             </Text>
                         </View>
                         <View
@@ -620,7 +620,7 @@ const Feed = () => {
                         marginHorizontal: 8,
                         paddingVertical: 18,
                         borderTopWidth: 1,
-                        borderTopColor: '#FDF6ED',
+                        borderTopColor: '#fff',
                     }}
                 >
                     <Image
@@ -661,8 +661,8 @@ const Feed = () => {
                     backgroundColor: '#fff',
                     flexDirection: 'column',
                     width: '100%',
-                    borderRadius: 26,
                     borderWidth: 1,
+                    borderTopColor: '#FDF6ED',
                     borderColor: '#fff',
                     marginVertical: 12,
                 }}
@@ -827,7 +827,7 @@ const Feed = () => {
                             <Text
                                 style={{ ...FONTS.body4, fontWeight: 'bold' }}
                             >
-                                Thích bởi 14
+                                Tham gia 12/50
                             </Text>
                         </View>
                         <View

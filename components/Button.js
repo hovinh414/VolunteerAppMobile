@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
 import React from 'react'
 import COLORS from '../constants/colors'
 
@@ -17,6 +17,7 @@ const Button = (props) => {
             }}
             onPress={props.onPress}
         >
+        
             <Text style={{ fontSize: 18, ... { color: textColor } }}>{props.title}</Text>
         </TouchableOpacity>
     )

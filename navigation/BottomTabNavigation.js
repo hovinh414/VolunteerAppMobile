@@ -108,7 +108,7 @@ const BottomTabNavigation = () => {
                     },
                 }}
             />
-
+            
             <Tab.Screen
                 name="LoginScreen"
                 component={LoginScreen}
