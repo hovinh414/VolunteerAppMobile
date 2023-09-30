@@ -110,8 +110,8 @@ const BottomTabNavigation = () => {
             />
             
             <Tab.Screen
-                name="LoginScreen"
-                component={LoginScreen}
+                name="Profile"
+                component={Profile}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return (

@@ -10,6 +10,7 @@ import BottomTabNavigation from './navigation/BottomTabNavigation'
 import SignupType from './screens/Signup/SignType'
 import SignupOrganisation from './screens/Signup/SignupOrganisation'
 import Signup from './screens/Signup/Signup'
+import EditProfile from './screens/Profile/EditProfile'
 
 const Stack = createNativeStackNavigator()
 
@@ -69,6 +70,13 @@ export default function App() {
                     <Stack.Screen
                         name="SignupOrganisation"
                         component={SignupOrganisation}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="EditProfile"
+                        component={EditProfile}
                         options={{
                             headerShown: false,
                         }}

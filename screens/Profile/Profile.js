@@ -1,16 +1,22 @@
-import { View, Text, Image, useWindowDimensions, FlatList } from 'react-native'
+import { View, Text, Image, useWindowDimensions, FlatList, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { COLORS, FONTS, SIZES, images } from '../constants'
+import { COLORS, FONTS, SIZES, images } from '../../constants'
 import { Feather, AntDesign, Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
-import { posts } from '../constants/data'
+import { posts } from '../../constants/data'
+import CustomInput from '../../components/CustomInput'
+import Auth from '../Login/Auth'
+import CustomInputDateTime from '../../components/CustomInputDateTime'
+
+
 
 const PostsRoute = () => (
     <View
         style={{
             flex: 1,
+            paddingTop:12,
         }}
     >
         <FlatList
@@ -81,20 +87,73 @@ const PostsRoute = () => (
     </View>
 )
 
-const HighLightsRoute = () => (
-    <View style={{ flex: 1, backfaceColor: 'blue' }}></View>
-)
+const InfoRoute = () => {
+    const [fullname, setFullname] = useState("");
+    const [phone, setPhone] = useState("");
+    const [email, setEmail] = useState("");
+    const [fullnameErrorMessage, setfullnameErrorMessage] = useState('');
+    const [phoneErrorMessage, setPhoneErrorMessage] = useState('');
+    const [emailErrorMessage, setEmailErrorMessage] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState();
+    const showFullNameError = (_fullname) => {
+        if (_fullname.length === 0) {
+        setfullnameErrorMessage('Tên không được trống');
+        }
+    
+        else {
+            setfullnameErrorMessage('')
+        }
+    }
+    const showPhonenumberErrorMessage = (_phone) => {
+        if (Auth.isValidPhone(_phone) === false) {
+            setPhoneErrorMessage('Số điện thoại phải đủ 10 số');
+        }
+        
+        else {
+            setPhoneErrorMessage('')
+        }
+    }
+    const showEmailMessage = (_email) => {
+        if (_email.length === 0) {
+            setEmailErrorMessage('Email không được trống')
+        } else if (Auth.isValidEmail (_email) === false) {
+            setEmailErrorMessage('Email sai định dạng')
+        }
+        
+        else {
+            setEmailErrorMessage('')
+        }
+        
+    }
+    return (
+        <ScrollView style={{ flex: 1, paddingTop:25, }}>
+            <View>
+                    <Text style={{
+                        fontSize: 18,
+                        fontWeight: 400,
+                        marginVertical: 8
+                    }}>Tên <CustomInput
+                        onChangeText={(fullname) => {
+                            setFullname(fullname);
+                            showFullNameError(fullname);
+                        }}
+                        
+                        error={fullnameErrorMessage.length !== 0}
+                        errorMessage={fullnameErrorMessage}
+                    /></Text>
 
-const TaggedRoute = () => (
-    <View style={{ flex: 1, backfaceColor: 'blue' }}></View>
-)
+                    
+                    
+            </View>
+        </ScrollView>
+    )
+}
 
 const renderScene = SceneMap({
     first: PostsRoute,
-    second: HighLightsRoute,
-    third: TaggedRoute,
+    second: InfoRoute,
 })
-const Profile = () => {
+const Profile = ({navigation}) => {
     function renderProfileCard() {
         return (
             <View
@@ -180,6 +239,7 @@ const Profile = () => {
                                 name="edit"
                                 size={24}
                                 color={COLORS.black}
+                                onPress={() => navigation.navigate("EditProfile")}
                             />
                 </View>
 
@@ -211,9 +271,9 @@ const Profile = () => {
     const layout = useWindowDimensions()
     const [index, setIndex] = useState(0)
     const [routes] = useState([
-        { key: 'first', title: 'Posts', icon: 'square-outline' },
-        { key: 'second', title: 'Highlights', icon: 'heart-outline' },
-        { key: 'third', title: 'Tagged', icon: 'person-outline' },
+        { key: 'first', title: 'Bài đăng', icon: 'home' },
+        { key: 'second', title: 'Thông tin', icon: 'user' },
+        
     ])
 
     const renderTabBar = (props) => (
@@ -223,7 +283,7 @@ const Profile = () => {
                 backgroundColor: COLORS.primary,
             }}
             renderIcon={({ route, focused, color }) => (
-                <Ionicons
+                <AntDesign
                     name={route.icon}
                     size={20}
                     color={focused ? COLORS.black : 'gray'}
@@ -238,67 +298,10 @@ const Profile = () => {
                     {route.title}
                 </Text>
             )}
+            
         />
     )
 
-    function renderButtions() {
-        return (
-            <View
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    paddingHorizontal: 22,
-                    marginVertical: 12,
-                }}
-            >
-                <LinearGradient
-                    colors={['#F68464', '#EEA849']}
-                    style={{
-                        height: 40,
-                        width: 150,
-                        borderRadius: SIZES.padding * 3,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <AntDesign name="adduser" size={24} color={COLORS.white} />
-                    <Text
-                        style={{
-                            ...FONTS.body4,
-                            marginLeft: 12,
-                            color: COLORS.white,
-                        }}
-                    >
-                        Follow
-                    </Text>
-                </LinearGradient>
-
-                <LinearGradient
-                    colors={['#F68464', '#EEA849']}
-                    style={{
-                        height: 40,
-                        width: 150,
-                        borderRadius: SIZES.padding * 3,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <AntDesign name="message1" size={24} color={COLORS.white} />
-                    <Text
-                        style={{
-                            ...FONTS.body4,
-                            marginLeft: 12,
-                            color: COLORS.white,
-                        }}
-                    >
-                        Message
-                    </Text>
-                </LinearGradient>
-            </View>
-        )
-    }
     return (
         <SafeAreaView
             style={{
@@ -308,7 +311,6 @@ const Profile = () => {
         >
             <View style={{ flex: 1 }}>
                 {renderProfileCard()}
-                {renderButtions()}
                 <View
                     style={{
                         flex: 1,
