@@ -56,7 +56,9 @@ const Signup = ({ navigation }) => {
     }
     const showPhonenumberErrorMessage = (_phone) => {
         if (Auth.isValidPhone(_phone) === false) {
-            setPhoneErrorMessage('Số điện thoại phải đủ 10 số');
+            setPhoneErrorMessage('Số điện thoại không đúng');
+        } else if (_phone.length !== 10) {
+            setPhoneErrorMessage('Số điện thoại phải đủ 10 chữ số');
         }
         
         else {

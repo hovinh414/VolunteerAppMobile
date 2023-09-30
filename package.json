@@ -23,12 +23,14 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.72.5",
+    "react-native-modern-datepicker": "^1.0.0-beta.91",
     "react-native-paper": "^5.10.6",
     "react-native-tab-view": "^3.5.2",
     "react-native-web": "~0.19.6",
     "react-router-dom": "^6.16.0",
     "react-toastify": "^9.1.3",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "expo-image-picker": "~14.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

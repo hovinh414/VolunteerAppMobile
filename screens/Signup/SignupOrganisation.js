@@ -153,7 +153,7 @@ const Signup = ({ navigation }) => {
                                 setEmail(email);
                                 showEmailMessage(email);
                             }}
-                            placeholder='Nhập email của ttor chức'
+                            placeholder='Nhập email của tổ chức'
                             error={emailErrorMessage.length !== 0}
                             errorMessage={emailErrorMessage}
                         />
