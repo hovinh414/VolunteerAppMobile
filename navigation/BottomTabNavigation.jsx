@@ -1,5 +1,5 @@
-import { View, Text, Platform } from 'react-native'
-import React from 'react'
+import { View, Text, Platform, Image } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import {
     Feather,
     Ionicons,
@@ -10,8 +10,13 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { COLORS } from '../constants'
 import { Chat, Create, Feed, LoginScreen, Notifications, Profile } from '../screens'
 import { LinearGradient } from 'expo-linear-gradient'
+import AsyncStoraged from '../services/AsyncStoraged'
+import ImageAvata from "../assets/images/user3.jpg"
+import { Avatar } from 'react-native-paper'
+
 
 const Tab = createBottomTabNavigator()
+
 
 const screenOptions = {
     tabBarShowLabel: false,
@@ -30,6 +35,13 @@ const screenOptions = {
     },
 }
 const BottomTabNavigation = () => {
+    const [email, setEmail] = useState(null);
+    const [avatar, setAvatar] = useState(null);
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData();
+        setEmail(userStored.userResult.email);
+    }
+    useEffect(() => { getUserStored(); }, []);
     return (
         <Tab.Navigator screenOptions={screenOptions}>
             <Tab.Screen
@@ -108,22 +120,45 @@ const BottomTabNavigation = () => {
                     },
                 }}
             />
-            
-            <Tab.Screen
-                name="Profile"
-                component={Profile}
-                options={{
-                    tabBarIcon: ({ focused }) => {
-                        return (
-                            <FontAwesome
-                                name="user-circle"
-                                size={24}
-                                color={focused ? COLORS.primary : COLORS.black}
-                            />
-                        )
-                    },
-                }}
-            />
+            {email === null ?
+                <Tab.Screen
+                    name="LoginScreen"
+                    component={LoginScreen}
+                    options={{
+                        tabBarIcon: ({ focused }) => {
+                            return (
+                                <FontAwesome
+                                    name="user-circle"
+                                    size={24}
+                                    color={focused ? COLORS.primary : COLORS.black}
+                                />
+                            )
+                        },
+                    }}
+                />
+                :
+                <Tab.Screen
+                    name="Profile"
+                    component={Profile}
+                    options={{
+                        tabBarIcon: ({ focused }) => {
+                            return (
+                                <Image
+                                    source={ImageAvata}
+                                    style={{
+                                        height: 24,
+                                        width: 24,
+                                        borderWidth: 1,
+                                        borderRadius: 85,
+                                        borderColor: focused ? COLORS.primary : COLORS.black,
+                                    }}
+                                />
+                            )
+                        },
+                    }}
+                />
+            }
+
         </Tab.Navigator>
     )
 }

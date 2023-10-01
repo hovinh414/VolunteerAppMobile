@@ -236,10 +236,10 @@ const Profile = ({navigation}) => {
                                     
                                     paddingLeft: 10,
                                 }}
-                                name="edit"
+                                name="menu"
                                 size={24}
                                 color={COLORS.black}
-                                onPress={() => navigation.navigate("EditProfile")}
+                                onPress={() => navigation.navigate("Settings")}
                             />
                 </View>
 

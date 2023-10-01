@@ -9,5 +9,7 @@ import SignupType from './Signup/SignType'
 import Signup from './Signup/Signup'
 import SignupOrganisation from './Signup/SignupOrganisation'
 import EditProfile from './Profile/EditProfile'
+import Settings from './Profile/Settings'
 
-export { Feed, Create, Profile, Notifications, Welcome, Chat, LoginScreen, Signup, SignupType, SignupOrganisation, EditProfile }
+
+export { Feed, Create, Profile, Notifications, Welcome, Chat, LoginScreen, Signup, SignupType, SignupOrganisation, EditProfile, Settings }

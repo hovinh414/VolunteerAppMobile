@@ -16,13 +16,12 @@ const Welcome = () => {
                     return prevProgress
                 }
 
-                return prevProgress + 0.3
+                return prevProgress + 1
             })
         }, 1000)
 
         return () => clearInterval(intervalId)
     }, [])
-
     useEffect(() => {
         if (progress >= 1) {
             // navigate to the Feed Screen

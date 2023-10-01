@@ -7,7 +7,8 @@ import {
     Image,
     TextInput,
 } from 'react-native'
-import React from 'react'
+import * as Progress from 'react-native-progress';
+import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../constants'
 import {
@@ -23,11 +24,12 @@ import { friends, posts } from '../constants/data'
 const users = [images.user1, images.user2, images.user3, images.user4]
 
 const Feed = () => {
+
     function renderHeader() {
         return (
             <View
                 style={{
-                    padding:12,
+                    padding: 12,
                     flexDirection: 'row',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -114,12 +116,12 @@ const Feed = () => {
     function renderSuggestionsContainer() {
         return (
             <View style={{
-                paddingBottom:5,
-                borderBottomWidth:1,
-                borderBottomColor:'#fff',
+                paddingBottom: 5,
+                borderBottomWidth: 1,
+                borderBottomColor: '#fff',
             }}>
                 <View style={{ marginVertical: 8 }}>
-                    
+
                 </View>
 
                 <FlatList
@@ -140,10 +142,10 @@ const Feed = () => {
                                 onPress={() => console.log('Pressed')}
                                 style={{
                                     paddingVertical: 4,
-                                    marginLeft:12,
+                                    marginLeft: 12,
                                 }}
                             >
-                            
+
                                 <Image
                                     source={item.image}
                                     resizeMode="contain"
@@ -152,12 +154,12 @@ const Feed = () => {
                                         height: 80,
                                         borderRadius: 80,
                                         borderWidth: 3,
-                                    
+
                                         borderColor: '#FF493C',
                                     }}
                                 />
                             </TouchableOpacity>
-                            
+
                         </View>
                     )}
                 />
@@ -209,7 +211,7 @@ const Feed = () => {
                             >
                                 Hồ Thành Vinh
                             </Text>
-                            
+
                         </View>
                     </View>
 
@@ -220,27 +222,27 @@ const Feed = () => {
                     />
                 </View>
                 {/* Post image */}
-                <FlatList 
-                    data={friends} 
+                <FlatList
+                    data={friends}
                     horizontal
                     keyExtractor={(item) => item.id}
-                    renderItem={({item}) => 
-                    <View
-                    style={{
-                        alignItems: 'center',
-                        marginVertical: 8,
-                    }}
-                >
-                    <Image
-                            source={item.image}
+                    renderItem={({ item }) =>
+                        <View
                             style={{
-                                height: 450,
-                                width: 450,
-                                marginRight:10,
+                                alignItems: 'center',
+                                marginVertical: 8,
                             }}
-                        />
-                </View>
-                }/ > 
+                        >
+                            <Image
+                                source={item.image}
+                                style={{
+                                    height: 450,
+                                    width: 450,
+                                    marginRight: 10,
+                                }}
+                            />
+                        </View>
+                    } />
 
                 {/* Post content */}
 
@@ -257,7 +259,9 @@ const Feed = () => {
                         Ủng hộ đồng bào lũ lụt miền trung qua momo 0967626483 nha.
                     </Text>
                 </View>
-
+                <View style={{ paddingLeft: 10, paddingBottom: 5, }}>
+                    <Progress.Bar progress={36 / 100} color='#FF493C' height={8} width={SIZES.width - 20} unfilledColor='#F5F5F5' borderColor='#F5F5F5' borderRadius={25} />
+                </View>
                 <View
                     style={{
                         marginHorizontal: 8,
@@ -350,7 +354,7 @@ const Feed = () => {
                                 marginLeft: 10,
                             }}
                         >
-                            {users.map((user, index) => (
+                            {/* {users.map((user, index) => (
                                 <Image
                                     source={user}
                                     key={index}
@@ -363,7 +367,7 @@ const Feed = () => {
                                         marginLeft: -5,
                                     }}
                                 />
-                            ))}
+                            ))} */}
                         </View>
                     </View>
                 </View>
@@ -454,7 +458,7 @@ const Feed = () => {
                             >
                                 Lê Đỗ Thành Đạt
                             </Text>
-                            
+
                         </View>
                     </View>
 
@@ -465,27 +469,27 @@ const Feed = () => {
                     />
                 </View>
                 {/* Post image */}
-                <FlatList 
-                    data={posts} 
+                <FlatList
+                    data={posts}
                     horizontal
                     keyExtractor={(item) => item.id}
-                    renderItem={({item}) => 
-                    <View
-                    style={{
-                        alignItems: 'center',
-                        marginVertical: 8,
-                    }}
-                >
-                    <Image
-                            source={item.image}
+                    renderItem={({ item }) =>
+                        <View
                             style={{
-                                height: 450,
-                                width: 450,
-                                marginRight:10,
+                                alignItems: 'center',
+                                marginVertical: 8,
                             }}
-                        />
-                </View>
-                }/ > 
+                        >
+                            <Image
+                                source={item.image}
+                                style={{
+                                    height: 450,
+                                    width: 450,
+                                    marginRight: 10,
+                                }}
+                            />
+                        </View>
+                    } />
                 {/* Post content */}
 
                 <View
@@ -501,7 +505,9 @@ const Feed = () => {
                         Hehehehehehe
                     </Text>
                 </View>
-
+                <View style={{ paddingLeft: 10, paddingBottom: 5, }}>
+                    <Progress.Bar progress={100 / 150} color='#FF493C' height={8} width={SIZES.width - 20} unfilledColor='#F5F5F5' borderColor='#F5F5F5' borderRadius={25} />
+                </View>
                 <View
                     style={{
                         marginHorizontal: 8,
@@ -594,7 +600,7 @@ const Feed = () => {
                                 marginLeft: 10,
                             }}
                         >
-                            {users.map((user, index) => (
+                            {/* {users.map((user, index) => (
                                 <Image
                                     source={user}
                                     key={index}
@@ -607,7 +613,7 @@ const Feed = () => {
                                         marginLeft: -5,
                                     }}
                                 />
-                            ))}
+                            ))} */}
                         </View>
                     </View>
                 </View>
@@ -698,7 +704,7 @@ const Feed = () => {
                             >
                                 Nguyễn Nguyên Trung
                             </Text>
-                            
+
                         </View>
                     </View>
 
@@ -709,27 +715,27 @@ const Feed = () => {
                     />
                 </View>
                 {/* Post image */}
-                <FlatList 
-                    data={posts} 
+                <FlatList
+                    data={posts}
                     horizontal
                     keyExtractor={(item) => item.id}
-                    renderItem={({item}) => 
-                    <View
-                    style={{
-                        alignItems: 'center',
-                        marginVertical: 8,
-                    }}
-                >
-                    <Image
-                            source={item.image}
+                    renderItem={({ item }) =>
+                        <View
                             style={{
-                                height: 450,
-                                width: 450,
-                                marginRight:10,
+                                alignItems: 'center',
+                                marginVertical: 8,
                             }}
-                        />
-                </View>
-                }/ >               
+                        >
+                            <Image
+                                source={item.image}
+                                style={{
+                                    height: 450,
+                                    width: 450,
+                                    marginRight: 10,
+                                }}
+                            />
+                        </View>
+                    } />
                 {/* Post content */}
 
                 <View
@@ -745,7 +751,9 @@ const Feed = () => {
                         Bị đau mắt đỏ vào ngày 25/09/2023
                     </Text>
                 </View>
-
+                <View style={{ paddingLeft: 10, paddingBottom: 5, }}>
+                    <Progress.Bar progress={12 / 50} color='#FF493C' height={8} width={SIZES.width - 20} unfilledColor='#F5F5F5' borderColor='#F5F5F5' borderRadius={25} />
+                </View>
                 <View
                     style={{
                         marginHorizontal: 8,
@@ -838,7 +846,7 @@ const Feed = () => {
                                 marginLeft: 10,
                             }}
                         >
-                            {users.map((user, index) => (
+                            {/* {users.map((user, index) => (
                                 <Image
                                     source={user}
                                     key={index}
@@ -851,7 +859,7 @@ const Feed = () => {
                                         marginLeft: -5,
                                     }}
                                 />
-                            ))}
+                            ))} */}
                         </View>
                     </View>
                 </View>
@@ -899,8 +907,9 @@ const Feed = () => {
         )
     }
     return (
+
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <View style={{ flex: 1}}>
+            <View style={{ flex: 1 }}>
                 {renderHeader()}
                 <ScrollView>
                     {renderSuggestionsContainer()}
