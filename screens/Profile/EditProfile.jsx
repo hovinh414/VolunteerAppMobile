@@ -6,9 +6,11 @@ import {
   Image,
   TextInput,
   SafeAreaView,
+  Alert,
+  Pressable
 } from "react-native";
 import React, { useState, useEffect } from "react";
-
+import axios from 'axios';
 import * as ImagePicker from "expo-image-picker";
 import { COLORS, FONTS } from "../../constants/theme";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
@@ -21,21 +23,35 @@ import AsyncStoraged from '../../services/AsyncStoraged'
 
 const EditProfile = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState();
+  const [avatar, setAvatar] = useState();
   const [fullname, setFullname] = useState('');
+  const [username, setUsername] = useState('');
   const [fullnameErrorMessage, setfullnameErrorMessage] = useState('');
+  const [usernameErrorMessage, setUsernameErrorMessage] = useState('');
   const [email, setEmail] = useState('');
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [phone, setPhone] = useState('');
   const [phoneErrorMessage, setPhoneErrorMessage] = useState('');
-  const [address, setAddress] = useState("25/27 đường 6, Phường Hiệp Phú");
-  const [dateOfBirth, setDateOfBirth] = useState(new Date('2002-03-10'));
-  const [sex, setSex] = useState('male');
+  const [address, setAddress] = useState('');
+  const [sex, setSex] = useState('');
+  const [userId, setUserId] = useState();
+  const [token, setToken] = useState();
 
   const getUserStored = async () => {
     const userStored = await AsyncStoraged.getData();
     setFullname(userStored.userResult.fullname);
-    setPhone(userStored.userResult.avatar);
+    setUsername(userStored.userResult.username);
+    setPhone(userStored.userResult.phone);
     setEmail(userStored.userResult.email);
+    setAddress(userStored.userResult.address);
+    setAvatar(userStored.userResult.avatar)
+    setUserId(userStored.userResult._id)
+    setToken(userStored.accessToken)
+    if (userStored.userResult.address === 'Nam') {
+      setSex('female');
+    } else {
+      setSex('male');
+    }
   }
   useEffect(() => { getUserStored(); }, []);
   const showFullNameError = (_fullname) => {
@@ -45,6 +61,15 @@ const EditProfile = ({ navigation }) => {
 
     else {
       setfullnameErrorMessage('')
+    }
+  }
+  const showUserNameError = (_username) => {
+    if (_username.length === 0) {
+      setUsernameErrorMessage('Tên đăng nhập không được trống');
+    }
+
+    else {
+      setUsernameErrorMessage('')
     }
   }
   const showEmailMessage = (_email) => {
@@ -72,6 +97,48 @@ const EditProfile = ({ navigation }) => {
   }
 
 
+  const handleUpdateUser = async () => {
+    try {
+      const res = await axios({
+        method: 'put',
+        url: 'http://192.168.9.14:3000/api/v1/user?userid=' + userId,
+        headers: {
+          'Authorization': token,
+        },
+        data: {
+          fullname: fullname,
+          email: email,
+          username: username,
+          phone: phone,
+          address: address,
+          password: 'Hovinh1003',
+          oldPassword: 'Hovinh1003',
+        },
+      });
+
+      if (res.data.status === 'SUCCESS') {
+        Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
+
+          { text: 'OK', onPress: () => console.log('Press') },
+        ]);
+        setFullname(res.data.data.fullname);
+        setUsername(res.data.data.username);
+        setPhone(res.data.data.phone);
+        setEmail(res.data.data.email);
+        setAddress(res.data.data.address);
+        setAvatar(res.data.data.avatar)
+
+      }
+    } catch (error) {
+      Alert.alert('Thông báo', "Lỗi khi cập nhật thông tin!", [
+
+        { text: 'OK', onPress: () => console.log('Press') },
+      ]);
+    }
+
+  }
+
+
 
   const handleImageSelection = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -87,7 +154,6 @@ const EditProfile = ({ navigation }) => {
       setSelectedImage();
     }
   };
-
   return (
     <SafeAreaView
       style={{
@@ -133,7 +199,7 @@ const EditProfile = ({ navigation }) => {
         >
           <TouchableOpacity onPress={handleImageSelection}>
             <Image
-              source={ImageAvata}
+              source={{ uri: avatar }}
               style={{
                 height: 140,
                 width: 140,
@@ -152,7 +218,7 @@ const EditProfile = ({ navigation }) => {
               <MaterialIcons
                 name="photo-camera"
                 size={24}
-                color={'#fff'}
+                color={'black'}
               />
             </View>
           </TouchableOpacity>
@@ -173,6 +239,22 @@ const EditProfile = ({ navigation }) => {
               }}
               error={fullnameErrorMessage.length !== 0}
               errorMessage={fullnameErrorMessage}
+            />
+          </View>
+          <View>
+            <Text style={{
+              fontSize: 16,
+              fontWeight: 400,
+              marginVertical: 8
+            }}>Tên đăng nhập </Text>
+            <CustomInput
+              value={username}
+              onChangeText={(username) => {
+                setUsername(username);
+                showUserNameError(username);
+              }}
+              error={usernameErrorMessage.length !== 0}
+              errorMessage={usernameErrorMessage}
             />
           </View>
           <View>
@@ -247,7 +329,7 @@ const EditProfile = ({ navigation }) => {
             />
           </View>
 
-          <View>
+          {/* <View>
             <Text style={{
               fontSize: 16,
               fontWeight: 400,
@@ -259,7 +341,7 @@ const EditProfile = ({ navigation }) => {
               _value={dateOfBirth}
               onChangeText={(text) => { setDateOfBirth(text) }}
             />
-          </View>
+          </View> */}
         </View>
 
         <View>
@@ -280,22 +362,19 @@ const EditProfile = ({ navigation }) => {
           style={{
             backgroundColor: COLORS.primary,
             height: 44,
-            borderRadius: 6,
+            borderRadius: 20,
             alignItems: "center",
             justifyContent: "center",
           }}
+          onPress={() => handleUpdateUser()}
         >
           <Text
             style={{
-              ...FONTS.body3,
-              color: '#fff',
+              fontFamily: 'bold',
+              color: '#FFF',
             }}
           >
-            <AntDesign
-              name={'checkcircleo'}
-              size={22}
-              color={'#fff'}
-            />
+            THAY ĐỔI THÔNG TIN
           </Text>
         </TouchableOpacity>
       </ScrollView>

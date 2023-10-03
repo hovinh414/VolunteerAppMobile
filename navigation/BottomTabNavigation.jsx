@@ -35,11 +35,12 @@ const screenOptions = {
     },
 }
 const BottomTabNavigation = () => {
-    const [email, setEmail] = useState(null);
-    const [avatar, setAvatar] = useState(null);
+    const [email, setEmail] = useState('');
+    const [avatar, setAvatar] = useState('');
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData();
         setEmail(userStored.userResult.email);
+        setAvatar(userStored.userResult.avatar);
     }
     useEffect(() => { getUserStored(); }, []);
     return (
@@ -144,7 +145,7 @@ const BottomTabNavigation = () => {
                         tabBarIcon: ({ focused }) => {
                             return (
                                 <Image
-                                    source={ImageAvata}
+                                    source={{uri: avatar}}
                                     style={{
                                         height: 24,
                                         width: 24,

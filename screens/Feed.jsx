@@ -6,6 +6,7 @@ import {
     FlatList,
     Image,
     TextInput,
+    Actions
 } from 'react-native'
 import * as Progress from 'react-native-progress';
 import React, { useState, useEffect } from 'react'
@@ -20,9 +21,11 @@ import {
 } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { friends, posts } from '../constants/data'
+import { SliderBox } from 'react-native-image-slider-box'
 
-const users = [images.user1, images.user2, images.user3, images.user4]
-
+const post1 = [images.friend1, images.friend2, images.friend3, images.friend4, images.friend5]
+const post2 = [images.user1, images.user2, images.user3, images.user4, images.user5]
+const post3 = [images.post1, images.post2, images.post3, images.post4, images.post5]
 const Feed = () => {
 
     function renderHeader() {
@@ -187,6 +190,7 @@ const Feed = () => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         marginTop: 12,
+                        paddingBottom: 10,
                     }}
                 >
                     <View
@@ -221,8 +225,20 @@ const Feed = () => {
                         color={COLORS.black}
                     />
                 </View>
+                <View
+                >
+                    <SliderBox
+                        images={post1}
+                        paginationBoxVerticalPadding={5}
+                        activeOpacity={1}
+                        dotColor={COLORS.primary}
+                        inactiveDotColor={COLORS.white}
+                        sliderBoxHeight={500}
+                        dotStyle={{ width: 7, height: 7 }}
+                    />
+                </View>
                 {/* Post image */}
-                <FlatList
+                {/* <FlatList
                     data={friends}
                     horizontal
                     keyExtractor={(item) => item.id}
@@ -242,7 +258,7 @@ const Feed = () => {
                                 }}
                             />
                         </View>
-                    } />
+                    } /> */}
 
                 {/* Post content */}
 
@@ -434,6 +450,7 @@ const Feed = () => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         marginTop: 12,
+                        paddingBottom: 10,
                     }}
                 >
                     <View
@@ -469,7 +486,7 @@ const Feed = () => {
                     />
                 </View>
                 {/* Post image */}
-                <FlatList
+                {/* <FlatList
                     data={posts}
                     horizontal
                     keyExtractor={(item) => item.id}
@@ -489,7 +506,20 @@ const Feed = () => {
                                 }}
                             />
                         </View>
-                    } />
+                    } /> */}
+                <View
+                >
+                    <SliderBox
+                        images={post2}
+                        paginationBoxVerticalPadding={5}
+
+                        activeOpacity={1}
+                        dotColor={COLORS.primary}
+                        inactiveDotColor={COLORS.white}
+                        sliderBoxHeight={500}
+                        dotStyle={{ width: 7, height: 7 }}
+                    />
+                </View>
                 {/* Post content */}
 
                 <View
@@ -680,6 +710,7 @@ const Feed = () => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         marginTop: 8,
+                        paddingBottom: 10,
                     }}
                 >
                     <View
@@ -715,7 +746,7 @@ const Feed = () => {
                     />
                 </View>
                 {/* Post image */}
-                <FlatList
+                {/* <FlatList
                     data={posts}
                     horizontal
                     keyExtractor={(item) => item.id}
@@ -735,7 +766,20 @@ const Feed = () => {
                                 }}
                             />
                         </View>
-                    } />
+                    } /> */}
+                <View
+                >
+                    <SliderBox
+                        images={post3}
+                        paginationBoxVerticalPadding={5}
+
+                        activeOpacity={1}
+                        dotColor={COLORS.primary}
+                        inactiveDotColor={COLORS.white}
+                        sliderBoxHeight={500}
+                        dotStyle={{ width: 7, height: 7 }}
+                    />
+                </View>
                 {/* Post content */}
 
                 <View

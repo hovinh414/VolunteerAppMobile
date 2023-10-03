@@ -1,5 +1,5 @@
 import { View, Text, Image, useWindowDimensions, FlatList, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
 import { Feather, AntDesign, Ionicons } from '@expo/vector-icons'
@@ -9,7 +9,7 @@ import { posts } from '../../constants/data'
 import CustomInput from '../../components/CustomInput'
 import Auth from '../Login/Auth'
 import CustomInputDateTime from '../../components/CustomInputDateTime'
-
+import AsyncStoraged from '../../services/AsyncStoraged'
 
 
 const PostsRoute = () => (
@@ -88,63 +88,9 @@ const PostsRoute = () => (
 )
 
 const InfoRoute = () => {
-    const [fullname, setFullname] = useState("");
-    const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
-    const [fullnameErrorMessage, setfullnameErrorMessage] = useState('');
-    const [phoneErrorMessage, setPhoneErrorMessage] = useState('');
-    const [emailErrorMessage, setEmailErrorMessage] = useState('');
-    const [dateOfBirth, setDateOfBirth] = useState();
-    const showFullNameError = (_fullname) => {
-        if (_fullname.length === 0) {
-        setfullnameErrorMessage('Tên không được trống');
-        }
-    
-        else {
-            setfullnameErrorMessage('')
-        }
-    }
-    const showPhonenumberErrorMessage = (_phone) => {
-        if (Auth.isValidPhone(_phone) === false) {
-            setPhoneErrorMessage('Số điện thoại phải đủ 10 số');
-        }
-        
-        else {
-            setPhoneErrorMessage('')
-        }
-    }
-    const showEmailMessage = (_email) => {
-        if (_email.length === 0) {
-            setEmailErrorMessage('Email không được trống')
-        } else if (Auth.isValidEmail (_email) === false) {
-            setEmailErrorMessage('Email sai định dạng')
-        }
-        
-        else {
-            setEmailErrorMessage('')
-        }
-        
-    }
     return (
         <ScrollView style={{ flex: 1, paddingTop:25, }}>
-            <View>
-                    <Text style={{
-                        fontSize: 18,
-                        fontWeight: 400,
-                        marginVertical: 8
-                    }}>Tên <CustomInput
-                        onChangeText={(fullname) => {
-                            setFullname(fullname);
-                            showFullNameError(fullname);
-                        }}
-                        
-                        error={fullnameErrorMessage.length !== 0}
-                        errorMessage={fullnameErrorMessage}
-                    /></Text>
-
-                    
-                    
-            </View>
+            
         </ScrollView>
     )
 }
@@ -154,6 +100,18 @@ const renderScene = SceneMap({
     second: InfoRoute,
 })
 const Profile = ({navigation}) => {
+    const [avatar, setAvatar] = useState("");
+    const [fullname, setFullname] = useState("");
+    const [address, setAddress] = useState('');
+    const [email, setEmail] = useState('');
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData();
+        setAvatar(userStored.userResult.avatar);
+        setFullname(userStored.userResult.fullname);
+        setAddress(userStored.userResult.address);
+        setEmail(userStored.userResult.email);
+    }
+    useEffect(() => { getUserStored(); }, []);
     function renderProfileCard() {
         return (
             <View
@@ -177,7 +135,7 @@ const Profile = ({navigation}) => {
                     {/* Profile image container */}
                     <View>
                         <Image
-                            source={images.user3}
+                            source={{uri: avatar}}
                             resizeMode="contain"
                             style={{
                                 height: 90,
@@ -249,18 +207,18 @@ const Profile = ({navigation}) => {
                         marginVertical: 12,
                     }}
                 >
-                    <Text style={{ ...FONTS.body4 }}>Lê Đỗ Thành Đạt</Text>
+                    <Text style={{ ...FONTS.body4 }}>{fullname}</Text>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ ...FONTS.body4 }}>Hacker Hutech</Text>
+                        <Text style={{ ...FONTS.body4 }}>Email: </Text>
                         <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
-                            @thanhdatdev
+                            @{email}
                         </Text>
                     </View>
 
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ ...FONTS.body4 }}>Creator of</Text>
+                        <Text style={{ ...FONTS.body4 }}>Địa chỉ: </Text>
                         <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
-                            @damnpixels
+                            {address}
                         </Text>
                     </View>
                 </View>

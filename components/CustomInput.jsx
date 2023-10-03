@@ -10,16 +10,17 @@ const CustomInput = ({value, placeholder, keyboardType, secureTextEntry, onChang
                         height: 48,
                         borderColor: error ? COLORS.primary : COLORS.black,
                         borderWidth: 1,
-                        borderRadius: 8,
+                        borderRadius: 16,
                         alignItems: "center",
                         justifyContent: "center",
                         paddingLeft: 22
                     }}>
             <TextInput
+            
                 value={value}
                 onChangeText={onChangeText}
                 placeholder={placeholder}
-                placeholderTextColor={COLORS.black}
+                placeholderTextColor={'#999'}
                 secureTextEntry={secureTextEntry}
                 keyboardType={keyboardType}
                 style={{

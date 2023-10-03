@@ -10,6 +10,7 @@ import Signup from './Signup/Signup'
 import SignupOrganisation from './Signup/SignupOrganisation'
 import EditProfile from './Profile/EditProfile'
 import Settings from './Profile/Settings'
+import ChangePassword from './Profile/ChangePassword'
 
 
-export { Feed, Create, Profile, Notifications, Welcome, Chat, LoginScreen, Signup, SignupType, SignupOrganisation, EditProfile, Settings }
+export { Feed, Create, Profile, Notifications, Welcome, Chat, LoginScreen, Signup, SignupType, SignupOrganisation, EditProfile, Settings, ChangePassword }

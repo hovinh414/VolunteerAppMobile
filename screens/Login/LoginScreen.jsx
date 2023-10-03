@@ -94,7 +94,7 @@ const LoginScreen = ({ navigation }) => {
             }
             const res =  await axios( {
                 method : 'post',
-                url: 'http://192.168.9.10:3000/api/v1/login',
+                url: 'http://192.168.9.14:3000/api/v1/login',
                 headers:{
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Accept': 'application/json'
@@ -109,7 +109,7 @@ const LoginScreen = ({ navigation }) => {
             if (res.data.status === 'SUCCESS' && res.data.data.accessToken !== null) {
                 AsyncStoraged.storeData(res.data.data);
                 setToken(res.data.data.accessToken);
-                navigation.navigate("Welcome");
+                navigation.push('BottomTabNavigation');
                 
             } 
             
@@ -121,10 +121,7 @@ const LoginScreen = ({ navigation }) => {
                 ]);
                 
             }
-
-
-        
-            
+      
         }
     }
     return (

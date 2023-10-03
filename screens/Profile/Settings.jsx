@@ -6,9 +6,12 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const Settings = ({ navigation }) => {
 
+  const removeUser = async () => {
+    const userStored = await AsyncStoraged.removeData();
+}
 
   const navigateToEditProfile = () => {
-    navigation.navigate("EditProfile");
+    navigation.push("EditProfile");
   };
 
   const navigateToSecurity = () => {
@@ -20,7 +23,7 @@ const Settings = ({ navigation }) => {
   };
 
   const navigateToPrivacy = () => {
-    console.log("Privacy function");
+    navigation.navigate("ChangePassword");
   };
 
   const navigateToSubscription = () => {
@@ -58,9 +61,8 @@ const Settings = ({ navigation }) => {
         onPress: () => console.log('Cancel Pressed'),
         style: 'cancel',
       },
-      { text: 'Đồng ý', onPress: () => navigation.navigate("LoginScreen")},
+      { text: 'Đồng ý', onPress: () => navigation.push('LoginScreen')},
     ]);
-
   };
 
   const accountItems = [
