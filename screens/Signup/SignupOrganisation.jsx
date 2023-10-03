@@ -27,7 +27,7 @@ const Signup = ({ navigation }) => {
         if (_fullname.length === 0) {
             setfullnameErrorMessage('Tên không được trống');
         }
-        
+
         else {
             setfullnameErrorMessage('')
         }
@@ -35,20 +35,20 @@ const Signup = ({ navigation }) => {
     const showEmailMessage = (_email) => {
         if (_email.length === 0) {
             setEmailErrorMessage('Email không được trống')
-        } else if (Auth.isValidEmail (_email) === false) {
+        } else if (Auth.isValidEmail(_email) === false) {
             setEmailErrorMessage('Email sai định dạng')
         }
-        
+
         else {
             setEmailErrorMessage('')
         }
-        
+
     }
     const showUsernameErrorMessage = (_username) => {
         if (_username.length === 0) {
             setusernameErrorMessage('Tên đăng nhập không được trống');
         }
-        
+
         else {
             setusernameErrorMessage('')
         }
@@ -57,7 +57,7 @@ const Signup = ({ navigation }) => {
         if (Auth.isValidPhone(_phone) === false) {
             setPhoneErrorMessage('Số điện thoại phải đủ 10 số');
         }
-        
+
         else {
             setPhoneErrorMessage('')
         }
@@ -65,49 +65,45 @@ const Signup = ({ navigation }) => {
     const showPasswordMessage = (_password) => {
         if (_password.length === 0) {
             setPasswordErrorMessage('Mật khẩu không được trống')
-        } else if (Auth.isValidPassword (_password) === false) {
+        } else if (Auth.isValidPassword(_password) === false) {
             setPasswordErrorMessage('Mật khẩu bao gồm 8 ký tự, chữ in hoa và chữ số')
         }
-        
+
         else {
             setPasswordErrorMessage('')
         }
-        
+
     }
     const handleSignup = async () => {
         try {
             if (!username || !password || !email || !phone || !fullname) {
                 Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ thông tin!', [
-                    
-                    {text: 'OK', onPress: () => console.log('OK Pressed')},
-                  ]);
+
+                    { text: 'OK', onPress: () => console.log('OK Pressed') },
+                ]);
                 return;
             }
-            await signUpApi(type,fullname, email, username, password, phone).then((res) => {
-                
+            await signUpApi(type, fullname, email, username, password, phone).then((res) => {
+
                 if (res.status === 201) {
-                    // Alert.alert('Thông báo', 'Đăng ký thành công!', [
-                    
-                    //     {text: 'OK', onPress: () => console.log('OK Pressed')},
-                    //   ]);
-                    alert('Đăng ký thành công vui lòng đăng nhập!');
-                    navigation.navigate("LoginScreen");
-                } else  {
-                    Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
-                    
-                        {text: 'OK', onPress: () => console.log('OK Pressed')},
-                      ]);
-                    return;
+                    if (res.status === 201) {
+                        Alert.alert('Thông báo', 'Đăng ký thành công vui lòng đăng nhập!', [
+
+                            { text: 'OK', onPress: () => navigation.navigate("LoginScreen") },
+                        ]);
+
+
+                    }
                 }
-    
+
             })
         } catch (error) {
             alert(error);
         }
-        
+
     }
     return (
-        <ScrollView style={{ flex: 1, backgroundColor: COLORS.white, paddingTop:15, }}>
+        <ScrollView style={{ flex: 1, backgroundColor: COLORS.white, paddingTop: 15, }}>
             <View style={{ flex: 1, marginHorizontal: 22 }}>
                 <View style={{ marginVertical: 22 }}>
                     <Text style={{
@@ -131,15 +127,15 @@ const Signup = ({ navigation }) => {
                         marginVertical: 8
                     }}>Tên của tổ chức </Text>
 
-                        <CustomInput
-                            onChangeText={(fullname) => {
-                                setFullname(fullname);
-                                showFullNameError(fullname);
-                            }}
-                            placeholder='Nhập tên của tổ chức!'
-                            error={fullnameErrorMessage.length !== 0}
-                            errorMessage={fullnameErrorMessage}
-                        />
+                    <CustomInput
+                        onChangeText={(fullname) => {
+                            setFullname(fullname);
+                            showFullNameError(fullname);
+                        }}
+                        placeholder='Nhập tên của tổ chức!'
+                        error={fullnameErrorMessage.length !== 0}
+                        errorMessage={fullnameErrorMessage}
+                    />
                 </View>
                 <View>
                     <Text style={{
@@ -148,15 +144,15 @@ const Signup = ({ navigation }) => {
                         marginVertical: 8
                     }}>Email</Text>
 
-                        <CustomInput
-                            onChangeText={(email) => {
-                                setEmail(email);
-                                showEmailMessage(email);
-                            }}
-                            placeholder='Nhập email của tổ chức'
-                            error={emailErrorMessage.length !== 0}
-                            errorMessage={emailErrorMessage}
-                        />
+                    <CustomInput
+                        onChangeText={(email) => {
+                            setEmail(email);
+                            showEmailMessage(email);
+                        }}
+                        placeholder='Nhập email của tổ chức'
+                        error={emailErrorMessage.length !== 0}
+                        errorMessage={emailErrorMessage}
+                    />
                 </View>
                 <View>
                     <Text style={{
@@ -165,16 +161,16 @@ const Signup = ({ navigation }) => {
                         marginVertical: 8
                     }}>Tài khoản</Text>
 
-                        <CustomInput
-                            onChangeText={(username) => {
-                                setUsername(username);
-                                showUsernameErrorMessage(username);
-                            }}
-                            placeholder='Nhập tên đăng nhập của tổ chức'
-                            error={usernameErrorMessage.length !== 0}
-                            errorMessage={usernameErrorMessage}
-                        />
-                </View>               
+                    <CustomInput
+                        onChangeText={(username) => {
+                            setUsername(username);
+                            showUsernameErrorMessage(username);
+                        }}
+                        placeholder='Nhập tên đăng nhập của tổ chức'
+                        error={usernameErrorMessage.length !== 0}
+                        errorMessage={usernameErrorMessage}
+                    />
+                </View>
                 <View>
                     <Text style={{
                         fontSize: 16,
@@ -182,54 +178,54 @@ const Signup = ({ navigation }) => {
                         marginVertical: 8
                     }}>Số điện thoại</Text>
 
-                        <CustomInput
-                            keyboardType={'numeric'}
-                            onChangeText={(phone) => {
-                                setPhone(phone);
-                                showPhonenumberErrorMessage(phone);
-                            }}
-                            placeholder='Nhập số điện thoại của tổ chức'
-                            error={phoneErrorMessage.length !== 0}
-                            errorMessage={phoneErrorMessage}
-                        />
+                    <CustomInput
+                        keyboardType={'numeric'}
+                        onChangeText={(phone) => {
+                            setPhone(phone);
+                            showPhonenumberErrorMessage(phone);
+                        }}
+                        placeholder='Nhập số điện thoại của tổ chức'
+                        error={phoneErrorMessage.length !== 0}
+                        errorMessage={phoneErrorMessage}
+                    />
                 </View>
 
-                <View  style={{ marginBottom: 12 }}>
+                <View style={{ marginBottom: 12 }}>
                     <Text style={{
                         fontSize: 16,
                         fontWeight: 400,
                         marginVertical: 8
                     }}>Mật khẩu</Text>
 
-                    
-                        <CustomInput
-                            onChangeText={(password) => {
-                                setPassword(password);
-                                showPasswordMessage(password);
-                            }}
-                            placeholder='Nhập mật khẩu của tổ chức'
-                            error={passwordErrorMessage.length !== 0}
-                            errorMessage={passwordErrorMessage}
-                            secureTextEntry={isPasswordShown}
-                            
-                        />
 
-                        <TouchableOpacity
-                            onPress={() => setIsPasswordShown(!isPasswordShown)}
-                            style={{
-                                position: "absolute",
-                                right: 12
-                            }}
-                        >
-                            {
-                                isPasswordShown == true ? (
-                                    <Ionicons name="eye-off" size={24} color={COLORS.black} />
-                                ) : (
-                                    <Ionicons name="eye" size={24} color={COLORS.black} />
-                                )
-                            }
+                    <CustomInput
+                        onChangeText={(password) => {
+                            setPassword(password);
+                            showPasswordMessage(password);
+                        }}
+                        placeholder='Nhập mật khẩu của tổ chức'
+                        error={passwordErrorMessage.length !== 0}
+                        errorMessage={passwordErrorMessage}
+                        secureTextEntry={isPasswordShown}
 
-                        </TouchableOpacity>
+                    />
+
+                    <TouchableOpacity
+                        onPress={() => setIsPasswordShown(!isPasswordShown)}
+                        style={{
+                            position: "absolute",
+                            right: 12
+                        }}
+                    >
+                        {
+                            isPasswordShown == true ? (
+                                <Ionicons name="eye-off" size={24} color={COLORS.black} />
+                            ) : (
+                                <Ionicons name="eye" size={24} color={COLORS.black} />
+                            )
+                        }
+
+                    </TouchableOpacity>
                 </View>
 
                 <View style={{
@@ -265,10 +261,10 @@ const Signup = ({ navigation }) => {
                             marginHorizontal: 10
                         }}
                     />
-                    
+
                 </View>
 
-                
+
 
                 <View style={{
                     flexDirection: "row",

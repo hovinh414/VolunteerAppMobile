@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from '../../constants/colors';
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from './SignupScreenStyle';
+import { MaterialIcons } from "@expo/vector-icons";
 import Checkbox from "expo-checkbox"
 import Button from '../../components/Button';
 
@@ -12,6 +13,21 @@ const Signup = ({ navigation }) => {
     const [isChecked, setIsChecked] = useState(false);
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{
+            paddingTop:80,
+            paddingLeft:20,
+            position: "absolute",
+            left: 0,
+          }}
+        >
+          <MaterialIcons
+            name="keyboard-arrow-left"
+            size={30}
+            color={COLORS.black}
+          />
+        </TouchableOpacity>
             <View style={{ flex: 1, marginHorizontal: 22 }}>
             <View style={{paddingBottom: 30}}>
                 <Text style={styles.textHeader}>Chọn loại</Text>

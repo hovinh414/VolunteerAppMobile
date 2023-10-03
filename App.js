@@ -11,7 +11,9 @@ import SignupType from './screens/Signup/SignType'
 import SignupOrganisation from './screens/Signup/SignupOrganisation'
 import Signup from './screens/Signup/Signup'
 import EditProfile from './screens/Profile/EditProfile'
-
+import Settings from './screens/Profile/Settings'
+import LoginScreen from './screens/Login/LoginScreen'
+import ChangePassword from './screens/Profile/ChangePassword'
 const Stack = createNativeStackNavigator()
 
 SplashScreen.preventAutoHideAsync()
@@ -77,6 +79,27 @@ export default function App() {
                     <Stack.Screen
                         name="EditProfile"
                         component={EditProfile}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="Settings"
+                        component={Settings}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="LoginScreen"
+                        component={LoginScreen}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ChangePassword"
+                        component={ChangePassword}
                         options={{
                             headerShown: false,
                         }}
