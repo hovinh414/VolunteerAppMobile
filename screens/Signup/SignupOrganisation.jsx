@@ -12,7 +12,7 @@ import CustomInput from '../../components/CustomInput';
 const Signup = ({ navigation }) => {
     const [isPasswordShown, setIsPasswordShown] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
-    const [type, setType] = useState("organisation");
+    const [type, setType] = useState("Organisation");
     const [fullname, setFullname] = useState("");
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");

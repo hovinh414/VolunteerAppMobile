@@ -13,7 +13,7 @@ const Signup = ({ navigation }) => {
     const [isPasswordShown, setIsPasswordShown] = useState(true);
     const [isChecked, setIsChecked] = useState(false);
 
-    const [type, setType] = useState("user");
+    const [type, setType] = useState("User");
     const [fullname, setFullname] = useState("");
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");

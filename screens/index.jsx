@@ -1,6 +1,7 @@
 import Feed from './Feed'
 import Create from './Create'
 import Profile from './Profile/Profile'
+import ProfileOrganisation from './Profile/ProfileOrganisation'
 import Notifications from './Notifications'
 import Welcome from './Welcome'
 import Chat from './Chat'
@@ -13,4 +14,4 @@ import Settings from './Profile/Settings'
 import ChangePassword from './Profile/ChangePassword'
 
 
-export { Feed, Create, Profile, Notifications, Welcome, Chat, LoginScreen, Signup, SignupType, SignupOrganisation, EditProfile, Settings, ChangePassword }
+export { Feed, Create, Profile, Notifications, Welcome, Chat, LoginScreen, Signup, SignupType, SignupOrganisation, EditProfile, Settings, ChangePassword, ProfileOrganisation }

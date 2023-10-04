@@ -13,7 +13,9 @@ import { COLORS, FONTS } from "../../constants/theme";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import CustomInput from "../../components/CustomInput";
 import Auth from "../Login/Auth";
+import axios from 'axios';
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStoraged from '../../services/AsyncStoraged'
 
 const ChangePassword = ({ navigation }) => {
     const [password, setPassword] = useState();
@@ -25,6 +27,46 @@ const ChangePassword = ({ navigation }) => {
     const [isPasswordShow, setIsPasswordShow] = useState(true);
     const [isNewPasswordShow, setIsNewPasswordShow] = useState(true);
     const [isConfirmPasswordShow, setIsConfỉmPasswordShow] = useState(true);
+    const [userId, setUserId] = useState();
+    const [token, setToken] = useState();
+
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData();
+        setUserId(userStored.userResult._id);
+        setToken(userStored.accessToken);
+      }
+      useEffect(() => { getUserStored(); }, []);
+    const handleUpdatePassword = async () => {
+        try {
+          const res = await axios({
+            method: 'put',
+            url: 'http://192.168.9.14:3000/api/v1/user?userid=' + userId,
+            headers: {
+              'Authorization': token,
+            },
+            data: {
+                oldPassword: password,
+                password: passwordConfirm,
+            },
+          });
+    
+          if (res.data.status === 'SUCCESS') {
+            Alert.alert('Thông báo', 'Thay đổi mật khẩu thành công!', [
+    
+              { text: 'OK', onPress: () => console.log('Press') },
+            ]);
+            navigation.push("BottomTabNavigation");
+    
+          }
+        } catch (error) {
+            alert(error);
+          Alert.alert('Thông báo', "Lỗi khi cập nhật thông tin!", [
+    
+            { text: 'OK', onPress: () => console.log('Press') },
+          ]);
+        }
+    
+      }
     const showPasswordMessage = (_password) => {
         if (_password.length === 0) {
             setPasswordErrorMessage('Mật khẩu không được trống');
@@ -224,6 +266,7 @@ const ChangePassword = ({ navigation }) => {
                         alignItems: "center",
                         justifyContent: "center",
                     }}
+                    onPress={() => handleUpdatePassword()}
                 >
                     <Text
                         style={{

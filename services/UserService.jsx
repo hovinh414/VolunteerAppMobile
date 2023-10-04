@@ -7,7 +7,7 @@ const loginApi = (username, password) => {
 }
 
 const signUpApi = (type, fullname, email, username, password, phone) => {
-    return axios.post("http://192.168.9.10:3000/api/v1/signup", {type, fullname, email, username, password, phone})
+    return axios.post("http://192.168.9.14:3000/api/v1/signup", {type, fullname, email, username, password, phone})
 }
 
 const editUserApi = (userId,fullname, email, username, phone, avatar, address) => {

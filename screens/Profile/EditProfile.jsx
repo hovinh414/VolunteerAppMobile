@@ -18,7 +18,7 @@ import { RadioButton } from 'react-native-paper';
 import CustomInput from "../../components/CustomInput";
 import CustomInputDateTime from "../../components/CustomInputDateTime";
 import Auth from "../Login/Auth";
-import ImageAvata from "../../assets/images/user3.jpg"
+import ImageAvata from "../../assets/hero2.jpg"
 import AsyncStoraged from '../../services/AsyncStoraged'
 
 const EditProfile = ({ navigation }) => {
@@ -44,9 +44,9 @@ const EditProfile = ({ navigation }) => {
     setPhone(userStored.userResult.phone);
     setEmail(userStored.userResult.email);
     setAddress(userStored.userResult.address);
-    setAvatar(userStored.userResult.avatar)
-    setUserId(userStored.userResult._id)
-    setToken(userStored.accessToken)
+    setAvatar(userStored.userResult.avatar);
+    setUserId(userStored.userResult._id);
+    setToken(userStored.accessToken);
     if (userStored.userResult.address === 'Nam') {
       setSex('female');
     } else {
@@ -111,8 +111,7 @@ const EditProfile = ({ navigation }) => {
           username: username,
           phone: phone,
           address: address,
-          password: 'Hovinh1003',
-          oldPassword: 'Hovinh1003',
+          avatar: avatar,
         },
       });
 
@@ -121,12 +120,12 @@ const EditProfile = ({ navigation }) => {
 
           { text: 'OK', onPress: () => console.log('Press') },
         ]);
-        setFullname(res.data.data.fullname);
-        setUsername(res.data.data.username);
-        setPhone(res.data.data.phone);
-        setEmail(res.data.data.email);
-        setAddress(res.data.data.address);
-        setAvatar(res.data.data.avatar)
+        setFullname(res.data.data.userResultForUpdate.fullname);
+        setUsername(res.data.data.userResultForUpdate.username);
+        setPhone(res.data.data.userResultForUpdate.phone);
+        setEmail(res.data.data.userResultForUpdate.email);
+        setAddress(res.data.data.userResultForUpdate.address);
+        setAvatar(res.data.data.userResultForUpdate.avatar)
 
       }
     } catch (error) {
@@ -144,14 +143,16 @@ const EditProfile = ({ navigation }) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 4],
+      aspect: [5, 5],
       quality: 1,
     });
 
     console.log(result);
 
     if (!result.canceled) {
-      setSelectedImage();
+      
+      setAvatar(result.assets[0].uri);
+      
     }
   };
   return (
@@ -199,7 +200,7 @@ const EditProfile = ({ navigation }) => {
         >
           <TouchableOpacity onPress={handleImageSelection}>
             <Image
-              source={{ uri: avatar }}
+              source={avatar ? {uri: avatar} : ImageAvata}
               style={{
                 height: 140,
                 width: 140,

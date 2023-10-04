@@ -1,4 +1,4 @@
-import { View, Text, Image, useWindowDimensions, FlatList, ScrollView } from 'react-native'
+import { View, Text, Image, useWindowDimensions, FlatList, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
@@ -16,7 +16,7 @@ const PostsRoute = () => (
     <View
         style={{
             flex: 1,
-            paddingTop:12,
+            paddingTop: 12,
         }}
     >
         <FlatList
@@ -87,19 +87,40 @@ const PostsRoute = () => (
     </View>
 )
 
-const InfoRoute = () => {
+const VerifyRoute = () => {
     return (
-        <ScrollView style={{ flex: 1, paddingTop:25, }}>
-            
+        <ScrollView style={{ flex: 1, paddingTop: 25, }}>
+            <View style={{ flex: 1 }}>
+                {/* Đặt nội dung chính ở đây */}
+            </View>
+            <TouchableOpacity
+                style={{
+                    backgroundColor: COLORS.primary,
+                    height: 44,
+                    borderRadius: 20,
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+                
+            >
+                <Text
+                    style={{
+                        fontFamily: 'bold',
+                        color: '#FFF',
+                    }}
+                >
+                    ĐĂNG MINH CHỨNG
+                </Text>
+            </TouchableOpacity>
         </ScrollView>
     )
 }
 
 const renderScene = SceneMap({
     first: PostsRoute,
-    second: InfoRoute,
+    second: VerifyRoute,
 })
-const Profile = ({navigation}) => {
+const ProfileOrganisation = ({ navigation }) => {
     const [avatar, setAvatar] = useState("");
     const [fullname, setFullname] = useState("");
     const [address, setAddress] = useState('');
@@ -122,7 +143,7 @@ const Profile = ({navigation}) => {
                     paddingHorizontal: 6,
                     paddingVertical: 18,
                     backgroundColor: '#FFFFFF',
-                    
+
 
                 }}
             >
@@ -135,7 +156,7 @@ const Profile = ({navigation}) => {
                     {/* Profile image container */}
                     <View>
                         <Image
-                            source={avatar ? {uri: avatar} : ImageAvata}
+                            source={avatar ? { uri: avatar } : ImageAvata}
                             resizeMode="contain"
                             style={{
                                 height: 90,
@@ -162,7 +183,7 @@ const Profile = ({navigation}) => {
                                 alignItems: 'center',
                             }}
                         >
-                            
+
                         </View>
 
                         <View
@@ -171,8 +192,8 @@ const Profile = ({navigation}) => {
                                 justifyContent: 'center',
                             }}
                         >
-                            
-                            
+
+
                             <View
                                 style={{
                                     backgroundColor: '#FFF9E8',
@@ -183,22 +204,22 @@ const Profile = ({navigation}) => {
                                     padding: 15,
                                 }}
                             >
-                                <Text style={{ ...FONTS.body4 }}>Đã tham gia 24 hoạt động</Text>
+                                <Text style={{ ...FONTS.body4 }}>Đã tổ chức 24 hoạt động</Text>
                             </View>
-                            
+
                         </View>
-                        
+
                     </View>
                     <Feather
-                                style={{
-                                    
-                                    paddingLeft: 10,
-                                }}
-                                name="menu"
-                                size={24}
-                                color={COLORS.black}
-                                onPress={() => navigation.navigate("Settings")}
-                            />
+                        style={{
+
+                            paddingLeft: 10,
+                        }}
+                        name="menu"
+                        size={24}
+                        color={COLORS.black}
+                        onPress={() => navigation.navigate("Settings")}
+                    />
                 </View>
 
                 <View
@@ -229,9 +250,9 @@ const Profile = ({navigation}) => {
     const layout = useWindowDimensions()
     const [index, setIndex] = useState(0)
     const [routes] = useState([
-        { key: 'first', title: 'Bài đăng', icon: 'home' },
-        { key: 'second', title: 'Thông tin', icon: 'user' },
-        
+        { key: 'first', title: 'Hoạt động', icon: 'team' },
+        { key: 'second', title: 'Đăng minh chứng', icon: 'upload' },
+
     ])
 
     const renderTabBar = (props) => (
@@ -256,7 +277,7 @@ const Profile = ({navigation}) => {
                     {route.title}
                 </Text>
             )}
-            
+
         />
     )
 
@@ -288,4 +309,4 @@ const Profile = ({navigation}) => {
     )
 }
 
-export default Profile
+export default ProfileOrganisation

@@ -6,9 +6,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const Settings = ({ navigation }) => {
 
-  const removeUser = async () => {
-    const userStored = await AsyncStoraged.removeData();
-}
 
   const navigateToEditProfile = () => {
     navigation.push("EditProfile");
