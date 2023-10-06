@@ -2,8 +2,8 @@ import axios from 'axios';
 
 
 
-const loginApi = (username, password) => {
-    return axios.post("http://192.168.9.10:3000/api/v1/login", {username, password})
+const checkUsername = (username) => {
+    return axios.get("http://192.168.9.14:3000/api/v1/checkUsername", {username})
 }
 
 const signUpApi = (type, fullname, email, username, password, phone) => {
@@ -17,4 +17,4 @@ const editUserApi = (userId,fullname, email, username, phone, avatar, address) =
       };
     return axios.put("http://192.168.9.14:3000/api/v1/user?userid=" + userId, {fullname, email, username, phone, avatar, address},headers)
 }
-export {loginApi, signUpApi, editUserApi};
+export {checkUsername, signUpApi, editUserApi};

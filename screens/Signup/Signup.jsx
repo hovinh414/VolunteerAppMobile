@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from '../../constants/colors';
 import { Ionicons } from "@expo/vector-icons";
 import Checkbox from "expo-checkbox"
+import axios from 'axios';
 import Button from '../../components/Button';
 import { signUpApi } from '../../services/UserService';
 import Auth from '../Login/Auth';
@@ -77,6 +78,23 @@ const Signup = ({ navigation }) => {
         }
 
     }
+    const handleCheckUsername = async (_username) => {
+
+        try {
+            console.log(res);
+            const res = await axios({
+                method: 'get',
+                url: 'http://192.168.9.14:3000/api/v1/checkUsername?username=' + _username,
+            });
+            console.log(res.status);
+            if (res.data.status === 'SUCCESS') {
+                console.log('OK');
+            }
+        } catch (error) {
+            setusernameErrorMessage('Tên đăng nhập đã được sử dụng!');
+        }
+
+    };
     const handleSignup = async () => {
         try {
             if (!username || !password || !email || !phone || !fullname) {
@@ -168,6 +186,8 @@ const Signup = ({ navigation }) => {
                     <CustomInput
                         onChangeText={(username) => {
                             setUsername(username);
+                            
+                            handleCheckUsername(username);
                             showUsernameErrorMessage(username);
                         }}
                         placeholder='Nhập tên đăng nhập của bạn'

@@ -44,8 +44,8 @@ const BottomTabNavigation = () => {
             setType('');
         }
         else {
-            setType(userStored.userResult.type);
-            setAvatar(userStored.userResult.avatar);
+            setType(userStored.type);
+            setAvatar(userStored.avatar);
         }
 
     }

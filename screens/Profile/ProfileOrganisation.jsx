@@ -127,10 +127,10 @@ const ProfileOrganisation = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData();
-        setAvatar(userStored.userResult.avatar);
-        setFullname(userStored.userResult.fullname);
-        setAddress(userStored.userResult.address);
-        setEmail(userStored.userResult.email);
+        setAvatar(userStored.avatar);
+        setFullname(userStored.fullname);
+        setAddress(userStored.address);
+        setEmail(userStored.email);
     }
     useEffect(() => { getUserStored(); }, []);
     function renderProfileCard() {

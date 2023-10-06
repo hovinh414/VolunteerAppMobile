@@ -32,7 +32,7 @@ const ChangePassword = ({ navigation }) => {
 
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData();
-        setUserId(userStored.userResult._id);
+        setUserId(userStored._id);
         setToken(userStored.accessToken);
       }
       useEffect(() => { getUserStored(); }, []);

@@ -107,8 +107,8 @@ const LoginScreen = ({ navigation }) => {
             
             
             if (res.data.status === 'SUCCESS' && res.data.data.accessToken !== null) {
-                AsyncStoraged.storeData(res.data.data);
-                setToken(res.data.data.accessToken);
+                AsyncStoraged.storeData(res.data.data.userResult);
+                AsyncStoraged.setToken(res.data.data.accessToken);
                 navigation.push('BottomTabNavigation');
                 
             } 

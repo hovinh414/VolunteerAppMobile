@@ -14,15 +14,13 @@ import axios from 'axios';
 import * as ImagePicker from "expo-image-picker";
 import { COLORS, FONTS } from "../../constants/theme";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
-import { RadioButton } from 'react-native-paper';
 import CustomInput from "../../components/CustomInput";
-import CustomInputDateTime from "../../components/CustomInputDateTime";
 import Auth from "../Login/Auth";
 import ImageAvata from "../../assets/hero2.jpg"
 import AsyncStoraged from '../../services/AsyncStoraged'
-
+import * as FileSystem from 'expo-file-system';
 const EditProfile = ({ navigation }) => {
-  const [selectedImage, setSelectedImage] = useState();
+  const [selectedImage, setSelectedImage] = useState('test3');
   const [avatar, setAvatar] = useState();
   const [fullname, setFullname] = useState('');
   const [username, setUsername] = useState('');
@@ -33,25 +31,19 @@ const EditProfile = ({ navigation }) => {
   const [phone, setPhone] = useState('');
   const [phoneErrorMessage, setPhoneErrorMessage] = useState('');
   const [address, setAddress] = useState('');
-  const [sex, setSex] = useState('');
   const [userId, setUserId] = useState();
   const [token, setToken] = useState();
 
   const getUserStored = async () => {
     const userStored = await AsyncStoraged.getData();
-    setFullname(userStored.userResult.fullname);
-    setUsername(userStored.userResult.username);
-    setPhone(userStored.userResult.phone);
-    setEmail(userStored.userResult.email);
-    setAddress(userStored.userResult.address);
-    setAvatar(userStored.userResult.avatar);
-    setUserId(userStored.userResult._id);
+    setFullname(userStored.fullname);
+    setUsername(userStored.username);
+    setPhone(userStored.phone);
+    setEmail(userStored.email);
+    setAddress(userStored.address);
+    setAvatar(userStored.avatar);
+    setUserId(userStored._id);
     setToken(userStored.accessToken);
-    if (userStored.userResult.address === 'Nam') {
-      setSex('female');
-    } else {
-      setSex('male');
-    }
   }
   useEffect(() => { getUserStored(); }, []);
   const showFullNameError = (_fullname) => {
@@ -95,8 +87,12 @@ const EditProfile = ({ navigation }) => {
       setPhoneErrorMessage('')
     }
   }
-
-
+  const formData = new FormData();
+  const getToken = async () => {
+    const token = await AsyncStoraged.getToken();
+    setToken(token);
+  }
+  useEffect(() => { getToken(); }, []);
   const handleUpdateUser = async () => {
     try {
       const res = await axios({
@@ -111,21 +107,18 @@ const EditProfile = ({ navigation }) => {
           username: username,
           phone: phone,
           address: address,
-          avatar: avatar,
+          avatar:selectedImage,
         },
       });
 
       if (res.data.status === 'SUCCESS') {
+        AsyncStoraged.storeData(res.data.data.userResultForUpdate);
         Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
 
-          { text: 'OK', onPress: () => console.log('Press') },
+          { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
         ]);
-        setFullname(res.data.data.userResultForUpdate.fullname);
-        setUsername(res.data.data.userResultForUpdate.username);
-        setPhone(res.data.data.userResultForUpdate.phone);
-        setEmail(res.data.data.userResultForUpdate.email);
-        setAddress(res.data.data.userResultForUpdate.address);
-        setAvatar(res.data.data.userResultForUpdate.avatar)
+
+
 
       }
     } catch (error) {
@@ -137,20 +130,46 @@ const EditProfile = ({ navigation }) => {
 
   }
 
+  const handleCheckUsername = async (_username) => {
+
+    try {
+
+      const res = await axios({
+        method: 'get',
+        url: 'http://192.168.9.14:3000/api/v1/checkUsername?username=' + _username,
+      });
+
+      if (res.data.status === 'SUCCESS') {
+        console.log('OK');
+      }
+    } catch (error) {
+      setUsernameErrorMessage('Tên đăng nhập đã được sử dụng!');
+    }
+
+  };
 
 
   const handleImageSelection = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
+      type: 'image',
       aspect: [5, 5],
       quality: 1,
     });
+    delete result.cancelled;
 
-    console.log(result);
-
+    console.log(result.assets[0]);
     if (!result.canceled) {
-      
+      // formData.append({
+      //   uri:
+      //     Platform.OS === 'android'
+      //       ? result.assets[0].uri
+      //       : result.assets[0].uri.replace('file:///var/mobile/Containers/Data/Application/62394672-1123-43CE-9896-87D681D9DDC2/Library/Caches/ExponentExperienceData/%2540anonymous%252FVolunteerAppMobile-82f692a7-7e7c-4d2d-b92c-e8a2fe846a92/ImagePicker/', ''),
+      //   type: 'image/jpeg', // Định dạng tệp ảnh
+      //   name: 'avatar.jpg', // Tên tệp ảnh
+      // });
+      setSelectedImage(result?.assets[0]);
       setAvatar(result.assets[0].uri);
       
     }
@@ -200,7 +219,7 @@ const EditProfile = ({ navigation }) => {
         >
           <TouchableOpacity onPress={handleImageSelection}>
             <Image
-              source={avatar ? {uri: avatar} : ImageAvata}
+              source={avatar ? { uri: avatar } : ImageAvata}
               style={{
                 height: 140,
                 width: 140,
@@ -251,48 +270,14 @@ const EditProfile = ({ navigation }) => {
             <CustomInput
               value={username}
               onChangeText={(username) => {
+                handleCheckUsername(username);
                 setUsername(username);
                 showUserNameError(username);
+
               }}
               error={usernameErrorMessage.length !== 0}
               errorMessage={usernameErrorMessage}
             />
-          </View>
-          <View>
-            <Text style={{
-              fontSize: 16,
-              fontWeight: 400,
-              marginVertical: 8
-            }}>Giới tính</Text>
-            <RadioButton.Group
-              onValueChange={(sex) => setSex(sex)}
-              value={sex}>
-              <View style={{
-                marginRight: 60,
-                flexWrap: 'wrap',
-                flexDirection: 'row',
-                marginVertical: 5,
-              }}>
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginRight: 70,
-                }}>
-                  <RadioButton value="male" color={COLORS.primary} />
-                  <Text>Nam</Text>
-                </View>
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginRight: 70,
-                }}>
-                  <RadioButton value="female" color={COLORS.primary} />
-                  <Text>Nữ</Text>
-                </View>
-              </View>
-            </RadioButton.Group>
           </View>
           <View>
             <Text style={{
