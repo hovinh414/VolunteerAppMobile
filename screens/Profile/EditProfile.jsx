@@ -20,7 +20,7 @@ import ImageAvata from "../../assets/hero2.jpg"
 import AsyncStoraged from '../../services/AsyncStoraged'
 import * as FileSystem from 'expo-file-system';
 const EditProfile = ({ navigation }) => {
-  const [selectedImage, setSelectedImage] = useState('test3');
+  const [selectedImage, setSelectedImage] = useState('');
   const [avatar, setAvatar] = useState();
   const [fullname, setFullname] = useState('');
   const [username, setUsername] = useState('');
@@ -33,6 +33,7 @@ const EditProfile = ({ navigation }) => {
   const [address, setAddress] = useState('');
   const [userId, setUserId] = useState();
   const [token, setToken] = useState();
+  const [data, setData] = useState();
 
   const getUserStored = async () => {
     const userStored = await AsyncStoraged.getData();
@@ -87,47 +88,76 @@ const EditProfile = ({ navigation }) => {
       setPhoneErrorMessage('')
     }
   }
-  const formData = new FormData();
+
+
   const getToken = async () => {
     const token = await AsyncStoraged.getToken();
     setToken(token);
   }
   useEffect(() => { getToken(); }, []);
+  const formData = new FormData();
   const handleUpdateUser = async () => {
-    try {
-      const res = await axios({
-        method: 'put',
-        url: 'http://192.168.9.14:3000/api/v1/user?userid=' + userId,
+
+    formData.append('fullname', fullname);
+    formData.append('username', username);
+    formData.append('email', email);
+    formData.append('phone', phone);
+    formData.append('address', address);
+    formData.append('avatar',{
+      uri: selectedImage,
+      type: 'image/jpeg',
+      name: username + userId,
+    });
+    axios.put(('http://192.168.1.6:3000/api/v1/user?userid=' + userId), formData, {
         headers: {
+          'Content-Type': 'multipart/form-data',
           'Authorization': token,
         },
-        data: {
-          fullname: fullname,
-          email: email,
-          username: username,
-          phone: phone,
-          address: address,
-          avatar:selectedImage,
-        },
+      })
+      .then((response) => {
+        if (response.data.status === 'SUCCESS') {
+            AsyncStoraged.storeData(response.data.data.userResultForUpdate);
+            Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
+      
+              { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
+            ]);
+      
+          }
+      })
+      .catch((error) => {
+        console.error('API Error:', error);
       });
 
-      if (res.data.status === 'SUCCESS') {
-        AsyncStoraged.storeData(res.data.data.userResultForUpdate);
-        Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
+    // }
+    // else {
+    //   console.log('SAI')
+    // }
+    // const res = await axios({
+    //   method: 'put',
+    //   url: 'http://192.168.9.14:3000/api/v1/user?userid=' + userId,
+    //   headers: {
+    //     'Authorization': token,
+    //   },
+    //   data: {
+    //     fullname:fullname,
+    //     username: username,
+    //     phone: phone,
+    //     email:email,
+    //     address:address,
+    //   },
+    // });
 
-          { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
-        ]);
+    // if (res.data.status === 'SUCCESS') {
+    //   AsyncStoraged.storeData(res.data.data.userResultForUpdate);
+    //   Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
 
+    //     { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
+    //   ]);
 
-
-      }
-    } catch (error) {
-      Alert.alert('Thông báo', "Lỗi khi cập nhật thông tin!", [
-
-        { text: 'OK', onPress: () => console.log('Press') },
-      ]);
-    }
-
+    // }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 
   const handleCheckUsername = async (_username) => {
@@ -153,25 +183,16 @@ const EditProfile = ({ navigation }) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      type: 'image',
       aspect: [5, 5],
       quality: 1,
     });
     delete result.cancelled;
 
-    console.log(result.assets[0]);
     if (!result.canceled) {
-      // formData.append({
-      //   uri:
-      //     Platform.OS === 'android'
-      //       ? result.assets[0].uri
-      //       : result.assets[0].uri.replace('file:///var/mobile/Containers/Data/Application/62394672-1123-43CE-9896-87D681D9DDC2/Library/Caches/ExponentExperienceData/%2540anonymous%252FVolunteerAppMobile-82f692a7-7e7c-4d2d-b92c-e8a2fe846a92/ImagePicker/', ''),
-      //   type: 'image/jpeg', // Định dạng tệp ảnh
-      //   name: 'avatar.jpg', // Tên tệp ảnh
-      // });
-      setSelectedImage(result?.assets[0]);
+
+      setSelectedImage(result.assets[0].uri);
       setAvatar(result.assets[0].uri);
-      
+
     }
   };
   return (
