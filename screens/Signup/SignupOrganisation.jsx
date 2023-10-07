@@ -3,7 +3,8 @@ import React, { useState } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from '../../constants/colors';
 import { Ionicons } from "@expo/vector-icons";
-import Checkbox from "expo-checkbox"
+import Checkbox from "expo-checkbox";
+import axios from 'axios';
 import Button from '../../components/Button';
 import { signUpApi } from '../../services/UserService';
 import Auth from '../Login/Auth';
@@ -12,7 +13,7 @@ import CustomInput from '../../components/CustomInput';
 const Signup = ({ navigation }) => {
     const [isPasswordShown, setIsPasswordShown] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
-    const [type, setType] = useState("organisation");
+    const [type, setType] = useState("Organisation");
     const [fullname, setFullname] = useState("");
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
@@ -74,6 +75,23 @@ const Signup = ({ navigation }) => {
         }
 
     }
+    const handleCheckUsername = async (_username) => {
+
+        try {
+
+            const res = await axios({
+                method: 'get',
+                url: 'http://192.168.9.14:3000/api/v1/checkUsername?username=' + _username,
+            });
+
+            if (res.data.status === 'SUCCESS') {
+                console.log('OK');
+            }
+        } catch (error) {
+            setusernameErrorMessage('Tên đăng nhập đã được sử dụng!');
+        }
+
+    };
     const handleSignup = async () => {
         try {
             if (!username || !password || !email || !phone || !fullname) {
@@ -163,6 +181,7 @@ const Signup = ({ navigation }) => {
 
                     <CustomInput
                         onChangeText={(username) => {
+                            handleCheckUsername(username);
                             setUsername(username);
                             showUsernameErrorMessage(username);
                         }}

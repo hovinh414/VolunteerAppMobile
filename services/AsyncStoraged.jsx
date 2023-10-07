@@ -28,14 +28,21 @@ class AsyncStoraged {
         console.log('Done.')
     }
 
+    setToken = async (value) => {
+        try {
+            await AsyncStorage.setItem('Token', value);
+        } catch (error) {
+            console.error('Store' + error);
+        }
+    }
     getToken = async () => {
-        let jwt = '';
-        await AsyncStorage.getItem('Authorized')
-            .then((data) => { jwt = data.token; })
-            .catch(error => { console.error(error); });
-        return jwt;
-    };
-
+        try {
+            const value = await AsyncStorage.getItem('Token')
+            return value;
+        } catch (error) {
+            console.error('get store', error);
+        }
+    }
     storeDataBykey = async (key, value) => {
         try {
             const jsonValue = JSON.stringify(value)

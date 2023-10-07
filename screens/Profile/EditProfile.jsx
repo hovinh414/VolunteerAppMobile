@@ -14,15 +14,13 @@ import axios from 'axios';
 import * as ImagePicker from "expo-image-picker";
 import { COLORS, FONTS } from "../../constants/theme";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
-import { RadioButton } from 'react-native-paper';
 import CustomInput from "../../components/CustomInput";
-import CustomInputDateTime from "../../components/CustomInputDateTime";
 import Auth from "../Login/Auth";
-import ImageAvata from "../../assets/images/user3.jpg"
+import ImageAvata from "../../assets/hero2.jpg"
 import AsyncStoraged from '../../services/AsyncStoraged'
-
+import * as FileSystem from 'expo-file-system';
 const EditProfile = ({ navigation }) => {
-  const [selectedImage, setSelectedImage] = useState();
+  const [selectedImage, setSelectedImage] = useState('');
   const [avatar, setAvatar] = useState();
   const [fullname, setFullname] = useState('');
   const [username, setUsername] = useState('');
@@ -33,25 +31,19 @@ const EditProfile = ({ navigation }) => {
   const [phone, setPhone] = useState('');
   const [phoneErrorMessage, setPhoneErrorMessage] = useState('');
   const [address, setAddress] = useState('');
-  const [sex, setSex] = useState('');
   const [userId, setUserId] = useState();
   const [token, setToken] = useState();
 
   const getUserStored = async () => {
     const userStored = await AsyncStoraged.getData();
-    setFullname(userStored.userResult.fullname);
-    setUsername(userStored.userResult.username);
-    setPhone(userStored.userResult.phone);
-    setEmail(userStored.userResult.email);
-    setAddress(userStored.userResult.address);
-    setAvatar(userStored.userResult.avatar)
-    setUserId(userStored.userResult._id)
-    setToken(userStored.accessToken)
-    if (userStored.userResult.address === 'Nam') {
-      setSex('female');
-    } else {
-      setSex('male');
-    }
+    setFullname(userStored.fullname);
+    setUsername(userStored.username);
+    setPhone(userStored.phone);
+    setEmail(userStored.email);
+    setAddress(userStored.address);
+    setAvatar(userStored.avatar);
+    setUserId(userStored._id);
+    setToken(userStored.accessToken);
   }
   useEffect(() => { getUserStored(); }, []);
   const showFullNameError = (_fullname) => {
@@ -97,61 +89,79 @@ const EditProfile = ({ navigation }) => {
   }
 
 
+  const getToken = async () => {
+    const token = await AsyncStoraged.getToken();
+    setToken(token);
+  }
+  useEffect(() => { getToken(); }, []);
+  const formData = new FormData();
+  const randomNum = Math.floor(Math.random() * (10000 - 10 + 1)) + 10;
   const handleUpdateUser = async () => {
-    try {
-      const res = await axios({
-        method: 'put',
-        url: 'http://192.168.9.14:3000/api/v1/user?userid=' + userId,
+
+    formData.append('fullname', fullname);
+    formData.append('username', username);
+    formData.append('email', email);
+    formData.append('phone', phone);
+    formData.append('address', address);
+    formData.append('avatar',{
+      uri: selectedImage,
+      type: 'image/jpeg',
+      name: username + userId + randomNum,
+    });
+    axios.put(('http://192.168.1.6:3000/api/v1/user?userid=' + userId), formData, {
         headers: {
+          'Content-Type': 'multipart/form-data',
           'Authorization': token,
         },
-        data: {
-          fullname: fullname,
-          email: email,
-          username: username,
-          phone: phone,
-          address: address,
-          password: 'Hovinh1003',
-          oldPassword: 'Hovinh1003',
-        },
+      })
+      .then((response) => {
+        if (response.data.status === 'SUCCESS') {
+            AsyncStoraged.storeData(response.data.data.userResultForUpdate);
+            Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
+      
+              { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
+            ]);
+      
+          }
+      })
+      .catch((error) => {
+        console.error('API Error:', error);
+      });
+  }
+
+  const handleCheckUsername = async (_username) => {
+
+    try {
+
+      const res = await axios({
+        method: 'get',
+        url: 'http://192.168.9.14:3000/api/v1/checkUsername?username=' + _username,
       });
 
       if (res.data.status === 'SUCCESS') {
-        Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
-
-          { text: 'OK', onPress: () => console.log('Press') },
-        ]);
-        setFullname(res.data.data.fullname);
-        setUsername(res.data.data.username);
-        setPhone(res.data.data.phone);
-        setEmail(res.data.data.email);
-        setAddress(res.data.data.address);
-        setAvatar(res.data.data.avatar)
-
+        console.log('OK');
       }
     } catch (error) {
-      Alert.alert('Thông báo', "Lỗi khi cập nhật thông tin!", [
-
-        { text: 'OK', onPress: () => console.log('Press') },
-      ]);
+      setUsernameErrorMessage('Tên đăng nhập đã được sử dụng!');
     }
 
-  }
-
+  };
 
 
   const handleImageSelection = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 4],
+      aspect: [5, 5],
       quality: 1,
     });
-
-    console.log(result);
+    delete result.cancelled;
 
     if (!result.canceled) {
-      setSelectedImage();
+
+      setSelectedImage(result.assets[0].uri);
+      setAvatar(result.assets[0].uri);
+
     }
   };
   return (
@@ -199,7 +209,7 @@ const EditProfile = ({ navigation }) => {
         >
           <TouchableOpacity onPress={handleImageSelection}>
             <Image
-              source={{ uri: avatar }}
+              source={avatar ? { uri: avatar } : ImageAvata}
               style={{
                 height: 140,
                 width: 140,
@@ -250,48 +260,14 @@ const EditProfile = ({ navigation }) => {
             <CustomInput
               value={username}
               onChangeText={(username) => {
+                handleCheckUsername(username);
                 setUsername(username);
                 showUserNameError(username);
+
               }}
               error={usernameErrorMessage.length !== 0}
               errorMessage={usernameErrorMessage}
             />
-          </View>
-          <View>
-            <Text style={{
-              fontSize: 16,
-              fontWeight: 400,
-              marginVertical: 8
-            }}>Giới tính</Text>
-            <RadioButton.Group
-              onValueChange={(sex) => setSex(sex)}
-              value={sex}>
-              <View style={{
-                marginRight: 60,
-                flexWrap: 'wrap',
-                flexDirection: 'row',
-                marginVertical: 5,
-              }}>
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginRight: 70,
-                }}>
-                  <RadioButton value="male" color={COLORS.primary} />
-                  <Text>Nam</Text>
-                </View>
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginRight: 70,
-                }}>
-                  <RadioButton value="female" color={COLORS.primary} />
-                  <Text>Nữ</Text>
-                </View>
-              </View>
-            </RadioButton.Group>
           </View>
           <View>
             <Text style={{
