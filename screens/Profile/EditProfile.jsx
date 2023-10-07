@@ -33,7 +33,6 @@ const EditProfile = ({ navigation }) => {
   const [address, setAddress] = useState('');
   const [userId, setUserId] = useState();
   const [token, setToken] = useState();
-  const [data, setData] = useState();
 
   const getUserStored = async () => {
     const userStored = await AsyncStoraged.getData();
@@ -96,6 +95,7 @@ const EditProfile = ({ navigation }) => {
   }
   useEffect(() => { getToken(); }, []);
   const formData = new FormData();
+  const randomNum = Math.floor(Math.random() * (10000 - 10 + 1)) + 10;
   const handleUpdateUser = async () => {
 
     formData.append('fullname', fullname);
@@ -106,7 +106,7 @@ const EditProfile = ({ navigation }) => {
     formData.append('avatar',{
       uri: selectedImage,
       type: 'image/jpeg',
-      name: username + userId,
+      name: username + userId + randomNum,
     });
     axios.put(('http://192.168.1.6:3000/api/v1/user?userid=' + userId), formData, {
         headers: {
@@ -127,37 +127,6 @@ const EditProfile = ({ navigation }) => {
       .catch((error) => {
         console.error('API Error:', error);
       });
-
-    // }
-    // else {
-    //   console.log('SAI')
-    // }
-    // const res = await axios({
-    //   method: 'put',
-    //   url: 'http://192.168.9.14:3000/api/v1/user?userid=' + userId,
-    //   headers: {
-    //     'Authorization': token,
-    //   },
-    //   data: {
-    //     fullname:fullname,
-    //     username: username,
-    //     phone: phone,
-    //     email:email,
-    //     address:address,
-    //   },
-    // });
-
-    // if (res.data.status === 'SUCCESS') {
-    //   AsyncStoraged.storeData(res.data.data.userResultForUpdate);
-    //   Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
-
-    //     { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
-    //   ]);
-
-    // }
-    // } catch (error) {
-    //   console.log(error);
-    // }
   }
 
   const handleCheckUsername = async (_username) => {

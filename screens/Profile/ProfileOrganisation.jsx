@@ -1,17 +1,15 @@
-import { View, Text, Image, useWindowDimensions, FlatList, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, Image, useWindowDimensions, FlatList, ScrollView, TouchableOpacity, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
 import { Feather, AntDesign, Ionicons } from '@expo/vector-icons'
-import { LinearGradient } from 'expo-linear-gradient'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
 import { posts } from '../../constants/data'
-import CustomInput from '../../components/CustomInput'
-import Auth from '../Login/Auth'
-import CustomInputDateTime from '../../components/CustomInputDateTime'
 import AsyncStoraged from '../../services/AsyncStoraged'
+import * as ImagePicker from "expo-image-picker";
 import ImageAvata from "../../assets/hero2.jpg"
-
+import ImageUpload from "../../assets/photo.png"
+import axios from 'axios';
 const PostsRoute = () => (
     <View
         style={{
@@ -87,12 +85,100 @@ const PostsRoute = () => (
     </View>
 )
 
-const VerifyRoute = () => {
+const VerifyRoute = (navigation) => {
+    const [selectedImage, setSelectedImage] = useState('');
+    const [avatar, setAvatar] = useState();
+    const [orgId, setOrgId] = useState();
+    const [token, setToken] = useState();
+    const [username, setUsername] = useState('');
+
+
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData();
+        setOrgId(userStored._id);
+        setToken(userStored.accessToken);
+        setUsername(userStored.username);
+    }
+    useEffect(() => { getUserStored(); }, []);
+
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken();
+        setToken(token);
+    }
+    useEffect(() => { getToken(); }, []);
+    const handleImageSelection = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [5, 5],
+            quality: 1,
+        });
+        delete result.cancelled;
+
+        if (!result.canceled) {
+
+            setSelectedImage(result.assets[0].uri);
+            setAvatar(result.assets[0].uri);
+
+        }
+    };
+    const formData = new FormData();
+    const randomNum = Math.floor(Math.random() * (10000 - 10 + 1)) + 10;
+    const handleUpload = async () => {
+        if (!avatar) {
+            Alert.alert('Thông báo', 'Vui lòng chọn ảnh!', [
+
+                { text: 'OK' },
+            ]);
+            return;
+        }
+
+        formData.append('images', {
+            uri: avatar,
+            type: 'image/jpeg',
+            name: username + orgId + randomNum,
+        });
+        axios.put(('http://192.168.1.6:3000/api/v1/org/verify?orgId=' + orgId), formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': token,
+            },
+        })
+            .then((response) => {
+
+                if (response.data.status === 'SUCCESS') {
+                    Alert.alert('Thông báo', 'Đăng minh chứng thành công!', [
+
+                        { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
+                    ]);
+
+                }
+            })
+            .catch((error) => {
+                console.error('API Error:', error);
+            });
+
+    }
     return (
         <ScrollView style={{ flex: 1, paddingTop: 25, }}>
-            <View style={{ flex: 1 }}>
-                {/* Đặt nội dung chính ở đây */}
-            </View>
+            <TouchableOpacity
+                style={{
+                    paddingBottom: 15,
+                    flex: 1,
+                    justifyContent: 'center', // căn giữa theo chiều dọc
+                    alignItems: 'center'
+                }}
+                onPress={() => handleImageSelection()}
+            >
+                <Image
+                    source={avatar ? { uri: avatar } : ImageUpload}
+                    style={{
+                        height: 350,
+                        width: 350,
+                        borderRadius: 15,
+                    }}
+                />
+            </TouchableOpacity>
             <TouchableOpacity
                 style={{
                     backgroundColor: COLORS.primary,
@@ -101,7 +187,7 @@ const VerifyRoute = () => {
                     alignItems: "center",
                     justifyContent: "center",
                 }}
-                
+                onPress={() => handleUpload()}
             >
                 <Text
                     style={{
