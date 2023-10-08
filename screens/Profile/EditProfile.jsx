@@ -18,7 +18,7 @@ import CustomInput from "../../components/CustomInput";
 import Auth from "../Login/Auth";
 import ImageAvata from "../../assets/hero2.jpg"
 import AsyncStoraged from '../../services/AsyncStoraged'
-import * as FileSystem from 'expo-file-system';
+import CustomButton from "../../components/CustomButton";
 const EditProfile = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState('');
   const [avatar, setAvatar] = useState();
@@ -33,6 +33,7 @@ const EditProfile = ({ navigation }) => {
   const [address, setAddress] = useState('');
   const [userId, setUserId] = useState();
   const [token, setToken] = useState();
+  const [ButtonPress, setButtonPress] = useState('');
 
   const getUserStored = async () => {
     const userStored = await AsyncStoraged.getData();
@@ -108,7 +109,8 @@ const EditProfile = ({ navigation }) => {
       type: 'image/jpeg',
       name: username + userId + randomNum,
     });
-    axios.put(('http://192.168.1.6:3000/api/v1/user?userid=' + userId), formData, {
+    setButtonPress(true);
+    axios.put(('http://192.168.9.14:3000/api/v1/user?userid=' + userId), formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': token,
@@ -121,7 +123,7 @@ const EditProfile = ({ navigation }) => {
       
               { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
             ]);
-      
+            setButtonPress(false);
           }
       })
       .catch((error) => {
@@ -139,7 +141,7 @@ const EditProfile = ({ navigation }) => {
       });
 
       if (res.data.status === 'SUCCESS') {
-        console.log('OK');
+
       }
     } catch (error) {
       setUsernameErrorMessage('Tên đăng nhập đã được sử dụng!');
@@ -334,25 +336,7 @@ const EditProfile = ({ navigation }) => {
           />
         </View>
 
-        <TouchableOpacity
-          style={{
-            backgroundColor: COLORS.primary,
-            height: 44,
-            borderRadius: 20,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onPress={() => handleUpdateUser()}
-        >
-          <Text
-            style={{
-              fontFamily: 'bold',
-              color: '#FFF',
-            }}
-          >
-            THAY ĐỔI THÔNG TIN
-          </Text>
-        </TouchableOpacity>
+        <CustomButton onPress={() => handleUpdateUser()} title='THAY ĐỔI THÔNG TIN' isLoading={ButtonPress} />
       </ScrollView>
     </SafeAreaView>
   );

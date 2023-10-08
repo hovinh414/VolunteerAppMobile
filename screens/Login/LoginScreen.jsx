@@ -94,7 +94,7 @@ const LoginScreen = ({ navigation }) => {
             }
             const res =  await axios( {
                 method : 'post',
-                url: 'http://192.168.1.6:3000/api/v1/login',
+                url: 'http://192.168.9.14:3000/api/v1/login',
                 headers:{
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Accept': 'application/json'

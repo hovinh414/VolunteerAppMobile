@@ -2,14 +2,16 @@ import { View, Text, Image, useWindowDimensions, FlatList, ScrollView, Touchable
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
-import { Feather, AntDesign, Ionicons } from '@expo/vector-icons'
+import { Feather, AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
 import { posts } from '../../constants/data'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import * as ImagePicker from "expo-image-picker";
 import ImageAvata from "../../assets/hero2.jpg"
-import ImageUpload from "../../assets/photo.png"
+import ImageUpload from "../../assets/add-image.png"
 import axios from 'axios';
+import CustomButton from '../../components/CustomButton'
+
 const PostsRoute = () => (
     <View
         style={{
@@ -85,19 +87,18 @@ const PostsRoute = () => (
     </View>
 )
 
-const VerifyRoute = (navigation) => {
-    const [selectedImage, setSelectedImage] = useState('');
+const VerifyRoute = ({ navigation }) => {
+    const [selectedImages, setSelectedImage] = useState([]);
     const [avatar, setAvatar] = useState();
     const [orgId, setOrgId] = useState();
     const [token, setToken] = useState();
-    const [username, setUsername] = useState('');
+    const [ButtonPress, setButtonPress] = useState('');
 
 
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData();
         setOrgId(userStored._id);
         setToken(userStored.accessToken);
-        setUsername(userStored.username);
     }
     useEffect(() => { getUserStored(); }, []);
 
@@ -105,27 +106,48 @@ const VerifyRoute = (navigation) => {
         const token = await AsyncStoraged.getToken();
         setToken(token);
     }
+
     useEffect(() => { getToken(); }, []);
     const handleImageSelection = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
+            allowsMultipleSelection: true,
             aspect: [5, 5],
             quality: 1,
         });
         delete result.cancelled;
-
         if (!result.canceled) {
 
-            setSelectedImage(result.assets[0].uri);
-            setAvatar(result.assets[0].uri);
+            if (selectedImages.length + result.assets.length > 5) {
+                Alert.alert('Thông báo', 'Chỉ chọn tối đa 5 hình!', [
 
+                    { text: 'OK' },
+                ]);
+                return;
+            } else if (selectedImages.length === 0) {
+                setSelectedImage(result.assets);
+            }
+            else if (selectedImages.length + result.assets.length <= 5) {
+                setSelectedImage([...selectedImages, ...result.assets]);
+            }
         }
     };
+    function removeImage(item) {
+        const newList = selectedImages.filter((listItem) => listItem !== item);
+        setSelectedImage(newList);
+    }
     const formData = new FormData();
-    const randomNum = Math.floor(Math.random() * (10000 - 10 + 1)) + 10;
     const handleUpload = async () => {
-        if (!avatar) {
+        selectedImages.forEach((images, index) => {
+            formData.append('images', {
+                uri: images.uri,
+                type: 'image/jpeg',
+                name: images.fileName,
+            });
+        });
+
+        setButtonPress(true);
+        if (!selectedImages) {
             Alert.alert('Thông báo', 'Vui lòng chọn ảnh!', [
 
                 { text: 'OK' },
@@ -133,12 +155,7 @@ const VerifyRoute = (navigation) => {
             return;
         }
 
-        formData.append('images', {
-            uri: avatar,
-            type: 'image/jpeg',
-            name: username + orgId + randomNum,
-        });
-        axios.put(('http://192.168.1.6:3000/api/v1/org/verify?orgId=' + orgId), formData, {
+        axios.put(('http://192.168.9.14:3000/api/v1/org/verify?orgId=' + orgId), formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': token,
@@ -149,55 +166,123 @@ const VerifyRoute = (navigation) => {
                 if (response.data.status === 'SUCCESS') {
                     Alert.alert('Thông báo', 'Đăng minh chứng thành công!', [
 
-                        { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
+                        { text: 'OK', onPress: () => setSelectedImage(null) },
                     ]);
-
+                    setButtonPress(false);
+                    setAvatar(null);
                 }
             })
             .catch((error) => {
                 console.error('API Error:', error);
             });
+        
 
     }
+
     return (
         <ScrollView style={{ flex: 1, paddingTop: 25, }}>
+
+            <FlatList
+                data={selectedImages}
+                horizontal={true}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item, index }) => (
+                    <View
+                        key={item.id}
+                        style={{
+                            position: 'relative',
+                            flexDirection: 'column',
+                            flex: 1,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <Image
+                            source={{ uri: item.uri }}
+                            style={{
+                                paddingVertical: 4,
+                                marginLeft: 12,
+                                width: 140,
+                                height: 140,
+                                borderRadius: 12,
+                            }}
+                        />
+                        <TouchableOpacity
+                            onPress={() => removeImage(item)}
+                            style={{
+                                position: "absolute",
+                                top: 0,
+                                right: 0,
+                                backgroundColor: '#C5C7C7',
+                                borderRadius: 12, // Bo tròn góc
+                                padding: 5,
+                            }}
+                        >
+                            <MaterialIcons
+                                name="delete"
+                                size={24}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+
+
+                    </View>
+                )}
+            />
             <TouchableOpacity
                 style={{
+                    paddingTop: 25,
                     paddingBottom: 15,
                     flex: 1,
-                    justifyContent: 'center', // căn giữa theo chiều dọc
-                    alignItems: 'center'
+                    flexDirection: 'row',
+
+
                 }}
                 onPress={() => handleImageSelection()}
             >
                 <Image
                     source={avatar ? { uri: avatar } : ImageUpload}
                     style={{
-                        height: 350,
-                        width: 350,
-                        borderRadius: 15,
+                        height: 110,
+                        width: 110,
+                        marginRight: 15,
                     }}
                 />
+                <View style={{
+
+                    backgroundColor: '#C5C7C7',
+                    flex: 1,
+                    padding: 10,
+                    borderRadius: 5,
+                }}>
+                    <Text style={{
+                        fontStyle: 'italic',
+                        fontSize: 17,
+                        backgroundColor: 'transparent',
+
+                    }}>Minh chứng bao gồm <Text style={{
+                        fontStyle: 'italic',
+                        color: '#8B0000',
+                    }}>5 hình</Text>: </Text>
+                    <Text style={{
+                        fontStyle: 'italic',
+                        backgroundColor: 'transparent',
+
+                    }}>- 2 ảnh CCCD hoặc CMND.</Text>
+                    <Text style={{
+                        fontStyle: 'italic',
+                        backgroundColor: 'transparent',
+
+                    }}>- 3 ảnh chụp địa điểm tổ chức.</Text>
+                    <Text style={{
+                        fontStyle: 'italic',
+                        color: '#8B0000',
+                        backgroundColor: 'transparent',
+
+                    }}>* (Ảnh chụp phải rõ nét, ảnh CCCD là hình gốc không scan hay photocopy, không bị mất góc)</Text>
+                </View>
             </TouchableOpacity>
-            <TouchableOpacity
-                style={{
-                    backgroundColor: COLORS.primary,
-                    height: 44,
-                    borderRadius: 20,
-                    alignItems: "center",
-                    justifyContent: "center",
-                }}
-                onPress={() => handleUpload()}
-            >
-                <Text
-                    style={{
-                        fontFamily: 'bold',
-                        color: '#FFF',
-                    }}
-                >
-                    ĐĂNG MINH CHỨNG
-                </Text>
-            </TouchableOpacity>
+            <CustomButton onPress={() => handleUpload()} title='ĐĂNG MINH CHỨNG' isLoading={ButtonPress} />
         </ScrollView>
     )
 }
