@@ -6,8 +6,6 @@ import { Ionicons } from "@expo/vector-icons";
 import Checkbox from "expo-checkbox"
 import Button from '../../components/Button';
 import axios from 'axios';
-import {toast} from 'react-toastify';
-import { loginApi } from '../../services/UserService';
 import CustomInput from '../../components/CustomInput';
 import Auth from './Auth';
 import AsyncStoraged from '../../services/AsyncStoraged';
@@ -107,7 +105,12 @@ const LoginScreen = ({ navigation }) => {
             
             
             if (res.data.status === 'SUCCESS' && res.data.data.accessToken !== null) {
-                AsyncStoraged.storeData(res.data.data.userResult);
+                if (!res.data.data.userResult) {
+                    AsyncStoraged.storeData(res.data.data.orgResult);
+                } else {
+                    AsyncStoraged.storeData(res.data.data.userResult);
+                }
+                
                 AsyncStoraged.setToken(res.data.data.accessToken);
                 navigation.push('BottomTabNavigation');
                 

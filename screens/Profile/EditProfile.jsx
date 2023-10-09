@@ -44,9 +44,9 @@ const EditProfile = ({ navigation }) => {
     setAddress(userStored.address);
     setAvatar(userStored.avatar);
     setUserId(userStored._id);
-    setToken(userStored.accessToken);
   }
   useEffect(() => { getUserStored(); }, []);
+
   const showFullNameError = (_fullname) => {
     if (_fullname.length === 0) {
       setfullnameErrorMessage('Tên không được trống');
@@ -99,32 +99,42 @@ const EditProfile = ({ navigation }) => {
   const randomNum = Math.floor(Math.random() * (10000 - 10 + 1)) + 10;
   const handleUpdateUser = async () => {
 
-    formData.append('fullname', fullname);
-    formData.append('username', username);
-    formData.append('email', email);
-    formData.append('phone', phone);
-    formData.append('address', address);
-    formData.append('avatar',{
-      uri: selectedImage,
-      type: 'image/jpeg',
-      name: username + userId + randomNum,
-    });
+
+    if (selectedImage.length > 0) {
+      formData.append('fullname', fullname);
+      formData.append('username', username);
+      formData.append('email', email);
+      formData.append('phone', phone);
+      formData.append('address', address);
+      formData.append('avatar', {
+        uri: selectedImage,
+        type: 'image/jpeg',
+        name: username + userId + randomNum,
+      });
+    } else {
+      formData.append('fullname', fullname);
+      formData.append('username', username);
+      formData.append('email', email);
+      formData.append('phone', phone);
+      formData.append('address', address);
+    }
+
     setButtonPress(true);
     axios.put(('http://192.168.9.14:3000/api/v1/user?userid=' + userId), formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': token,
-        },
-      })
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': token,
+      },
+    })
       .then((response) => {
         if (response.data.status === 'SUCCESS') {
-            AsyncStoraged.storeData(response.data.data.userResultForUpdate);
-            Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
-      
-              { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
-            ]);
-            setButtonPress(false);
-          }
+          AsyncStoraged.storeData(response.data.data.userResultForUpdate);
+          Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
+
+            { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
+          ]);
+          setButtonPress(false);
+        }
       })
       .catch((error) => {
         console.error('API Error:', error);
@@ -307,19 +317,6 @@ const EditProfile = ({ navigation }) => {
             />
           </View>
 
-          {/* <View>
-            <Text style={{
-              fontSize: 16,
-              fontWeight: 400,
-              marginVertical: 8
-            }}>Ngày sinh</Text>
-
-            <CustomInputDateTime
-
-              _value={dateOfBirth}
-              onChangeText={(text) => { setDateOfBirth(text) }}
-            />
-          </View> */}
         </View>
 
         <View>

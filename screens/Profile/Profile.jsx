@@ -3,12 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
 import { Feather, AntDesign, Ionicons } from '@expo/vector-icons'
-import { LinearGradient } from 'expo-linear-gradient'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
 import { posts } from '../../constants/data'
-import CustomInput from '../../components/CustomInput'
-import Auth from '../Login/Auth'
-import CustomInputDateTime from '../../components/CustomInputDateTime'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import ImageAvata from "../../assets/hero2.jpg"
 

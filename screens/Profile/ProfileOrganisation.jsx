@@ -145,7 +145,7 @@ const VerifyRoute = ({ navigation }) => {
                 name: images.fileName,
             });
         });
-
+        console.log(formData);
         setButtonPress(true);
         if (!selectedImages) {
             Alert.alert('Thông báo', 'Vui lòng chọn ảnh!', [
@@ -220,7 +220,7 @@ const VerifyRoute = ({ navigation }) => {
                         >
                             <MaterialIcons
                                 name="delete"
-                                size={24}
+                                size={20}
                                 color={COLORS.black}
                             />
                         </TouchableOpacity>

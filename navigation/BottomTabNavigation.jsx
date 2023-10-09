@@ -8,7 +8,8 @@ import {
 } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { COLORS } from '../constants'
-import { Chat, Create, Feed, LoginScreen, Notifications, Profile, Settings } from '../screens'
+import { Chat, Feed, LoginScreen, Notifications, Profile, Settings } from '../screens'
+import Create from '../screens/Post/Create'
 import { LinearGradient } from 'expo-linear-gradient'
 import AsyncStoraged from '../services/AsyncStoraged'
 import ImageAvata from "../assets/hero2.jpg"
@@ -152,7 +153,7 @@ const BottomTabNavigation = () => {
 
             </Tab.Navigator>
         )
-    } else if (type === "Organisation") {
+    } else if (type === "Organization") {
         return (
             <Tab.Navigator screenOptions={screenOptions}>
                 <Tab.Screen
@@ -199,7 +200,6 @@ const BottomTabNavigation = () => {
                                         justifyContent: 'center',
                                         width: Platform.OS == 'ios' ? 50 : 60,
                                         height: Platform.OS == 'ios' ? 50 : 60,
-                                        top: Platform.OS == 'ios' ? -10 : -20,
                                         borderRadius: 22,
                                         borderColor: '#fff',
                                         borderWidth: 4,
