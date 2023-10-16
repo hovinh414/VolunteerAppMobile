@@ -2,20 +2,23 @@ import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, Image, TouchableOpacity, TextInput, Pressable } from 'react-native';
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
 import { COLORS, SIZES } from '../constants/theme';
-
+import { addDays, format, addYears } from 'date-fns';
 const CustomInputDateTime = ({ onChangeText, _value }) => {
+    const currentDate = new Date();
     const convertDigitIn = (str) => {
         return str.split('/').reverse().join('/');
      }
      const getDateOfBirth = (dateOfBirth) => {
         if(!dateOfBirth) {
-            return '01/01/2000';
+            return format(addDays(currentDate,1), 'dd/MM/yyyy');
         }
         const D = new Date(dateOfBirth);
         return D.getDate() + '/' + (D.getMonth() < 10 ?  '0' : '') + (D.getMonth() + 1) + '/' + D.getFullYear();
     }
     const [visibleCalender, setVisibleCalender] = useState(false);
     const [date, setDate] = useState();
+    
+
     return (
         <React.Fragment>
             <Modal
@@ -26,13 +29,12 @@ const CustomInputDateTime = ({ onChangeText, _value }) => {
                 }}>
 
                 <View style={styles.datetimepicker}>
-                    <Text style={styles.headerText}>Chọn ngày tháng năm sinh</Text>
+                    <Text style={styles.headerText}>Chọn ngày tháng năm</Text>
                     <DatePicker
                         style={styles.datepicker}
                         mode='calendar'
-                        current='2000-01-01'
-                        minimumDate='1950-01-01'
-                        maximumDate='2022-01-01'
+                        minimumDate={format(addDays(currentDate,1), 'yyyy-MM-dd')}
+                        maximumDate={format(addYears(currentDate,1), 'yyyy-MM-dd')}
                         onSelectedChange={date => { 
                             setDate(date);
                         }}

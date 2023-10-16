@@ -89,6 +89,7 @@ const PostsRoute = () => (
 )
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
+const warning = '../../assets/warning.png';
 const VerifyRoute = ({ navigation }) => {
     const [selectedImages, setSelectedImage] = useState([]);
     const [avatar, setAvatar] = useState();
@@ -102,7 +103,6 @@ const VerifyRoute = ({ navigation }) => {
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData();
         setOrgId(userStored._id);
-        setToken(userStored.accessToken);
     }
     useEffect(() => { getUserStored(); }, []);
 
@@ -126,7 +126,7 @@ const VerifyRoute = ({ navigation }) => {
                 setIcon();
                 setMess('Số lượng ảnh phải ít hơn 5 ảnh');
                 setShowWarning(true);
-               
+
                 return;
             } else if (selectedImages.length === 0) {
                 setSelectedImage(result.assets);
@@ -152,18 +152,18 @@ const VerifyRoute = ({ navigation }) => {
         console.log(formData);
         setButtonPress(true);
         if (selectedImages.length === 0) {
-            
+
             setMess('Vui lòng chọn ảnh!');
             setIcon();
             setShowWarning(true);
             setButtonPress(false);
             return;
         }
-        
-        axios.put(('http://192.168.9.14:3000/api/v1/org/verify?orgId=' + orgId), formData, {
+
+        axios.put(('http://172.20.10.2:3000/api/v1/org/verify?orgId=' + orgId), formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-                'Authorization': orgId,
+                'Authorization': token,
             },
         })
             .then((response) => {
@@ -180,7 +180,7 @@ const VerifyRoute = ({ navigation }) => {
             .catch((error) => {
                 console.error('API Error:', error);
                 setMess('Đăng minh chứng thất bại!');
-                setIcon();
+                setIcon('FAIL');
                 setShowWarning(true);
                 setButtonPress(false);
             });
@@ -218,23 +218,33 @@ const VerifyRoute = ({ navigation }) => {
                     >
                         {
                             icon === 'SUCCESS' ?
-                            <Image
-                                source={require(success)}
-                                style={{
-                                    marginTop: 15,
-                                    width: 50,
-                                    height: 50,
-                                }}
-                            />
-                            :
-                            <Image
-                                source={require(fail)}
-                                style={{
-                                    marginTop: 15,
-                                    width: 50,
-                                    height: 50,
-                                }}
-                            />
+                                <Image
+                                    source={require(success)}
+                                    style={{
+                                        marginTop: 15,
+                                        width: 50,
+                                        height: 50,
+                                    }}
+                                />
+                                :
+                                icon === 'FAIL' ?
+                                    <Image
+                                        source={require(fail)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    />
+                                    :
+                                    <Image
+                                        source={require(warning)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    />
 
                         }
                         <Text style={{

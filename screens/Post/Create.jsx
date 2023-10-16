@@ -17,6 +17,7 @@ const checkin = '../../assets/checkin.png';
 const addPicture = '../../assets/add-image.png';
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
+const warning = '../../assets/warning.png';
 const Create = () => {
     const [selectedImages, setSelectedImage] = useState([]);
     const [avatar, setAvatar] = useState("");
@@ -92,7 +93,6 @@ const Create = () => {
         formData.append('scope', scope);
         formData.append('content', content);
         formData.append('participants', participants);
-        // formData.append('addressPost', addressPost);
         console.log(formData);
         setButtonPress(true);
 
@@ -122,7 +122,7 @@ const Create = () => {
             .catch((error) => {
                 console.error('API Error:', error);
                 setMess('Đăng bài viết thất bại!');
-                setIcon();
+                setIcon('FAIL');
                 setShowWarning(true);
                 setButtonPress(false);
             });
@@ -169,14 +169,23 @@ const Create = () => {
                                     }}
                                 />
                                 :
-                                <Image
-                                    source={require(fail)}
-                                    style={{
-                                        marginTop: 15,
-                                        width: 50,
-                                        height: 50,
-                                    }}
-                                />
+                                icon === 'FAIL' ?
+                                    <Image
+                                        source={require(fail)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    /> :
+                                    <Image
+                                        source={require(warning)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    />
 
                         }
                         <Text style={{
@@ -263,8 +272,8 @@ const Create = () => {
                         <Text style={styles.headerInput}>Ngày hết hạn:</Text>
                         <CustomInputDateTime
                             _value={exprirationDate}
-                            onChangeText={(exprirationDate) => { setExprirationDate(exprirationDate) }}
-                            
+                            onChangeText={(exprirationDate) => { (exprirationDate) }}
+
                         />
                         <Text style={styles.headerInput}>Nhập nội dung bài viết:</Text>
                         <TextInput
@@ -283,7 +292,7 @@ const Create = () => {
                             value={participants}
                             placeholderTextColor={'#696969'}
                             onChangeText={(participants) => {
-                                setParticipants(participants);
+                                setParticipants(participants)
                             }}
                             style={styles.address}
                             placeholder="100"

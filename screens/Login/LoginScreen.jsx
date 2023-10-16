@@ -14,6 +14,7 @@ import CustomButton from '../../components/CustomButton';
 
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
+const warning = '../../assets/warning.png';
 const LoginScreen = ({ navigation }) => {
     const [isPasswordShown, setIsPasswordShown] = useState(true);
     const [isChecked, setIsChecked] = useState(false);
@@ -31,39 +32,6 @@ const LoginScreen = ({ navigation }) => {
         const userStored = await AsyncStoraged.removeData();
     }
     useEffect(() => { removeUser(); }, []);
-    // const handleLogin = async () => {
-
-    //     if (!username || !password) {
-    //         Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ tên đằng nhập và mật khẩu!', [
-
-    //             {text: 'OK', onPress: () => console.log('OK Pressed')},
-    //           ]);
-    //         return;
-    //     }
-    //     await loginApi(username, password).then((res) => {
-
-    //         if (res.status === 200 && res.data.data.accessToken !== null) {
-    //             localStorage.setItem("token",res.data.data.accessToken);
-    //             localStorage.setItem("user",res.data.data.userResult);
-    //             navigation.navigate("Welcome");
-    //         } 
-    //         else  {
-    //             Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
-
-    //                 {text: 'OK', onPress: () => console.log('OK Pressed')},
-    //               ]);
-    //             return;
-    //         }
-
-    //     }).catch(error => {
-    //         Alert.alert('Thông báo', error, [
-
-    //             {text: 'OK', onPress: () => console.log('OK Pressed')},
-    //           ]);
-    //         return;
-    //     });
-
-    // }
     const showEmailandPhoneErrorMessage = (_username) => {
         if (_username.length === 0) {
             setusernameErrorMessage('Tên đăng nhập không được trống');
@@ -124,7 +92,7 @@ const LoginScreen = ({ navigation }) => {
         } catch (error) {
             if (error) {
                 setMess('Sai thông tin đăng nhập!');
-                setIcon();
+                setIcon('FAIL');
                 setShowWarning(true);
 
             }
@@ -171,14 +139,24 @@ const LoginScreen = ({ navigation }) => {
                                     }}
                                 />
                                 :
-                                <Image
-                                    source={require(fail)}
-                                    style={{
-                                        marginTop: 15,
-                                        width: 50,
-                                        height: 50,
-                                    }}
-                                />
+                                icon === 'FAIL' ?
+                                    <Image
+                                        source={require(fail)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    />
+                                    :
+                                    <Image
+                                        source={require(warning)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    />
 
                         }
                         <Text style={{
@@ -280,7 +258,7 @@ const LoginScreen = ({ navigation }) => {
                 <View style={{
                     flexDirection: 'row',
                     marginVertical: 6,
-                    marginBottom:18,
+                    marginBottom: 18,
                 }}>
                     <Checkbox
                         style={{ marginRight: 8 }}

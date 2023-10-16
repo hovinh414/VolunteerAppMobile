@@ -4,12 +4,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, FONTS } from "../../constants/theme";
 import { MaterialIcons } from "@expo/vector-icons";
 import CustomButton from "../../components/CustomButton";
+import CustomButtonV2 from "../../components/CustomButtonV2";
+import AsyncStoraged from "../../services/AsyncStoraged";
 
 const question = '../../assets/question.png';
 const Settings = ({ navigation }) => {
 
+  const removeData = async () => {
+    await AsyncStoraged.removeData();
+  }
   const [showWarning, setShowWarning] = useState(false);
   const [mess, setMess] = useState();
+
+
   const navigateToEditProfile = () => {
     navigation.push("EditProfile");
   };
@@ -153,20 +160,31 @@ const Settings = ({ navigation }) => {
               }}
             />
             <Text style={{
-              marginTop:15,
-              fontWeight:'bold',
+              marginTop: 15,
+              fontWeight: 'bold',
               fontSize: 18,
             }}>{mess}</Text>
 
-            <View style={{
-              flexDirection:'column',
-              marginTop: 30,
-              width: 80,
-            }}>
-            <CustomButton title='ĐỒNG Ý' onPress={() =>(navigation.push('LoginScreen'), setShowWarning(false))} />
-            <CustomButton title='ĐÓNG' onPress={() => setShowWarning(false)} />
+            <View
+              style={{
+                flexDirection: 'row',
+                marginTop: 30,
+              }}
+            >
+              <View style={{
+                width: 80,
+                marginRight: 15,
+              }}>
+
+                <CustomButtonV2 title='ĐÓNG' onPress={() => setShowWarning(false)} />
+              </View>
+              <View style={{
+                width: 80,
+              }}>
+
+                <CustomButton title='ĐỒNG Ý' onPress={() => (removeData(), navigation.push('BottomTabNavigation'), setShowWarning(false))} />
+              </View>
             </View>
-            
           </View>
 
 

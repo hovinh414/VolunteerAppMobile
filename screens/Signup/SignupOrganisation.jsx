@@ -13,6 +13,7 @@ import CustomButton from '../../components/CustomButton';
 
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
+const warning = '../../assets/warning.png';
 const Signup = ({ navigation }) => {
     const [isPasswordShown, setIsPasswordShown] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
@@ -107,6 +108,11 @@ const Signup = ({ navigation }) => {
                 setIcon();
                 setShowWarning(true);
                 return;
+            } else if (isChecked === false) {
+                setMess('Vui lòng đồng ý với các điều khoản!');
+                setIcon();
+                setShowWarning(true);
+                return;
             }
             setButtonPress(true);
             await signUpApi(type, fullname, email, username, password, phone).then((res) => {
@@ -126,7 +132,7 @@ const Signup = ({ navigation }) => {
             })
         } catch (error) {
             setMess('Đăng ký thất bại!');
-            setIcon();
+            setIcon('FAIL');
             setShowWarning(true);
             setButtonPress(false);
         }
@@ -172,14 +178,24 @@ const Signup = ({ navigation }) => {
                                     }}
                                 />
                                 :
-                                <Image
-                                    source={require(fail)}
-                                    style={{
-                                        marginTop: 15,
-                                        width: 50,
-                                        height: 50,
-                                    }}
-                                />
+                                icon === 'FAIL' ?
+                                    <Image
+                                        source={require(fail)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    />
+                                    :
+                                    <Image
+                                        source={require(warning)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    />
 
                         }
                         <Text style={{
@@ -329,7 +345,7 @@ const Signup = ({ navigation }) => {
                 <View style={{
                     flexDirection: 'row',
                     marginVertical: 6,
-                    marginBottom:18,
+                    marginBottom: 18,
                 }}>
                     <Checkbox
                         style={{ marginRight: 8 }}
@@ -341,7 +357,7 @@ const Signup = ({ navigation }) => {
                     <Text>Tôi đồng ý với các Điều khoản và Điều kiện</Text>
                 </View>
 
-               <CustomButton onPress={() => handleSignup()} title='ĐĂNG KÝ' isLoading={ButtonPress} />
+                <CustomButton onPress={() => handleSignup()} title='ĐĂNG KÝ' isLoading={ButtonPress} />
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
                     <View

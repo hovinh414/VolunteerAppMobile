@@ -23,6 +23,7 @@ import CustomButton from "../../components/CustomButton";
 
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
+const warning = '../../assets/warning.png';
 const EditProfile = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState('');
   const [avatar, setAvatar] = useState();
@@ -105,6 +106,12 @@ const EditProfile = ({ navigation }) => {
   const formData = new FormData();
   const randomNum = Math.floor(Math.random() * (10000 - 10 + 1)) + 10;
   const handleUpdateUser = async () => {
+    if (!fullname || !username || !email || !phone) {
+      setMess('Vui lòng điền đầy đủ thông tin!');
+      setIcon();
+      setShowWarning(true);
+      return;
+    }
     if (selectedImage.length > 0) {
       formData.append('fullname', fullname);
       formData.append('username', username);
@@ -138,15 +145,13 @@ const EditProfile = ({ navigation }) => {
           setIcon('SUCCESS');
           setShowWarning(true);
           setButtonPress(false);
-          if (showWarning) {
-            navigation.push('BottomTabNavigation');
-          }
+          navigation.push('BottomTabNavigation');
 
         }
       })
       .catch((error) => {
         setMess('Thay đổi thông tin thất bại!');
-        setIcon();
+        setIcon('FAIL');
         setShowWarning(true);
         setButtonPress(false);
       });
@@ -233,14 +238,24 @@ const EditProfile = ({ navigation }) => {
                   }}
                 />
                 :
-                <Image
-                  source={require(fail)}
-                  style={{
-                    marginTop: 15,
-                    width: 50,
-                    height: 50,
-                  }}
-                />
+                icon === 'FAIL' ?
+                  <Image
+                    source={require(fail)}
+                    style={{
+                      marginTop: 15,
+                      width: 50,
+                      height: 50,
+                    }}
+                  />
+                  :
+                  <Image
+                    source={require(warning)}
+                    style={{
+                      marginTop: 15,
+                      width: 50,
+                      height: 50,
+                    }}
+                  />
 
             }
             <Text style={{
