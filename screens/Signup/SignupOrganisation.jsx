@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native'
+import { View, Text, Image, Pressable, Modal, TouchableOpacity, Alert, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from '../../constants/colors';
@@ -9,7 +9,10 @@ import Button from '../../components/Button';
 import { signUpApi } from '../../services/UserService';
 import Auth from '../Login/Auth';
 import CustomInput from '../../components/CustomInput';
+import CustomButton from '../../components/CustomButton';
 
+const success = '../../assets/success.png';
+const fail = '../../assets/cross.png';
 const Signup = ({ navigation }) => {
     const [isPasswordShown, setIsPasswordShown] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
@@ -24,6 +27,11 @@ const Signup = ({ navigation }) => {
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [phoneErrorMessage, setPhoneErrorMessage] = useState('');
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+    const [showWarning, setShowWarning] = useState(false);
+    const [mess, setMess] = useState();
+    const [icon, setIcon] = useState();
+    const [ButtonPress, setButtonPress] = useState('');
+
     const showFullNameError = (_fullname) => {
         if (_fullname.length === 0) {
             setfullnameErrorMessage('Tên không được trống');
@@ -95,33 +103,104 @@ const Signup = ({ navigation }) => {
     const handleSignup = async () => {
         try {
             if (!username || !password || !email || !phone || !fullname) {
-                Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ thông tin!', [
-
-                    { text: 'OK', onPress: () => console.log('OK Pressed') },
-                ]);
+                setMess('Vui lòng nhập đầy đủ thông tin!');
+                setIcon();
+                setShowWarning(true);
                 return;
             }
+            setButtonPress(true);
             await signUpApi(type, fullname, email, username, password, phone).then((res) => {
 
                 if (res.status === 201) {
                     if (res.status === 201) {
-                        Alert.alert('Thông báo', 'Đăng ký thành công vui lòng đăng nhập!', [
-
-                            { text: 'OK', onPress: () => navigation.navigate("LoginScreen") },
-                        ]);
-
-
+                        setMess('Đăng ký thành công!');
+                        setIcon('SUCCESS');
+                        setShowWarning(true);
+                        if (icon.length > 0) {
+                            navigation.navigate("LoginScreen");
+                        }
+                        setButtonPress(false);
                     }
                 }
 
             })
         } catch (error) {
-            alert(error);
+            setMess('Đăng ký thất bại!');
+            setIcon();
+            setShowWarning(true);
+            setButtonPress(false);
         }
 
     }
     return (
         <ScrollView style={{ flex: 1, backgroundColor: COLORS.white, paddingTop: 15, }}>
+            <Modal
+                visible={showWarning}
+                animationType='fade'
+                transparent
+                onRequestClose={() =>
+                    setShowWarning(false)
+                }
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    }}
+                >
+                    <View
+                        style={{
+                            width: 300,
+                            height: 200,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 25,
+                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
+                            justifyContent: 'center', //
+                            padding: 20,
+                        }}
+                    >
+                        {
+                            icon === 'SUCCESS' ?
+                                <Image
+                                    source={require(success)}
+                                    style={{
+                                        marginTop: 15,
+                                        width: 50,
+                                        height: 50,
+                                    }}
+                                />
+                                :
+                                <Image
+                                    source={require(fail)}
+                                    style={{
+                                        marginTop: 15,
+                                        width: 50,
+                                        height: 50,
+                                    }}
+                                />
+
+                        }
+                        <Text style={{
+                            fontWeight: 'bold',
+                            fontSize: 18,
+                        }}>Thông báo</Text>
+                        <Text style={{
+                            fontSize: 16,
+                        }}>{mess}</Text>
+
+                        <View style={{
+                            marginTop: 15,
+                            width: 200,
+                        }}>
+                            <CustomButton title='ĐÓNG' onPress={() => setShowWarning(false)} />
+                        </View>
+                    </View>
+
+
+                </View>
+            </Modal>
             <View style={{ flex: 1, marginHorizontal: 22 }}>
                 <View style={{ marginVertical: 22 }}>
                     <Text style={{
@@ -249,7 +328,8 @@ const Signup = ({ navigation }) => {
 
                 <View style={{
                     flexDirection: 'row',
-                    marginVertical: 6
+                    marginVertical: 6,
+                    marginBottom:18,
                 }}>
                     <Checkbox
                         style={{ marginRight: 8 }}
@@ -261,15 +341,7 @@ const Signup = ({ navigation }) => {
                     <Text>Tôi đồng ý với các Điều khoản và Điều kiện</Text>
                 </View>
 
-                <Button
-                    title="Đăng Ký"
-                    filled
-                    style={{
-                        marginTop: 18,
-                        marginBottom: 4,
-                    }}
-                    onPress={() => handleSignup()}
-                />
+               <CustomButton onPress={() => handleSignup()} title='ĐĂNG KÝ' isLoading={ButtonPress} />
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
                     <View

@@ -1,4 +1,4 @@
-import { View, Text, Image, useWindowDimensions, FlatList, ScrollView, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, Image, useWindowDimensions, FlatList, ScrollView, TouchableOpacity, Modal } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
@@ -11,6 +11,7 @@ import ImageAvata from "../../assets/hero2.jpg"
 import ImageUpload from "../../assets/add-image.png"
 import axios from 'axios';
 import CustomButton from '../../components/CustomButton'
+import ModalAlert from '../../components/ModalAlert'
 
 const PostsRoute = () => (
     <View
@@ -86,14 +87,17 @@ const PostsRoute = () => (
         />
     </View>
 )
-
+const success = '../../assets/success.png';
+const fail = '../../assets/cross.png';
 const VerifyRoute = ({ navigation }) => {
     const [selectedImages, setSelectedImage] = useState([]);
     const [avatar, setAvatar] = useState();
     const [orgId, setOrgId] = useState();
     const [token, setToken] = useState();
     const [ButtonPress, setButtonPress] = useState('');
-
+    const [showWarning, setShowWarning] = useState(false);
+    const [mess, setMess] = useState();
+    const [icon, setIcon] = useState();
 
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData();
@@ -119,10 +123,10 @@ const VerifyRoute = ({ navigation }) => {
         if (!result.canceled) {
 
             if (selectedImages.length + result.assets.length > 5) {
-                Alert.alert('Thông báo', 'Chỉ chọn tối đa 5 hình!', [
-
-                    { text: 'OK' },
-                ]);
+                setIcon();
+                setMess('Số lượng ảnh phải ít hơn 5 ảnh');
+                setShowWarning(true);
+               
                 return;
             } else if (selectedImages.length === 0) {
                 setSelectedImage(result.assets);
@@ -147,41 +151,120 @@ const VerifyRoute = ({ navigation }) => {
         });
         console.log(formData);
         setButtonPress(true);
-        if (!selectedImages) {
-            Alert.alert('Thông báo', 'Vui lòng chọn ảnh!', [
-
-                { text: 'OK' },
-            ]);
+        if (selectedImages.length === 0) {
+            
+            setMess('Vui lòng chọn ảnh!');
+            setIcon();
+            setShowWarning(true);
+            setButtonPress(false);
             return;
         }
-
+        
         axios.put(('http://192.168.9.14:3000/api/v1/org/verify?orgId=' + orgId), formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-                'Authorization': token,
+                'Authorization': orgId,
             },
         })
             .then((response) => {
 
                 if (response.data.status === 'SUCCESS') {
-                    Alert.alert('Thông báo', 'Đăng minh chứng thành công!', [
-
-                        { text: 'OK', onPress: () => setSelectedImage(null) },
-                    ]);
+                    setMess('Đăng minh chứng thành công!')
+                    setIcon(response.data.status);
+                    setShowWarning(true);
+                    setSelectedImage([]);
                     setButtonPress(false);
                     setAvatar(null);
                 }
             })
             .catch((error) => {
                 console.error('API Error:', error);
+                setMess('Đăng minh chứng thất bại!');
+                setIcon();
+                setShowWarning(true);
+                setButtonPress(false);
             });
-        
+
 
     }
 
     return (
         <ScrollView style={{ flex: 1, paddingTop: 25, }}>
+            <Modal
+                visible={showWarning}
+                animationType='fade'
+                transparent
+                onRequestClose={() =>
+                    setShowWarning(false)
+                }
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    }}
+                >
+                    <View
+                        style={{
+                            width: 300,
+                            height: 200,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 25,
+                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
+                            justifyContent: 'center', //
+                        }}
+                    >
+                        {
+                            icon === 'SUCCESS' ?
+                            <Image
+                                source={require(success)}
+                                style={{
+                                    marginTop: 15,
+                                    width: 50,
+                                    height: 50,
+                                }}
+                            />
+                            :
+                            <Image
+                                source={require(fail)}
+                                style={{
+                                    marginTop: 15,
+                                    width: 50,
+                                    height: 50,
+                                }}
+                            />
 
+                        }
+                        <Text style={{
+                            fontWeight: 'bold',
+                            fontSize: 18,
+                        }}>Thông báo</Text>
+                        <Text style={{
+                            fontSize: 16,
+                        }}>{mess}</Text>
+
+                        <View style={{
+                            marginTop: 15,
+                            width: 200,
+                        }}>
+                            <CustomButton title='ĐÓNG' onPress={() => setShowWarning(false)} />
+                        </View>
+                    </View>
+
+
+                </View>
+            </Modal>
+            {/* <ModalAlert
+                visible={showWarning}
+                onRequestClose={setShowWarning(false)}
+                mess={mess}
+                icon={icon}
+                onPress={setShowWarning(false)}
+            >
+                
+            </ModalAlert> */}
             <FlatList
                 data={selectedImages}
                 horizontal={true}

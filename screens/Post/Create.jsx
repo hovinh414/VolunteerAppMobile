@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, Alert, FlatList, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, Image, Alert, FlatList, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { styles } from './PostScreenStyle';
 import CustomButton from '../../components/CustomButton';
@@ -10,16 +10,19 @@ import { addYears, format } from 'date-fns';
 import axios from 'axios';
 import { MaterialIcons } from '@expo/vector-icons'
 import { RadioButton } from 'react-native-paper';
+import CustomInputDateTime from '../../components/CustomInputDateTime';
+
 
 const checkin = '../../assets/checkin.png';
 const addPicture = '../../assets/add-image.png';
+const success = '../../assets/success.png';
+const fail = '../../assets/cross.png';
 const Create = () => {
     const [selectedImages, setSelectedImage] = useState([]);
     const [avatar, setAvatar] = useState("");
     const [fullname, setFullname] = useState("");
     const [address, setAddress] = useState('');
     const [token, setToken] = useState();
-
     const [exprirationDate, setExprirationDate] = useState('');
     useEffect(() => {
         const currentDate = new Date();
@@ -31,7 +34,9 @@ const Create = () => {
     const [content, setContent] = useState('');
     const [participants, setParticipants] = useState('');
     const [ButtonPress, setButtonPress] = useState('');
-    const [addressPost, setAddressPost] = useState('');
+    const [showWarning, setShowWarning] = useState(false);
+    const [mess, setMess] = useState();
+    const [icon, setIcon] = useState();
 
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData();
@@ -70,7 +75,6 @@ const Create = () => {
     }
     function resetForm() {
         setSelectedImage([]);
-        setAddressPost(null);
         setParticipants(null);
         setContent(null);
         setScope(null);
@@ -91,16 +95,15 @@ const Create = () => {
         // formData.append('addressPost', addressPost);
         console.log(formData);
         setButtonPress(true);
-        if (!selectedImages || !content || !scope || !participants) {
-            Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ thông tin và hình ảnh!', [
 
-                { text: 'OK' },
-            ]);
+        if (selectedImages.length === 0 || !content || !scope || !participants) {
+            setMess('Vui lòng nhập đầy đủ thông tin và hình ảnh!');
+            setIcon();
+            setShowWarning(true);
             setButtonPress(false);
             return;
         }
-
-        axios.post(('http://192.168.9.14:3000/api/v1/post'), formData, {
+        axios.post(('http://172.20.10.2:3000/api/v1/post'), formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': token,
@@ -109,15 +112,18 @@ const Create = () => {
             .then((response) => {
 
                 if (response.data.status === 'SUCCESS') {
-                    Alert.alert('Thông báo', 'Đăng bài viết thành công!', [
-
-                        { text: 'OK', onPress: () => resetForm() },
-                    ]);
+                    setMess('Đăng bài viết thành công!');
+                    setIcon('SUCCESS');
+                    setShowWarning(true);
+                    resetForm();
                     setButtonPress(false);
                 }
             })
             .catch((error) => {
                 console.error('API Error:', error);
+                setMess('Đăng bài viết thất bại!');
+                setIcon();
+                setShowWarning(true);
                 setButtonPress(false);
             });
 
@@ -125,6 +131,73 @@ const Create = () => {
     }
     return (
         <ScrollView style={{ backgroundColor: '#fff' }}>
+            <Modal
+                visible={showWarning}
+                animationType='fade'
+                transparent
+                onRequestClose={() =>
+                    setShowWarning(false)
+                }
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    }}
+                >
+                    <View
+                        style={{
+                            width: 300,
+                            height: 200,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 25,
+                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
+                            justifyContent: 'center', //
+                            padding: 20,
+                        }}
+                    >
+                        {
+                            icon === 'SUCCESS' ?
+                                <Image
+                                    source={require(success)}
+                                    style={{
+                                        marginTop: 15,
+                                        width: 50,
+                                        height: 50,
+                                    }}
+                                />
+                                :
+                                <Image
+                                    source={require(fail)}
+                                    style={{
+                                        marginTop: 15,
+                                        width: 50,
+                                        height: 50,
+                                    }}
+                                />
+
+                        }
+                        <Text style={{
+                            fontWeight: 'bold',
+                            fontSize: 18,
+                        }}>Thông báo</Text>
+                        <Text style={{
+                            fontSize: 16,
+                        }}>{mess}</Text>
+
+                        <View style={{
+                            marginTop: 15,
+                            width: 200,
+                        }}>
+                            <CustomButton title='ĐÓNG' onPress={() => setShowWarning(false)} />
+                        </View>
+                    </View>
+
+
+                </View>
+            </Modal>
             <View style={{ backgroundColor: '#fff', height: '100%' }}>
                 <View style={styles.post}>
                     <View style={styles.header}>
@@ -157,7 +230,7 @@ const Create = () => {
                                     flexDirection: 'row',
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    marginLeft:10,
+                                    marginLeft: 10,
                                     marginRight: 50,
 
                                 }}>
@@ -165,15 +238,15 @@ const Create = () => {
                                         borderColor: COLORS.primary, // Thay 'blue' bằng màu viền bạn muốn sử dụng
                                         borderWidth: 2,
                                         borderRadius: 50,
-                                        marginRight:10,
+                                        marginRight: 10,
                                     }}><RadioButton value="public" color={COLORS.primary} /></View>
-                                    <Text style={{fontSize:16}}>Công khai</Text>
+                                    <Text style={{ fontSize: 16 }}>Công khai</Text>
                                 </View>
                                 <View style={{
                                     flexDirection: 'row',
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    marginLeft:10,
+                                    marginLeft: 10,
                                     marginRight: 40,
 
                                 }}>
@@ -181,12 +254,18 @@ const Create = () => {
                                         borderColor: COLORS.primary, // Thay 'blue' bằng màu viền bạn muốn sử dụng
                                         borderWidth: 2,
                                         borderRadius: 50,
-                                        marginRight:10,
+                                        marginRight: 10,
                                     }}><RadioButton value="private" color={COLORS.primary} /></View>
-                                    <Text style={{fontSize:16}}>Riêng tư</Text>
+                                    <Text style={{ fontSize: 16 }}>Riêng tư</Text>
                                 </View>
                             </View>
                         </RadioButton.Group>
+                        <Text style={styles.headerInput}>Ngày hết hạn:</Text>
+                        <CustomInputDateTime
+                            _value={exprirationDate}
+                            onChangeText={(exprirationDate) => { setExprirationDate(exprirationDate) }}
+                            
+                        />
                         <Text style={styles.headerInput}>Nhập nội dung bài viết:</Text>
                         <TextInput
                             value={content}
@@ -234,8 +313,8 @@ const Create = () => {
                                     style={{
                                         paddingVertical: 4,
                                         marginLeft: 12,
-                                        width: 140,
-                                        height: 140,
+                                        width: 80,
+                                        height: 80,
                                         borderRadius: 12,
                                     }}
                                 />
@@ -274,8 +353,8 @@ const Create = () => {
                         <Image
                             source={require(addPicture)}
                             style={{
-                                height: 90,
-                                width: 90,
+                                height: 70,
+                                width: 70,
                                 marginRight: 15,
                             }}
                         />

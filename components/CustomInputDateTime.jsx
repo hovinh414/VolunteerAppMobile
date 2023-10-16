@@ -43,6 +43,7 @@ const CustomInputDateTime = ({ onChangeText, _value }) => {
                             mainColor: COLORS.primary,
                             borderColor: 'rgba(122, 146, 165, 0.1)',
                         }}
+                        
                     >
 
                     </DatePicker>
@@ -72,6 +73,7 @@ const CustomInputDateTime = ({ onChangeText, _value }) => {
                         selectTextOnFocus={false}
                         onChangeText={onChangeText}
                         value={date ? convertDigitIn(date) : getDateOfBirth(_value)}
+                        
                     >
 
                     </TextInput>
@@ -88,14 +90,14 @@ const CustomInputDateTime = ({ onChangeText, _value }) => {
 
 const styles = StyleSheet.create({
     container: {
-        width: '100%',
+        width: '95%',
+        marginHorizontal: 10,
         paddingHorizontal: 10,
-        marginVertical: 5,
         height: 50,
         justifyContent: 'center',
-        borderRadius: 5,
-        borderWidth: 1,
-        borderColor: COLORS.black,
+        borderRadius: 10,
+        borderWidth: 1.5,
+        borderColor: COLORS.primary,
     },
     headerText: {
         flex: 1,
@@ -132,11 +134,11 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        fontSize: SIZES.h4,
+        fontSize: 16,
         marginLeft: 10,
         paddingVertical: 13,
         width: 29,
-        color: COLORS.black,
+        color: '#696969',
     },
     iconStyle: {
     },
