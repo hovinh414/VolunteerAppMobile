@@ -2,20 +2,23 @@ import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, Image, TouchableOpacity, TextInput, Pressable } from 'react-native';
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
 import { COLORS, SIZES } from '../constants/theme';
-
+import { addDays, format, addYears } from 'date-fns';
 const CustomInputDateTime = ({ onChangeText, _value }) => {
+    const currentDate = new Date();
     const convertDigitIn = (str) => {
         return str.split('/').reverse().join('/');
      }
      const getDateOfBirth = (dateOfBirth) => {
         if(!dateOfBirth) {
-            return '01/01/2000';
+            return format(addDays(currentDate,1), 'dd/MM/yyyy');
         }
         const D = new Date(dateOfBirth);
         return D.getDate() + '/' + (D.getMonth() < 10 ?  '0' : '') + (D.getMonth() + 1) + '/' + D.getFullYear();
     }
     const [visibleCalender, setVisibleCalender] = useState(false);
     const [date, setDate] = useState();
+    
+
     return (
         <React.Fragment>
             <Modal
@@ -26,13 +29,12 @@ const CustomInputDateTime = ({ onChangeText, _value }) => {
                 }}>
 
                 <View style={styles.datetimepicker}>
-                    <Text style={styles.headerText}>Chọn ngày tháng năm sinh</Text>
+                    <Text style={styles.headerText}>Chọn ngày tháng năm</Text>
                     <DatePicker
                         style={styles.datepicker}
                         mode='calendar'
-                        current='2000-01-01'
-                        minimumDate='1950-01-01'
-                        maximumDate='2022-01-01'
+                        minimumDate={format(addDays(currentDate,1), 'yyyy-MM-dd')}
+                        maximumDate={format(addYears(currentDate,1), 'yyyy-MM-dd')}
                         onSelectedChange={date => { 
                             setDate(date);
                         }}
@@ -43,6 +45,7 @@ const CustomInputDateTime = ({ onChangeText, _value }) => {
                             mainColor: COLORS.primary,
                             borderColor: 'rgba(122, 146, 165, 0.1)',
                         }}
+                        
                     >
 
                     </DatePicker>
@@ -72,6 +75,7 @@ const CustomInputDateTime = ({ onChangeText, _value }) => {
                         selectTextOnFocus={false}
                         onChangeText={onChangeText}
                         value={date ? convertDigitIn(date) : getDateOfBirth(_value)}
+                        
                     >
 
                     </TextInput>
@@ -88,14 +92,14 @@ const CustomInputDateTime = ({ onChangeText, _value }) => {
 
 const styles = StyleSheet.create({
     container: {
-        width: '100%',
+        width: '95%',
+        marginHorizontal: 10,
         paddingHorizontal: 10,
-        marginVertical: 5,
         height: 50,
         justifyContent: 'center',
-        borderRadius: 5,
-        borderWidth: 1,
-        borderColor: COLORS.black,
+        borderRadius: 10,
+        borderWidth: 1.5,
+        borderColor: COLORS.primary,
     },
     headerText: {
         flex: 1,
@@ -132,11 +136,11 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        fontSize: SIZES.h4,
+        fontSize: 16,
         marginLeft: 10,
         paddingVertical: 13,
         width: 29,
-        color: COLORS.black,
+        color: '#696969',
     },
     iconStyle: {
     },

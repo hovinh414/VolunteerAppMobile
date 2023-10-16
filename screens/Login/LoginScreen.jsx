@@ -1,4 +1,4 @@
-import { View, Text, Image , Pressable, TextInput, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, Image, Pressable, Modal, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from '../../constants/colors';
@@ -6,14 +6,16 @@ import { Ionicons } from "@expo/vector-icons";
 import Checkbox from "expo-checkbox"
 import Button from '../../components/Button';
 import axios from 'axios';
-import {toast} from 'react-toastify';
-import { loginApi } from '../../services/UserService';
 import CustomInput from '../../components/CustomInput';
 import Auth from './Auth';
 import AsyncStoraged from '../../services/AsyncStoraged';
+import CustomButton from '../../components/CustomButton';
+
+
+const success = '../../assets/success.png';
+const fail = '../../assets/cross.png';
+const warning = '../../assets/warning.png';
 const LoginScreen = ({ navigation }) => {
-
-
     const [isPasswordShown, setIsPasswordShown] = useState(true);
     const [isChecked, setIsChecked] = useState(false);
     const [username, setUsername] = useState("");
@@ -21,50 +23,20 @@ const LoginScreen = ({ navigation }) => {
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
     const [token, setToken] = useState("");
     const [usernameErrorMessage, setusernameErrorMessage] = useState('');
+    const [showWarning, setShowWarning] = useState(false);
+    const [mess, setMess] = useState();
+    const [icon, setIcon] = useState();
 
 
     const removeUser = async () => {
         const userStored = await AsyncStoraged.removeData();
     }
     useEffect(() => { removeUser(); }, []);
-    // const handleLogin = async () => {
-        
-    //     if (!username || !password) {
-    //         Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ tên đằng nhập và mật khẩu!', [
-                
-    //             {text: 'OK', onPress: () => console.log('OK Pressed')},
-    //           ]);
-    //         return;
-    //     }
-    //     await loginApi(username, password).then((res) => {
-            
-    //         if (res.status === 200 && res.data.data.accessToken !== null) {
-    //             localStorage.setItem("token",res.data.data.accessToken);
-    //             localStorage.setItem("user",res.data.data.userResult);
-    //             navigation.navigate("Welcome");
-    //         } 
-    //         else  {
-    //             Alert.alert('Thông báo', 'Sai tên đăng nhập hoặc mật khẩu!', [
-                
-    //                 {text: 'OK', onPress: () => console.log('OK Pressed')},
-    //               ]);
-    //             return;
-    //         }
-
-    //     }).catch(error => {
-    //         Alert.alert('Thông báo', error, [
-                
-    //             {text: 'OK', onPress: () => console.log('OK Pressed')},
-    //           ]);
-    //         return;
-    //     });
-        
-    // }
     const showEmailandPhoneErrorMessage = (_username) => {
         if (_username.length === 0) {
             setusernameErrorMessage('Tên đăng nhập không được trống');
         }
-        
+
         else {
             setusernameErrorMessage('')
         }
@@ -72,30 +44,29 @@ const LoginScreen = ({ navigation }) => {
     const showPasswordMessage = (_password) => {
         if (_password.length === 0) {
             setPasswordErrorMessage('Mật khẩu không được trống')
-        } else if (Auth.isValidPassword (_password) === false) {
+        } else if (Auth.isValidPassword(_password) === false) {
             setPasswordErrorMessage('Mật khẩu bao gồm 8 ký tự, chữ in hoa và chữ số')
         }
-        
+
         else {
             setPasswordErrorMessage('')
         }
-        
+
     }
-    
+
     const handleLogin = async () => {
-        
+
         try {
             if (!username || !password) {
-                Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!', [
-                            
-                    {text: 'OK', onPress: () => console.log('OK Pressed')},
-                ]);
+                setMess('Vui lòng nhập đầy đủ thông tin!');
+                setIcon();
+                setShowWarning(true);
                 return;
             }
-            const res =  await axios( {
-                method : 'post',
-                url: 'http://192.168.1.6:3000/api/v1/login',
-                headers:{
+            const res = await axios({
+                method: 'post',
+                url: 'http://172.20.10.2:3000/api/v1/login',
+                headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Accept': 'application/json'
                 },
@@ -104,28 +75,109 @@ const LoginScreen = ({ navigation }) => {
                     password
                 },
             });
-            
-            
+
+
             if (res.data.status === 'SUCCESS' && res.data.data.accessToken !== null) {
-                AsyncStoraged.storeData(res.data.data.userResult);
+                if (!res.data.data.userResult) {
+                    AsyncStoraged.storeData(res.data.data.orgResult);
+                } else {
+                    AsyncStoraged.storeData(res.data.data.userResult);
+                }
+
                 AsyncStoraged.setToken(res.data.data.accessToken);
                 navigation.push('BottomTabNavigation');
-                
-            } 
-            
+
+            }
+
         } catch (error) {
             if (error) {
-                Alert.alert('Thông báo', 'Sai thông tin đăng nhập vui lòng kiểm tra lại!', [
-                            
-                    {text: 'OK', onPress: () => console.log('OK Pressed')},
-                ]);
-                
+                setMess('Sai thông tin đăng nhập!');
+                setIcon('FAIL');
+                setShowWarning(true);
+
             }
-      
+
         }
     }
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+            <Modal
+                visible={showWarning}
+                animationType='fade'
+                transparent
+                onRequestClose={() =>
+                    setShowWarning(false)
+                }
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    }}
+                >
+                    <View
+                        style={{
+                            width: 300,
+                            height: 200,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 25,
+                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
+                            justifyContent: 'center', //
+                            padding: 20,
+                        }}
+                    >
+                        {
+                            icon === 'SUCCESS' ?
+                                <Image
+                                    source={require(success)}
+                                    style={{
+                                        marginTop: 15,
+                                        width: 50,
+                                        height: 50,
+                                    }}
+                                />
+                                :
+                                icon === 'FAIL' ?
+                                    <Image
+                                        source={require(fail)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    />
+                                    :
+                                    <Image
+                                        source={require(warning)}
+                                        style={{
+                                            marginTop: 15,
+                                            width: 50,
+                                            height: 50,
+                                        }}
+                                    />
+
+                        }
+                        <Text style={{
+                            fontWeight: 'bold',
+                            fontSize: 18,
+                        }}>Thông báo</Text>
+                        <Text style={{
+                            fontSize: 16,
+                        }}>{mess}</Text>
+
+                        <View style={{
+                            marginTop: 15,
+                            width: 200,
+                        }}>
+                            <CustomButton title='ĐÓNG' onPress={() => setShowWarning(false)} />
+                        </View>
+                    </View>
+
+
+                </View>
+            </Modal>
             <View style={{ flex: 1, marginHorizontal: 22 }}>
                 <View style={{ marginVertical: 22 }}>
                     <Text style={{
@@ -150,17 +202,17 @@ const LoginScreen = ({ navigation }) => {
                         marginVertical: 8
                     }}>Tài khoản</Text>
 
-                    
-                        <CustomInput
-                            onChangeText={(username) => {
-                                setUsername(username);
-                                showEmailandPhoneErrorMessage(username);
-                            }}
-                            placeholder='Nhập tài khoản của bạn'
-                            error={usernameErrorMessage.length !== 0}
-                            errorMessage={usernameErrorMessage}
-                        />
-                    
+
+                    <CustomInput
+                        onChangeText={(username) => {
+                            setUsername(username);
+                            showEmailandPhoneErrorMessage(username);
+                        }}
+                        placeholder='Nhập tài khoản của bạn'
+                        error={usernameErrorMessage.length !== 0}
+                        errorMessage={usernameErrorMessage}
+                    />
+
                 </View>
 
                 <View style={{ marginBottom: 12 }}>
@@ -170,42 +222,43 @@ const LoginScreen = ({ navigation }) => {
                         marginVertical: 8
                     }}>Mật khẩu</Text>
 
-                    
+
                     <CustomInput
-                            onChangeText={(password) => {
-                                setPassword(password);
-                                showPasswordMessage(password);
-                            }}
-                            placeholder='Nhập mật khẩu của bạn'
-                            error={passwordErrorMessage.length !== 0}
-                            errorMessage={passwordErrorMessage}
-                            secureTextEntry={isPasswordShown}
-                            
-                        />
-                        <TouchableOpacity
-                            onPress={() => setIsPasswordShown(!isPasswordShown)}
-                            style={{
-                                position: "absolute",
-                                right: 12
-                            }}
-                        >
-                            {
-                                isPasswordShown == true ? (
-                                    <Ionicons name="eye-off" size={24} color={COLORS.black} />
-                                ) : (
-                                    <Ionicons name="eye" size={24} color={COLORS.black} />
-                                )
-                            }
+                        onChangeText={(password) => {
+                            setPassword(password);
+                            showPasswordMessage(password);
+                        }}
+                        placeholder='Nhập mật khẩu của bạn'
+                        error={passwordErrorMessage.length !== 0}
+                        errorMessage={passwordErrorMessage}
+                        secureTextEntry={isPasswordShown}
 
-                        </TouchableOpacity>
-                        
+                    />
+                    <TouchableOpacity
+                        onPress={() => setIsPasswordShown(!isPasswordShown)}
+                        style={{
+                            position: "absolute",
+                            right: 12
+                        }}
+                    >
+                        {
+                            isPasswordShown == true ? (
+                                <Ionicons name="eye-off" size={24} color={COLORS.black} />
+                            ) : (
+                                <Ionicons name="eye" size={24} color={COLORS.black} />
+                            )
+                        }
 
-                        
+                    </TouchableOpacity>
+
+
+
                 </View>
 
                 <View style={{
                     flexDirection: 'row',
-                    marginVertical: 6
+                    marginVertical: 6,
+                    marginBottom: 18,
                 }}>
                     <Checkbox
                         style={{ marginRight: 8 }}
@@ -217,15 +270,7 @@ const LoginScreen = ({ navigation }) => {
                     <Text>Remember Me</Text>
                 </View>
 
-                <Button
-                    title="Đăng nhập"
-                    filled
-                    style={{
-                        marginTop: 18,
-                        marginBottom: 4,
-                    }}
-                    onPress={() => handleLogin()}
-                />
+                <CustomButton onPress={() => handleLogin()} title='ĐĂNG NHẬP' />
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
                     <View

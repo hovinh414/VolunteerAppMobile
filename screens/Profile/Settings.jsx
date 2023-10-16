@@ -1,10 +1,20 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image, Modal } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, FONTS } from "../../constants/theme";
 import { MaterialIcons } from "@expo/vector-icons";
+import CustomButton from "../../components/CustomButton";
+import CustomButtonV2 from "../../components/CustomButtonV2";
+import AsyncStoraged from "../../services/AsyncStoraged";
 
+const question = '../../assets/question.png';
 const Settings = ({ navigation }) => {
+
+  const removeData = async () => {
+    await AsyncStoraged.removeData();
+  }
+  const [showWarning, setShowWarning] = useState(false);
+  const [mess, setMess] = useState();
 
 
   const navigateToEditProfile = () => {
@@ -52,14 +62,16 @@ const Settings = ({ navigation }) => {
   };
 
   const logout = () => {
-    Alert.alert('Thông báo', 'Bạn có muốn đăng xuất', [
-      {
-        text: 'Hủy',
-        onPress: () => console.log('Cancel Pressed'),
-        style: 'cancel',
-      },
-      { text: 'Đồng ý', onPress: () => navigation.push('LoginScreen')},
-    ]);
+    setMess('Bạn có muốn đăng xuất?');
+    setShowWarning(true);
+    // Alert.alert('Thông báo', 'Bạn có muốn đăng xuất', [
+    //   {
+    //     text: 'Hủy',
+    //     onPress: () => console.log('Cancel Pressed'),
+    //     style: 'cancel',
+    //   },
+    //   { text: 'Đồng ý', onPress: () => navigation.push('LoginScreen') },
+    // ]);
   };
 
   const accountItems = [
@@ -113,6 +125,71 @@ const Settings = ({ navigation }) => {
         backgroundColor: COLORS.gray,
       }}
     >
+      <Modal
+        visible={showWarning}
+        animationType='fade'
+        transparent
+        onRequestClose={() =>
+          setShowWarning(false)
+        }
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }}
+        >
+          <View
+            style={{
+              width: 300,
+              height: 200,
+              backgroundColor: '#ffffff',
+              borderRadius: 25,
+              alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
+              justifyContent: 'center', //
+            }}
+          >
+            <Image
+              source={require(question)}
+              style={{
+                marginTop: 15,
+                width: 50,
+                height: 50,
+              }}
+            />
+            <Text style={{
+              marginTop: 15,
+              fontWeight: 'bold',
+              fontSize: 18,
+            }}>{mess}</Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                marginTop: 30,
+              }}
+            >
+              <View style={{
+                width: 80,
+                marginRight: 15,
+              }}>
+
+                <CustomButtonV2 title='ĐÓNG' onPress={() => setShowWarning(false)} />
+              </View>
+              <View style={{
+                width: 80,
+              }}>
+
+                <CustomButton title='ĐỒNG Ý' onPress={() => (removeData(), navigation.push('BottomTabNavigation'), setShowWarning(false))} />
+              </View>
+            </View>
+          </View>
+
+
+        </View>
+      </Modal>
       <MaterialIcons name={icon} size={26} color="black" />
       <Text
         style={{

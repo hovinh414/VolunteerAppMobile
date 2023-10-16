@@ -4,7 +4,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  TextInput,
+  Modal,
   SafeAreaView,
   Alert,
   Pressable
@@ -18,7 +18,12 @@ import CustomInput from "../../components/CustomInput";
 import Auth from "../Login/Auth";
 import ImageAvata from "../../assets/hero2.jpg"
 import AsyncStoraged from '../../services/AsyncStoraged'
-import * as FileSystem from 'expo-file-system';
+import CustomButton from "../../components/CustomButton";
+
+
+const success = '../../assets/success.png';
+const fail = '../../assets/cross.png';
+const warning = '../../assets/warning.png';
 const EditProfile = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState('');
   const [avatar, setAvatar] = useState();
@@ -33,6 +38,10 @@ const EditProfile = ({ navigation }) => {
   const [address, setAddress] = useState('');
   const [userId, setUserId] = useState();
   const [token, setToken] = useState();
+  const [ButtonPress, setButtonPress] = useState('');
+  const [showWarning, setShowWarning] = useState(false);
+  const [mess, setMess] = useState();
+  const [icon, setIcon] = useState();
 
   const getUserStored = async () => {
     const userStored = await AsyncStoraged.getData();
@@ -43,9 +52,9 @@ const EditProfile = ({ navigation }) => {
     setAddress(userStored.address);
     setAvatar(userStored.avatar);
     setUserId(userStored._id);
-    setToken(userStored.accessToken);
   }
   useEffect(() => { getUserStored(); }, []);
+
   const showFullNameError = (_fullname) => {
     if (_fullname.length === 0) {
       setfullnameErrorMessage('Tên không được trống');
@@ -97,35 +106,54 @@ const EditProfile = ({ navigation }) => {
   const formData = new FormData();
   const randomNum = Math.floor(Math.random() * (10000 - 10 + 1)) + 10;
   const handleUpdateUser = async () => {
+    if (!fullname || !username || !email || !phone) {
+      setMess('Vui lòng điền đầy đủ thông tin!');
+      setIcon();
+      setShowWarning(true);
+      return;
+    }
+    if (selectedImage.length > 0) {
+      formData.append('fullname', fullname);
+      formData.append('username', username);
+      formData.append('email', email);
+      formData.append('phone', phone);
+      formData.append('address', address);
+      formData.append('avatar', {
+        uri: selectedImage,
+        type: 'image/jpeg',
+        name: username + userId + randomNum,
+      });
+    } else {
+      formData.append('fullname', fullname);
+      formData.append('username', username);
+      formData.append('email', email);
+      formData.append('phone', phone);
+      formData.append('address', address);
+    }
 
-    formData.append('fullname', fullname);
-    formData.append('username', username);
-    formData.append('email', email);
-    formData.append('phone', phone);
-    formData.append('address', address);
-    formData.append('avatar',{
-      uri: selectedImage,
-      type: 'image/jpeg',
-      name: username + userId + randomNum,
-    });
-    axios.put(('http://192.168.1.6:3000/api/v1/user?userid=' + userId), formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': token,
-        },
-      })
+    setButtonPress(true);
+    axios.put(('http://172.20.10.2:3000/api/v1/user?userid=' + userId), formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': token,
+      },
+    })
       .then((response) => {
         if (response.data.status === 'SUCCESS') {
-            AsyncStoraged.storeData(response.data.data.userResultForUpdate);
-            Alert.alert('Thông báo', 'Thay đổi thông tin thành công!', [
-      
-              { text: 'OK', onPress: () => navigation.push('BottomTabNavigation') },
-            ]);
-      
-          }
+          AsyncStoraged.storeData(response.data.data.userResultForUpdate);
+          setMess('Thay đổi thông tin thành công!');
+          setIcon('SUCCESS');
+          setShowWarning(true);
+          setButtonPress(false);
+          navigation.push('BottomTabNavigation');
+
+        }
       })
       .catch((error) => {
-        console.error('API Error:', error);
+        setMess('Thay đổi thông tin thất bại!');
+        setIcon('FAIL');
+        setShowWarning(true);
+        setButtonPress(false);
       });
   }
 
@@ -135,11 +163,11 @@ const EditProfile = ({ navigation }) => {
 
       const res = await axios({
         method: 'get',
-        url: 'http://192.168.9.14:3000/api/v1/checkUsername?username=' + _username,
+        url: 'http://172.20.10.2:3000/api/v1/checkUsername?username=' + _username,
       });
 
       if (res.data.status === 'SUCCESS') {
-        console.log('OK');
+
       }
     } catch (error) {
       setUsernameErrorMessage('Tên đăng nhập đã được sử dụng!');
@@ -172,6 +200,83 @@ const EditProfile = ({ navigation }) => {
 
       }}
     >
+      <Modal
+        visible={showWarning}
+        animationType='fade'
+        transparent
+        onRequestClose={() =>
+          setShowWarning(false)
+        }
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }}
+        >
+          <View
+            style={{
+              width: 300,
+              height: 200,
+              backgroundColor: '#ffffff',
+              borderRadius: 25,
+              alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
+              justifyContent: 'center', //
+              padding: 20,
+            }}
+          >
+            {
+              icon === 'SUCCESS' ?
+                <Image
+                  source={require(success)}
+                  style={{
+                    marginTop: 15,
+                    width: 50,
+                    height: 50,
+                  }}
+                />
+                :
+                icon === 'FAIL' ?
+                  <Image
+                    source={require(fail)}
+                    style={{
+                      marginTop: 15,
+                      width: 50,
+                      height: 50,
+                    }}
+                  />
+                  :
+                  <Image
+                    source={require(warning)}
+                    style={{
+                      marginTop: 15,
+                      width: 50,
+                      height: 50,
+                    }}
+                  />
+
+            }
+            <Text style={{
+              fontWeight: 'bold',
+              fontSize: 18,
+            }}>Thông báo</Text>
+            <Text style={{
+              fontSize: 16,
+            }}>{mess}</Text>
+
+            <View style={{
+              marginTop: 15,
+              width: 200,
+            }}>
+              <CustomButton title='ĐÓNG' onPress={() => setShowWarning(false)} />
+            </View>
+          </View>
+
+
+        </View>
+      </Modal>
       <View
         style={{
           marginHorizontal: 12,
@@ -305,19 +410,6 @@ const EditProfile = ({ navigation }) => {
             />
           </View>
 
-          {/* <View>
-            <Text style={{
-              fontSize: 16,
-              fontWeight: 400,
-              marginVertical: 8
-            }}>Ngày sinh</Text>
-
-            <CustomInputDateTime
-
-              _value={dateOfBirth}
-              onChangeText={(text) => { setDateOfBirth(text) }}
-            />
-          </View> */}
         </View>
 
         <View>
@@ -334,25 +426,7 @@ const EditProfile = ({ navigation }) => {
           />
         </View>
 
-        <TouchableOpacity
-          style={{
-            backgroundColor: COLORS.primary,
-            height: 44,
-            borderRadius: 20,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onPress={() => handleUpdateUser()}
-        >
-          <Text
-            style={{
-              fontFamily: 'bold',
-              color: '#FFF',
-            }}
-          >
-            THAY ĐỔI THÔNG TIN
-          </Text>
-        </TouchableOpacity>
+        <CustomButton onPress={() => handleUpdateUser()} title='THAY ĐỔI THÔNG TIN' isLoading={ButtonPress} />
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,5 +1,5 @@
 import Feed from './Feed'
-import Create from './Create'
+import Create from './Post/Create'
 import Profile from './Profile/Profile'
 import ProfileOrganisation from './Profile/ProfileOrganisation'
 import Notifications from './Notifications'
