@@ -13,26 +13,26 @@ const Signup = ({ navigation }) => {
     const [isChecked, setIsChecked] = useState(false);
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{
-            paddingTop:80,
-            paddingLeft:20,
-            position: "absolute",
-            left: 0,
-          }}
-        >
-          <MaterialIcons
-            name="keyboard-arrow-left"
-            size={30}
-            color={COLORS.black}
-          />
-        </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{
+                    paddingTop: 80,
+                    paddingLeft: 20,
+                    position: "absolute",
+                    left: 0,
+                }}
+            >
+                <MaterialIcons
+                    name="keyboard-arrow-left"
+                    size={30}
+                    color={COLORS.black}
+                />
+            </TouchableOpacity>
             <View style={{ flex: 1, marginHorizontal: 22 }}>
-            <View style={{paddingBottom: 30}}>
-                <Text style={styles.textHeader}>Chọn loại</Text>
-                <Text style={styles.textDesc}>Vui lòng chọn một trong hai</Text>
-            </View>
+                <View style={{ paddingBottom: 30 }}>
+                    <Text style={styles.textHeader}>Chọn loại</Text>
+                    <Text style={styles.textDesc}>Vui lòng chọn một trong hai</Text>
+                </View>
 
                 <Button
                     title="Tổ chức"
@@ -61,14 +61,14 @@ const Signup = ({ navigation }) => {
                             marginHorizontal: 10
                         }}
                     />
-                    
 
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center'
-                }}>
-                    
-                </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        justifyContent: 'center'
+                    }}>
+
+                    </View>
 
                 </View>
             </View>

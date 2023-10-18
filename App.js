@@ -14,7 +14,6 @@ import EditProfile from './screens/Profile/EditProfile'
 import Settings from './screens/Profile/Settings'
 import LoginScreen from './screens/Login/LoginScreen'
 import ChangePassword from './screens/Profile/ChangePassword'
-import ProfileOrganisation from './screens/Profile/ProfileOrganisation'
 const Stack = createNativeStackNavigator()
 
 SplashScreen.preventAutoHideAsync()
@@ -105,7 +104,6 @@ export default function App() {
                             headerShown: false,
                         }}
                     />
-                    
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>

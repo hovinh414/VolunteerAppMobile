@@ -11,7 +11,7 @@ import ImageAvata from "../../assets/hero2.jpg"
 import ImageUpload from "../../assets/add-image.png"
 import axios from 'axios';
 import CustomButton from '../../components/CustomButton'
-import ModalAlert from '../../components/ModalAlert'
+import CustomAlert from '../../components/CustomAlert'
 
 const PostsRoute = () => (
     <View
@@ -190,91 +190,16 @@ const VerifyRoute = ({ navigation }) => {
 
     return (
         <ScrollView style={{ flex: 1, paddingTop: 25, }}>
-            <Modal
+            <CustomAlert
                 visible={showWarning}
-                animationType='fade'
-                transparent
+                mess={mess}
                 onRequestClose={() =>
                     setShowWarning(false)
                 }
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)'
-                    }}
-                >
-                    <View
-                        style={{
-                            width: 300,
-                            height: 200,
-                            backgroundColor: '#ffffff',
-                            borderRadius: 25,
-                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
-                            justifyContent: 'center', //
-                        }}
-                    >
-                        {
-                            icon === 'SUCCESS' ?
-                                <Image
-                                    source={require(success)}
-                                    style={{
-                                        marginTop: 15,
-                                        width: 50,
-                                        height: 50,
-                                    }}
-                                />
-                                :
-                                icon === 'FAIL' ?
-                                    <Image
-                                        source={require(fail)}
-                                        style={{
-                                            marginTop: 15,
-                                            width: 50,
-                                            height: 50,
-                                        }}
-                                    />
-                                    :
-                                    <Image
-                                        source={require(warning)}
-                                        style={{
-                                            marginTop: 15,
-                                            width: 50,
-                                            height: 50,
-                                        }}
-                                    />
-
-                        }
-                        <Text style={{
-                            fontWeight: 'bold',
-                            fontSize: 18,
-                        }}>Thông báo</Text>
-                        <Text style={{
-                            fontSize: 16,
-                        }}>{mess}</Text>
-
-                        <View style={{
-                            marginTop: 15,
-                            width: 200,
-                        }}>
-                            <CustomButton title='ĐÓNG' onPress={() => setShowWarning(false)} />
-                        </View>
-                    </View>
-
-
-                </View>
-            </Modal>
-            {/* <ModalAlert
-                visible={showWarning}
-                onRequestClose={setShowWarning(false)}
-                mess={mess}
+                onPress={() => setShowWarning(false)}
+                title={'ĐÓNG'}
                 icon={icon}
-                onPress={setShowWarning(false)}
-            >
-                
-            </ModalAlert> */}
+            />
             <FlatList
                 data={selectedImages}
                 horizontal={true}
@@ -502,7 +427,7 @@ const ProfileOrganisation = ({ navigation }) => {
 
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Địa chỉ: </Text>
-                        <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
+                        <Text style={{ ...FONTS.body4, color: COLORS.blue, paddingRight:150, }}>
                             {address}
                         </Text>
                     </View>
