@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
-import { Modal, StyleSheet, TouchableOpacity, Text, View, Dimensions, Alert } from 'react-native';
+import { Modal, StyleSheet, TouchableOpacity, Text, View, Dimensions, ScrollView, KeyboardAvoidingView } from 'react-native';
 import CustomButton from "./CustomButton";
 import { COLORS, FONTS } from "../constants/theme";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
@@ -9,9 +9,9 @@ import CustomInput from "./CustomInput";
 import CustomAlert from "./CustomAlert";
 import { useNavigation } from '@react-navigation/native';
 import AsyncStoraged from "../services/AsyncStoraged";
+import API_URL from '../interfaces/config'
 
-
-const CustomEditAddress = ({ visible, close, onRequestClose, onPress, title}) => {
+const CustomEditAddress = ({ visible, close, onRequestClose, onPress, title }) => {
   const screenWidth = Dimensions.get('window').width;
   const [countryData, setCountryData] = useState([]);
   const [stateData, setStateData] = useState([]);
@@ -120,18 +120,18 @@ const CustomEditAddress = ({ visible, close, onRequestClose, onPress, title}) =>
       return;
     }
     formData.append('address', fullAddress);
-    
+
     setButtonPress(true);
-    axios.put(('http://172.20.10.2:3000/api/v1/user?userid=' + userId), formData, {
+    axios.put((API_URL.API_URL + '/user?userid=' + userId), formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         'Authorization': token,
       },
     })
       .then((response) => {
-       
+
         if (response.data.status === 'SUCCESS') {
-          
+
           AsyncStoraged.storeData(response.data.data.userResultForUpdate);
           setMess('Thay đổi địa chỉ thành công!');
           setIcon('SUCCESS');
@@ -165,171 +165,190 @@ const CustomEditAddress = ({ visible, close, onRequestClose, onPress, title}) =>
         title={'ĐÓNG'}
         icon={icon}
       />
-      <View
+      <KeyboardAvoidingView
         style={{
           flex: 1,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          flexDirection: 'column',
+          justifyContent: 'center',
+          paddingTop: 15,
         }}
-      >
-
-        <View
-          style={{
-            width: screenWidth,
-            top: 350,
-            height: 800,
-            backgroundColor: '#ffffff',
-            borderRadius: 25,
-            paddingBottom: 20,
-            paddingLeft: 20,
-            paddingRight: 20,
-          }}
-        >
+        behavior="padding">
+        <ScrollView >
           <View
             style={{
-              justifyContent: 'center',
-              alignItems: 'center',
+              flex: 1,
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 1,
+              shadowRadius: 4,
+              elevation: 5,
             }}
           >
-            <Feather
 
-              name="minus"
-              size={50}
-              color={COLORS.black}
-            />
-          </View>
-          <View style={{
-            flexDirection: "row", // Đặt chiều dọc thành chiều ngang
-            alignItems: "center", // Căn giữa theo chiều dọc
-            marginBottom: 15,
-          }}>
-            <Text style={{
-              fontWeight: 'bold',
-              fontSize: 20,
-            }}>Cập nhật địa chỉ</Text>
-            <TouchableOpacity
-              onPress={close}
+            <View
               style={{
-                position: "absolute",
-                right: 0, // Đặt biểu tượng bên phải
+                width: screenWidth,
+                top: 350,
+                height: 800,
+                backgroundColor: '#ffffff',
+                borderRadius: 25,
+                paddingBottom: 20,
+                paddingLeft: 20,
+                paddingRight: 20,
               }}
             >
-              <MaterialIcons
-                name="close"
-                size={25}
-                color={COLORS.black}
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Feather
+
+                  name="minus"
+                  size={50}
+                  color={COLORS.black}
+                />
+              </View>
+              <View style={{
+                flexDirection: "row", // Đặt chiều dọc thành chiều ngang
+                alignItems: "center", // Căn giữa theo chiều dọc
+                marginBottom: 15,
+              }}>
+                <Text style={{
+                  fontWeight: 'bold',
+                  fontSize: 20,
+                  flex: 1, // Để chữ căn giữa
+                  textAlign: 'center', // Để chữ căn giữa theo chiều ngang
+                }}>Cập nhật địa chỉ</Text>
+                <TouchableOpacity
+                  onPress={close}
+                  style={{
+                    position: "absolute",
+                    right: 0, // Đặt biểu tượng bên phải
+                  }}
+                >
+                  <MaterialIcons
+                    name="close"
+                    size={25}
+                    color={COLORS.black}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={{
+                fontSize: 16,
+                fontWeight: 400,
+                marginVertical: 8
+              }}>Tỉnh/Thành phố </Text>
+              <Dropdown
+                style={[styles.dropdown, isFocus && { borderColor: COLORS.primary }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                iconStyle={styles.iconStyle}
+                data={countryData}
+                search
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={!isFocus ? 'Chọn Tỉnh/Thành phố' : '...'}
+                searchPlaceholder="Tìm Kiếm"
+                value={country}
+                onFocus={() => setIsFocus(true)}
+                onBlur={() => setIsFocus(false)}
+                onChange={item => {
+                  setCountry(item.value);
+                  handleState(item.value);
+                  setCountryName(item.label);
+                  setIsFocus(false);
+                }}
               />
-            </TouchableOpacity>
+              <Text style={{
+                fontSize: 16,
+                fontWeight: 400,
+                marginVertical: 8
+              }}>Quận/Huyện</Text>
+              <Dropdown
+                style={[styles.dropdown, isFocus && { borderColor: COLORS.primary }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                iconStyle={styles.iconStyle}
+                data={stateData}
+                search
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={!isFocus ? 'Chọn Quận/Huyện' : '...'}
+                searchPlaceholder="Tìm Kiếm "
+                value={state}
+                onFocus={() => setIsFocus(true)}
+                onBlur={() => setIsFocus(false)}
+                onChange={item => {
+                  setState(item.value);
+                  handleCity(item.value);
+                  setStateName(item.label);
+                  setIsFocus(false);
+                }}
+              />
+              <Text style={{
+                fontSize: 16,
+                fontWeight: 400,
+                marginVertical: 8
+              }}>Phường/Xã</Text>
+              <Dropdown
+                style={[styles.dropdown, isFocus && { borderColor: COLORS.primary }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+
+                iconStyle={styles.iconStyle}
+                data={cityData}
+                search
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={!isFocus ? 'Chọn Phường/Xã' : '...'}
+                searchPlaceholder="Tìm Kiếm"
+                value={city}
+                onFocus={() => setIsFocus(true)}
+                onBlur={() => setIsFocus(false)}
+                onChange={item => {
+                  setCity(item.value);
+                  setCityName(item.label);
+                  setIsFocus(false);
+                }}
+              />
+              <Text style={{
+                fontSize: 16,
+                fontWeight: 400,
+                marginVertical: 8
+              }}>Số nhà, tên đường ... </Text>
+              <CustomInput
+                value={address}
+                placeholder='Số nhà, tên đường'
+                onChangeText={(address) => {
+                  setFullAddress(null);
+                  setAddress(address)
+                  setFullAddress(address + ', ' + cityName + ', ' + stateName + ', ' + countryName);
+                }}
+              />
+
+              <View style={{
+                marginTop: 15,
+              }}>
+                <CustomButton onPress={() => handleUpdateAddress()} title='CẬP NHẬT ĐỊA CHỈ' isLoading={ButtonPress} />
+              </View>
+            </View>
+
+
           </View>
-
-          <Text style={{
-            fontSize: 16,
-            fontWeight: 400,
-            marginVertical: 8
-          }}>Tỉnh/Thành phố </Text>
-          <Dropdown
-            style={[styles.dropdown, isFocus && { borderColor: COLORS.primary }]}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            inputSearchStyle={styles.inputSearchStyle}
-            iconStyle={styles.iconStyle}
-            data={countryData}
-            search
-            maxHeight={300}
-            labelField="label"
-            valueField="value"
-            placeholder={!isFocus ? 'Chọn Tỉnh/Thành phố' : '...'}
-            searchPlaceholder="Tìm Kiếm"
-            value={country}
-            onFocus={() => setIsFocus(true)}
-            onBlur={() => setIsFocus(false)}
-            onChange={item => {
-              setCountry(item.value);
-              handleState(item.value);
-              setCountryName(item.label);
-              setIsFocus(false);
-            }}
-          />
-          <Text style={{
-            fontSize: 16,
-            fontWeight: 400,
-            marginVertical: 8
-          }}>Quận/Huyện</Text>
-          <Dropdown
-            style={[styles.dropdown, isFocus && { borderColor: COLORS.primary }]}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            inputSearchStyle={styles.inputSearchStyle}
-            iconStyle={styles.iconStyle}
-            data={stateData}
-            search
-            maxHeight={300}
-            labelField="label"
-            valueField="value"
-            placeholder={!isFocus ? 'Chọn Quận/Huyện' : '...'}
-            searchPlaceholder="Tìm Kiếm "
-            value={state}
-            onFocus={() => setIsFocus(true)}
-            onBlur={() => setIsFocus(false)}
-            onChange={item => {
-              setState(item.value);
-              handleCity(item.value);
-              setStateName(item.label);
-              setIsFocus(false);
-            }}
-          />
-          <Text style={{
-            fontSize: 16,
-            fontWeight: 400,
-            marginVertical: 8
-          }}>Phường/Xã</Text>
-          <Dropdown
-            style={[styles.dropdown, isFocus && { borderColor: COLORS.primary }]}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            inputSearchStyle={styles.inputSearchStyle}
-
-            iconStyle={styles.iconStyle}
-            data={cityData}
-            search
-            maxHeight={300}
-            labelField="label"
-            valueField="value"
-            placeholder={!isFocus ? 'Chọn Phường/Xã' : '...'}
-            searchPlaceholder="Tìm Kiếm"
-            value={city}
-            onFocus={() => setIsFocus(true)}
-            onBlur={() => setIsFocus(false)}
-            onChange={item => {
-              setCity(item.value);
-              setCityName(item.label);
-              setIsFocus(false);
-            }}
-          />
-          <Text style={{
-            fontSize: 16,
-            fontWeight: 400,
-            marginVertical: 8
-          }}>Số nhà, tên đường ... </Text>
-          <CustomInput
-            value={address}
-            placeholder='Số nhà, tên đường'
-            onChangeText={(address) => {
-              setFullAddress(null);
-              setAddress(address)
-              setFullAddress(address + ', ' + cityName + ', ' + stateName + ', ' + countryName);
-            }}
-          />
-
-          <View style={{
-            marginTop: 15,
-          }}>
-            <CustomButton onPress={() => handleUpdateAddress()} title='CẬP NHẬT ĐỊA CHỈ' isLoading={ButtonPress} />
-          </View>
-        </View>
-
-
-      </View>
-
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Modal>
   )
 }

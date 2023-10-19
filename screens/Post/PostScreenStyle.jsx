@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import COLOR from '../../constants/colors';
+import COLORS from '../../constants/colors';
 export const styles = StyleSheet.create({
     post: {
         width: '100%',
@@ -46,12 +46,14 @@ export const styles = StyleSheet.create({
         fontWeight: '400',
         fontSize: 16,
         fontStyle: 'italic',
+        marginRight:150,
     }
     ,
     checkinIcon: {
-        width: 20,
-        height: 20,
-        opacity: 0.7
+        width: 22,
+        height: 22,
+        opacity: 0.7,
+        marginRight:5,
     },
     content: {
 
@@ -92,7 +94,7 @@ export const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 10,
         borderWidth: 1.5,
-        borderColor: COLOR.primary,
+        borderColor: COLORS.primary,
 
     },
     headerInput: {
@@ -102,14 +104,15 @@ export const styles = StyleSheet.create({
         // fontWeight: '500'
     },
     address: {
-        height: 35,
+        width: '40%',
         marginHorizontal: 10,
         paddingHorizontal: 10,
+        height: 50,
+        justifyContent: 'center',
         fontSize: 16,
-        backgroundColor: 'white',
         borderRadius: 10,
         borderWidth: 1.5,
-        borderColor: COLOR.primary,
+        borderColor: COLORS.primary,
     },
     people: {
         height: 35,
@@ -130,5 +133,55 @@ export const styles = StyleSheet.create({
     address_people: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-    }
+    },
+    textHeader: {
+        fontSize: 36,
+        marginVertical: 60,
+        color: "#111",
+    },
+    textSubHeader: {
+        fontSize: 25,
+        color: "#111",
+    },
+    inputBtn: {
+        flex: 1, flexDirection: 'row',
+        alignItems: 'center',
+        width: '40%',
+        marginHorizontal: 10,
+        paddingHorizontal: 10,
+        height: 50,
+        justifyContent: 'center',
+        borderRadius: 10,
+        borderWidth: 1.5,
+        marginLeft: 30,
+        borderColor: COLORS.primary,
+    },
+    centeredView: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    iconStyle: {
+    },
+    icon: {
+        width: 25,
+        height: 25,
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "#fff",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 20,
+        padding: 35,
+        width: "90%",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
 });

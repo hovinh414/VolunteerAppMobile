@@ -213,7 +213,7 @@ const Profile = ({navigation}) => {
 
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Địa chỉ: </Text>
-                        <Text style={{ ...FONTS.body4, color: COLORS.blue, paddingRight:150, }}>
+                        <Text style={{ ...FONTS.body4, color: COLORS.blue, paddingRight:100, }}>
                             {address}
                         </Text>
                     </View>

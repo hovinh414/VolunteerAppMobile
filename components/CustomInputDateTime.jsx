@@ -1,146 +1,123 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, StyleSheet, Image, TouchableOpacity, TextInput, Pressable } from 'react-native';
+import { View, Text, Modal, StyleSheet, Image, TouchableOpacity, KeyboardAvoidingView, Pressable } from 'react-native';
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
 import { COLORS, SIZES } from '../constants/theme';
 import { addDays, format, addYears } from 'date-fns';
+import { da } from 'date-fns/locale';
 const CustomInputDateTime = ({ onChangeText, _value }) => {
-    const currentDate = new Date();
-    const convertDigitIn = (str) => {
-        return str.split('/').reverse().join('/');
-     }
-     const getDateOfBirth = (dateOfBirth) => {
-        if(!dateOfBirth) {
-            return format(addDays(currentDate,1), 'dd/MM/yyyy');
-        }
-        const D = new Date(dateOfBirth);
-        return D.getDate() + '/' + (D.getMonth() < 10 ?  '0' : '') + (D.getMonth() + 1) + '/' + D.getFullYear();
-    }
-    const [visibleCalender, setVisibleCalender] = useState(false);
-    const [date, setDate] = useState();
-    
-
-    return (
-        <React.Fragment>
-            <Modal
-                visible={visibleCalender}
-                animationType='slide'
-                onRequestClose={() => {
-                    setVisibleCalender(!visibleCalender);
-                }}>
-
-                <View style={styles.datetimepicker}>
-                    <Text style={styles.headerText}>Chọn ngày tháng năm</Text>
-                    <DatePicker
-                        style={styles.datepicker}
-                        mode='calendar'
-                        minimumDate={format(addDays(currentDate,1), 'yyyy-MM-dd')}
-                        maximumDate={format(addYears(currentDate,1), 'yyyy-MM-dd')}
-                        onSelectedChange={date => { 
-                            setDate(date);
-                        }}
-                        options={{
-                            textHeaderColor: COLORS.primary,
-                            textDefaultColor: COLORS.primary,
-                            selectedTextColor: '#fff',
-                            mainColor: COLORS.primary,
-                            borderColor: 'rgba(122, 146, 165, 0.1)',
-                        }}
-                        
-                    >
-
-                    </DatePicker>
-                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-                        <TouchableOpacity
-                            style={styles.okeButton}
-                            onPress={() => { setVisibleCalender(false) }}>
-                            <Text style={styles.okeButtonText}>HỦY</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.okeButton}
-                            onPress={() => { setVisibleCalender(false) }}>
-                            <Text style={styles.okeButtonText}>OK</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                </View>
-
-
-            </Modal>
-
-            <Pressable style={styles.container} onPress={() => { setVisibleCalender(true) }}>
-                <View style={styles.flexRow}>
-                    <TextInput
-                        style={styles.input}
-                        editable={false}
-                        selectTextOnFocus={false}
-                        onChangeText={onChangeText}
-                        value={date ? convertDigitIn(date) : getDateOfBirth(_value)}
-                        
-                    >
-
-                    </TextInput>
-                    <View style={styles.iconStyle}>
-                        <Image
-                            style={styles.icon}
-                            source={require('../assets/icons8-calendar-64.png')} />
-                    </View>
-                </View>
-            </Pressable>
-        </React.Fragment>
+    const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
+    const today = new Date();
+    const startDate = getFormatedDate(
+        today.setDate(today.getDate() + 1),
+        "DD/MM/YYYY"
     );
-};
+    const [selectedStartDate, setSelectedStartDate] = useState("");
+    const [startedDate, setStartedDate] = useState("12/12/2023");
+
+    function handleChangeStartDate(propDate) {
+        setStartedDate(propDate);
+    }
+
+    const handleOnPressStartDate = () => {
+        setOpenStartDatePicker(!openStartDatePicker);
+    };
+    return (
+        <KeyboardAvoidingView
+            behavior={Platform.OS == "ios" ? "padding" : ""}
+            style={{
+                width: "100%",
+                height: "100%",
+                backgroundColor: "#fff",
+            }}
+        >
+            <View >
+                <View>
+                    <TouchableOpacity
+                        style={styles.inputBtn}
+                        onPress={handleOnPressStartDate}
+                    >
+                        <Text
+                            style={{
+                                flex: 1,
+                                fontSize: 16,
+                                marginLeft: 10,
+                                paddingVertical: 13,
+                                width: 29,
+                                color: '#696969',
+                            }}>{selectedStartDate}</Text>
+                        <View style={styles.iconStyle}>
+                            <Image
+                                style={styles.icon}
+                                source={require('../assets/icons8-calendar-64.png')} />
+                        </View>
+                    </TouchableOpacity>
+
+                </View>
+
+                {/* Create modal for date picker */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={openStartDatePicker}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <DatePicker
+                                mode="calendar"
+                                minimumDate={startDate}
+                                selected={startedDate}
+                                onDateChanged={handleChangeStartDate}
+                                onSelectedChange={(date) => setSelectedStartDate(date)}
+                                options={{
+                                    backgroundColor: "#FFF",
+                                    textHeaderColor: COLORS.primary,
+                                    textDefaultColor: COLORS.black,
+                                    selectedTextColor: COLORS.black,
+                                    mainColor: COLORS.primary,
+                                    textSecondaryColor: "#FFFFFF",
+                                    borderColor: "rgba(122, 146, 165, 0.1)",
+                                }}
+                            />
+
+                            <TouchableOpacity
+                             onPress={handleOnPressStartDate}>
+                                <Text style={{ color: COLORS.black }}>Đóng</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            </View>
+        </KeyboardAvoidingView>
+    );
+}
 
 const styles = StyleSheet.create({
-    container: {
-        width: '95%',
+    textHeader: {
+        fontSize: 36,
+        marginVertical: 60,
+        color: "#111",
+    },
+    textSubHeader: {
+        fontSize: 25,
+        color: "#111",
+    },
+    inputBtn: {
+        flex: 1, flexDirection: 'row',
+        alignItems: 'center',
+        width: '40%',
         marginHorizontal: 10,
         paddingHorizontal: 10,
         height: 50,
         justifyContent: 'center',
         borderRadius: 10,
         borderWidth: 1.5,
+        marginLeft: 30,
         borderColor: COLORS.primary,
     },
-    headerText: {
+    centeredView: {
         flex: 1,
-        paddingHorizontal: 20,
-        marginVertical: 20,
-        textAlign: 'center',
-        fontSize: SIZES.h3,
-        fontWeight: 'bold'
-    },
-
-    datetimepicker: {
-        flex: 1,
-        justifyContent: 'center',
-        backgroundColor: 'white',
-        marginVertical: 160,
-
-    },
-    okeButton: {
-        alignSelf: 'flex-end',
-        marginRight: 35,
-    },
-    okeButtonText: {
-        color: COLORS.primary,
-        fontSize: SIZES.h3,
-        fontWeight: 'bold'
-    },
-    datepicker: {
-    },
-    flexRow: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    input: {
-        flex: 1,
-        fontSize: 16,
-        marginLeft: 10,
-        paddingVertical: 13,
-        width: 29,
-        color: '#696969',
+        alignItems: "center",
+        justifyContent: "center",
     },
     iconStyle: {
     },
@@ -148,9 +125,22 @@ const styles = StyleSheet.create({
         width: 25,
         height: 25,
     },
-    errorMessage: {
-        marginHorizontal: 5,
-        color: COLORS.primary
-    }
+    modalView: {
+        margin: 20,
+        backgroundColor: "#fff",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 20,
+        padding: 35,
+        width: "90%",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
 });
 export default CustomInputDateTime;

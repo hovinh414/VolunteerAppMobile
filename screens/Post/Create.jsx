@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, Alert, FlatList, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
+import { View, Text, Image, KeyboardAvoidingView, FlatList, ScrollView, TouchableOpacity, TextInput, Modal, RefreshControl } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { styles } from './PostScreenStyle';
 import CustomButton from '../../components/CustomButton';
 import AsyncStoraged from '../../services/AsyncStoraged';
 import ImageAvata from "../../assets/hero2.jpg"
 import { COLORS, FONTS, SIZES, images } from '../../constants'
-import { addYears, format } from 'date-fns';
+import { addYears, format, addDays, parse } from 'date-fns';
 import axios from 'axios';
 import { MaterialIcons } from '@expo/vector-icons'
+import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker';
 import { RadioButton } from 'react-native-paper';
-import CustomInputDateTime from '../../components/CustomInputDateTime';
 import CustomAlert from '../../components/CustomAlert';
+import API_URL from '../../interfaces/config'
 
 const checkin = '../../assets/checkin.png';
 const addPicture = '../../assets/add-image.png';
@@ -24,13 +25,7 @@ const Create = () => {
     const [fullname, setFullname] = useState("");
     const [address, setAddress] = useState('');
     const [token, setToken] = useState();
-    const [exprirationDate, setExprirationDate] = useState('');
-    useEffect(() => {
-        const currentDate = new Date();
-        const nextYearDate = addYears(currentDate, 1);
-        const formattedDate = format(nextYearDate, 'dd-MM-yyyy'); // Định dạng ngày-tháng-năm
-        setExprirationDate(formattedDate);
-    }, []);
+    const [exprirationDate, setExprirationDate] = useState('Chọn ngày');
     const [scope, setScope] = useState('');
     const [content, setContent] = useState('');
     const [participants, setParticipants] = useState('');
@@ -38,6 +33,19 @@ const Create = () => {
     const [showWarning, setShowWarning] = useState(false);
     const [mess, setMess] = useState();
     const [icon, setIcon] = useState();
+
+
+    const [openStartDatePicker, setOpenStartDatePicker] = useState(false);
+    const currentDate = new Date();
+    function handleChangeStartDate(propDate) {
+        setStartedDate(propDate);
+    }
+
+    const handleOnPressStartDate = () => {
+        setOpenStartDatePicker(!openStartDatePicker);
+    };
+
+
 
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData();
@@ -80,8 +88,18 @@ const Create = () => {
         setContent(null);
         setScope(null);
     }
+    const [refreshing, setRefreshing] = React.useState(false);
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 2000);
+    }, []);
+
     const formData = new FormData();
     const uploadPost = async () => {
+        console.log(exprirationDate)
         selectedImages.forEach((images, index) => {
             formData.append('images', {
                 uri: images.uri,
@@ -103,7 +121,7 @@ const Create = () => {
             setButtonPress(false);
             return;
         }
-        axios.post(('http://172.20.10.2:3000/api/v1/post'), formData, {
+        axios.post((API_URL.API_URL + '/post'), formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': token,
@@ -130,202 +148,301 @@ const Create = () => {
 
     }
     return (
-        <ScrollView style={{ backgroundColor: '#fff' }}>
-            <CustomAlert
-                visible={showWarning}
-                mess={mess}
-                onRequestClose={() =>
-                    setShowWarning(false)
+        <KeyboardAvoidingView
+            style={{
+                flex: 1,
+                flexDirection: 'column',
+                justifyContent: 'center',
+                backgroundColor: '#fff',
+                paddingTop: 15,
+            }}
+            behavior="padding">
+            <ScrollView
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
-                onPress={() => setShowWarning(false)}
-                title={'ĐÓNG'}
-                icon={icon}
-            />
-            <View style={{ backgroundColor: '#fff', height: '100%' }}>
-                <View style={styles.post}>
-                    <View style={styles.header}>
-                        <View style={styles.profile}>
-                            <Image source={avatar ? { uri: avatar } : ImageAvata} style={styles.profile_img} />
-                            <View style={styles.profile_details}>
-                                <Text style={styles.author}>{fullname}</Text>
-                                <View style={styles.checkin}>
-                                    <Image source={require(checkin)} style={styles.checkinIcon} />
-                                    <Text style={styles.checkinText}>{address}</Text>
+            >
+                <CustomAlert
+                    visible={showWarning}
+                    mess={mess}
+                    onRequestClose={() =>
+                        setShowWarning(false)
+                    }
+                    onPress={() => setShowWarning(false)}
+                    title={'ĐÓNG'}
+                    icon={icon}
+                />
+                <View style={{ backgroundColor: '#fff', height: '100%' }}>
+                    <View style={styles.post}>
+                        <View style={styles.header}>
+                            <View style={styles.profile}>
+                                <Image source={avatar ? { uri: avatar } : ImageAvata} style={styles.profile_img} />
+                                <View style={styles.profile_details}>
+                                    <Text style={styles.author}>{fullname}</Text>
+                                    <View style={styles.checkin}>
+                                        <Image source={require(checkin)} style={styles.checkinIcon} />
+                                        <Text style={styles.checkinText}>{address}</Text>
+                                    </View>
                                 </View>
                             </View>
                         </View>
                     </View>
-                </View>
 
-                <View style={{ paddingHorizontal: 10 }}>
-                    <View style={styles.content}>
-                        <Text style={styles.headerInput}>Đối tượng</Text>
-                        <RadioButton.Group
-                            onValueChange={(scope) => setScope(scope)}
-                            value={scope}>
-                            <View style={{
-                                marginRight: 60,
-                                flexWrap: 'wrap',
-                                flexDirection: 'row',
-                                marginVertical: 5,
-                            }}>
+                    <View style={{ paddingHorizontal: 10 }}>
+                        <View style={styles.content}>
+                            <Text style={styles.headerInput}>Đối tượng</Text>
+                            <RadioButton.Group
+                                onValueChange={(scope) => setScope(scope)}
+                                value={scope}>
                                 <View style={{
+                                    marginRight: 60,
+                                    flexWrap: 'wrap',
                                     flexDirection: 'row',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    marginLeft: 10,
-                                    marginRight: 50,
-
+                                    marginVertical: 5,
                                 }}>
                                     <View style={{
-                                        borderColor: COLORS.primary, // Thay 'blue' bằng màu viền bạn muốn sử dụng
-                                        borderWidth: 2,
-                                        borderRadius: 50,
-                                        marginRight: 10,
-                                    }}><RadioButton value="public" color={COLORS.primary} /></View>
-                                    <Text style={{ fontSize: 16 }}>Công khai</Text>
-                                </View>
-                                <View style={{
-                                    flexDirection: 'row',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    marginLeft: 10,
-                                    marginRight: 40,
+                                        flexDirection: 'row',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        marginLeft: 10,
+                                        marginRight: 50,
 
-                                }}>
+                                    }}>
+                                        <View style={{
+                                            borderColor: COLORS.primary, // Thay 'blue' bằng màu viền bạn muốn sử dụng
+                                            borderWidth: 2,
+                                            borderRadius: 50,
+                                            marginRight: 10,
+                                        }}><RadioButton value="public" color={COLORS.primary} /></View>
+                                        <Text style={{ fontSize: 16 }}>Công khai</Text>
+                                    </View>
                                     <View style={{
-                                        borderColor: COLORS.primary, // Thay 'blue' bằng màu viền bạn muốn sử dụng
-                                        borderWidth: 2,
-                                        borderRadius: 50,
-                                        marginRight: 10,
-                                    }}><RadioButton value="private" color={COLORS.primary} /></View>
-                                    <Text style={{ fontSize: 16 }}>Riêng tư</Text>
+                                        flexDirection: 'row',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        marginLeft: 10,
+                                        marginRight: 40,
+
+                                    }}>
+                                        <View style={{
+                                            borderColor: COLORS.primary, // Thay 'blue' bằng màu viền bạn muốn sử dụng
+                                            borderWidth: 2,
+                                            borderRadius: 50,
+                                            marginRight: 10,
+                                        }}><RadioButton value="private" color={COLORS.primary} /></View>
+                                        <Text style={{ fontSize: 16 }}>Riêng tư</Text>
+                                    </View>
                                 </View>
-                            </View>
-                        </RadioButton.Group>
-                        <Text style={styles.headerInput}>Ngày hết hạn:</Text>
-                        <CustomInputDateTime
-                            _value={exprirationDate}
-                            onChangeText={(exprirationDate) => { (exprirationDate) }}
+                            </RadioButton.Group>
 
-                        />
-                        <Text style={styles.headerInput}>Nhập nội dung bài viết:</Text>
-                        <TextInput
-                            value={content}
-                            placeholderTextColor={'#696969'}
-                            onChangeText={(content) => {
-                                setContent(content);
-                            }}
-                            style={styles.content_detail}
-                            placeholder="Bạn muốn kêu gọi tình nguyện ở việc gì, ở đâu ..."
-                            multiline={true}
-                        />
-
-                        <Text style={styles.headerInput}>Số tình nguyện viên:</Text>
-                        <TextInput
-                            value={participants}
-                            placeholderTextColor={'#696969'}
-                            onChangeText={(participants) => {
-                                setParticipants(participants)
-                            }}
-                            style={styles.address}
-                            placeholder="100"
-                            multiline={true}
-                            keyboardType='numeric'
-                        />
-
-                    </View>
-                    <Text style={styles.headerInput}>Hình ảnh bài viết:</Text>
-                    <FlatList
-                        data={selectedImages}
-                        horizontal={true}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item, index }) => (
-                            <View
-                                key={item.id}
-                                style={{
-                                    position: 'relative',
-                                    flexDirection: 'column',
-                                    flex: 1,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
+                            <Text style={styles.headerInput}>Nhập nội dung bài viết:</Text>
+                            <TextInput
+                                value={content}
+                                placeholderTextColor={'#696969'}
+                                onChangeText={(content) => {
+                                    setContent(content);
                                 }}
-                            >
-                                <Image
-                                    source={{ uri: item.uri }}
-                                    style={{
-                                        paddingVertical: 4,
-                                        marginLeft: 12,
-                                        width: 80,
-                                        height: 80,
-                                        borderRadius: 12,
+                                style={styles.content_detail}
+                                placeholder="Bạn muốn kêu gọi tình nguyện ở việc gì, ở đâu ..."
+                                multiline={true}
+                            />
+                            <View
+                                style={{ flex: 1, flexDirection: 'row' }}>
+                                <Text style={styles.headerInput}>Số tình nguyện viên:</Text>
+                                <Text style={{
+                                    paddingVertical: 10,
+                                    marginHorizontal: 10,
+                                    fontSize: 18,
+                                    marginLeft: 30,
+                                }}>Ngày hết hạn:</Text>
+                            </View>
+                            <View
+                                style={{ flex: 1, flexDirection: 'row' }}>
+                                <TextInput
+                                    value={participants}
+                                    placeholderTextColor={'#696969'}
+                                    onChangeText={(participants) => {
+                                        setParticipants(participants)
                                     }}
+                                    style={styles.address}
+                                    placeholder="100"
+                                    keyboardType='numeric'
                                 />
-                                <TouchableOpacity
-                                    onPress={() => removeImage(item)}
+                                <KeyboardAvoidingView
+                                    behavior={Platform.OS == "ios" ? "padding" : ""}
                                     style={{
-                                        position: "absolute",
-                                        top: 0,
-                                        right: 0,
-                                        backgroundColor: '#C5C7C7',
-                                        borderRadius: 12, // Bo tròn góc
-                                        padding: 5,
+                                        width: "100%",
+                                        height: "100%",
+                                        backgroundColor: "#fff",
                                     }}
                                 >
-                                    <MaterialIcons
-                                        name="delete"
-                                        size={20}
-                                        color={COLORS.black}
-                                    />
-                                </TouchableOpacity>
+                                    <View >
+                                        <View>
+                                            <TouchableOpacity
+                                                style={styles.inputBtn}
+                                                onPress={handleOnPressStartDate}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        flex: 1,
+                                                        fontSize: 16,
+                                                        marginLeft: 10,
+                                                        paddingVertical: 13,
+                                                        width: 29,
+                                                        color: '#696969',
+                                                    }}>{exprirationDate}</Text>
+                                                <View style={styles.iconStyle}>
+                                                    <Image
+                                                        style={styles.icon}
+                                                        source={require('../../assets/calendar.png')} />
+                                                </View>
+                                            </TouchableOpacity>
+
+                                        </View>
+
+                                        {/* Create modal for date picker */}
+                                        <Modal
+                                            animationType="slide"
+                                            transparent={true}
+                                            visible={openStartDatePicker}
+                                        >
+                                            <View style={styles.centeredView}>
+                                                <View style={styles.modalView}>
+                                                    <DatePicker
+                                                        mode="calendar"
+                                                        minimumDate={format(addDays(currentDate, 1), 'yyyy-MM-dd')}
+                                                        maximumDate={format(addYears(currentDate, 1), 'yyyy-MM-dd')}
+                                                        onDateChanged={handleChangeStartDate}
+                                                        onSelectedChange={(date) =>
+                                                            setExprirationDate(format(parse(date, 'yyyy/MM/dd', new Date()), 'dd-MM-yyyy'))}
+                                                        options={{
+                                                            backgroundColor: "#FFF",
+                                                            textHeaderColor: COLORS.primary,
+                                                            textDefaultColor: COLORS.black,
+                                                            selectedTextColor: COLORS.black,
+                                                            mainColor: COLORS.primary,
+                                                            textSecondaryColor: "#FFFFFF",
+                                                            borderColor: "rgba(122, 146, 165, 0.1)",
+                                                        }}
+                                                    />
+
+                                                    <TouchableOpacity
+                                                        style={{
+                                                            padding: 10,
+                                                            borderRadius: 16,
+                                                            backgroundColor: COLORS.primary
+
+                                                        }}
+                                                        onPress={handleOnPressStartDate}>
+                                                        <Text style={{
+                                                            color: '#fff',
+                                                            fontSize: 16,
+                                                            fontFamily: 'regular',
+
+                                                        }}>Đóng</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        </Modal>
+                                    </View>
+                                </KeyboardAvoidingView>
+
 
 
                             </View>
-                        )}
-                    />
-                    <TouchableOpacity
-                        style={{
-                            flex: 1,
-                            flexDirection: 'row',
-                            paddingVertical: 10,
-                            marginHorizontal: 10,
 
-                        }}
-                        onPress={() => handleImageSelection()}
-                    >
-                        <Image
-                            source={require(addPicture)}
-                            style={{
-                                height: 70,
-                                width: 70,
-                                marginRight: 15,
-                            }}
-                        />
-                        <View style={{
-
-                            backgroundColor: '#C5C7C7',
-                            flex: 1,
-                            padding: 10,
-                            borderRadius: 5,
-                        }}>
-                            <Text style={{
-                                fontStyle: 'italic',
-                                fontSize: 18,
-                                color: '#8B0000',
-                                backgroundColor: 'transparent',
-
-                            }}>* (Ảnh chụp phải rõ nét, đầy đủ nơi tổ chức tình nguyện)</Text>
                         </View>
-                    </TouchableOpacity>
-                    <View style={{ justifyContent: 'center', alignItems: 'center', }}>
-                        <View style={{ width: 200, }}>
-                            <CustomButton title='ĐĂNG BÀI' onPress={() => uploadPost()} isLoading={ButtonPress} />
+                        <Text style={styles.headerInput}>Hình ảnh bài viết:</Text>
+                        <FlatList
+                            data={selectedImages}
+                            horizontal={true}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item, index }) => (
+                                <View
+                                    key={item.id}
+                                    style={{
+                                        position: 'relative',
+                                        flexDirection: 'column',
+                                        flex: 1,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Image
+                                        source={{ uri: item.uri }}
+                                        style={{
+                                            paddingVertical: 4,
+                                            marginLeft: 12,
+                                            width: 80,
+                                            height: 80,
+                                            borderRadius: 12,
+                                        }}
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() => removeImage(item)}
+                                        style={{
+                                            position: "absolute",
+                                            top: 0,
+                                            right: 0,
+                                            backgroundColor: '#C5C7C7',
+                                            borderRadius: 12, // Bo tròn góc
+                                            padding: 5,
+                                        }}
+                                    >
+                                        <MaterialIcons
+                                            name="delete"
+                                            size={20}
+                                            color={COLORS.black}
+                                        />
+                                    </TouchableOpacity>
+
+
+                                </View>
+                            )}
+                        />
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                flexDirection: 'row',
+                                paddingVertical: 10,
+                                marginHorizontal: 10,
+
+                            }}
+                            onPress={() => handleImageSelection()}
+                        >
+                            <Image
+                                source={require(addPicture)}
+                                style={{
+                                    height: 70,
+                                    width: 70,
+                                    marginRight: 15,
+                                }}
+                            />
+                            <View style={{
+
+                                backgroundColor: '#C5C7C7',
+                                flex: 1,
+                                padding: 10,
+                                borderRadius: 5,
+                            }}>
+                                <Text style={{
+                                    fontStyle: 'italic',
+                                    fontSize: 18,
+                                    color: '#8B0000',
+                                    backgroundColor: 'transparent',
+
+                                }}>* (Ảnh chụp phải rõ nét, đầy đủ nơi tổ chức tình nguyện)</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ justifyContent: 'center', alignItems: 'center', }}>
+                            <View style={{ width: 200, }}>
+                                <CustomButton title='ĐĂNG BÀI' onPress={() => uploadPost()} isLoading={ButtonPress} />
+                            </View>
                         </View>
                     </View>
                 </View>
-            </View>
-        </ScrollView>
-
+            </ScrollView >
+        </KeyboardAvoidingView>
     );
 }
 

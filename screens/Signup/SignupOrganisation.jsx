@@ -1,8 +1,8 @@
-import { View, Text, Image, Pressable, Modal, TouchableOpacity, Alert, ScrollView } from 'react-native'
+import { View, Text, Image, Pressable, Modal, TouchableOpacity, KeyboardAvoidingView, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from '../../constants/colors';
-import { Ionicons } from "@expo/vector-icons";
+import CustomInputPassword from '../../components/CustomInputPassword';
 import Checkbox from "expo-checkbox";
 import axios from 'axios';
 import Button from '../../components/Button';
@@ -11,13 +11,13 @@ import Auth from '../Login/Auth';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import CustomAlert from '../../components/CustomAlert';
-
+import API_URL from '../../interfaces/config'
 
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
 const warning = '../../assets/warning.png';
 const Signup = ({ navigation }) => {
-    const [isPasswordShown, setIsPasswordShown] = useState(false);
+    const [isPasswordShow, setIsPasswordShow] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
     const [type, setType] = useState("Organization");
     const [fullname, setFullname] = useState("");
@@ -92,7 +92,7 @@ const Signup = ({ navigation }) => {
 
             const res = await axios({
                 method: 'get',
-                url: 'http://192.168.9.14:3000/api/v1/checkUsername?username=' + _username,
+                url: API_URL.API_URL + '/checkUsername?username=' + _username,
             });
 
             if (res.data.status === 'SUCCESS') {
@@ -141,192 +141,186 @@ const Signup = ({ navigation }) => {
 
     }
     return (
-        <ScrollView style={{ flex: 1, backgroundColor: COLORS.white, paddingTop: 15, }}>
-            <CustomAlert
-                visible={showWarning}
-                mess={mess}
-                onRequestClose={() =>
-                    setShowWarning(false)
-                }
-                onPress={() => setShowWarning(false)}
-                title={'ĐÓNG'}
-                icon={icon}
-            />
-            <View style={{ flex: 1, marginHorizontal: 22 }}>
-                <View style={{ marginVertical: 22 }}>
-                    <Text style={{
-                        fontSize: 22,
-                        fontWeight: 'bold',
-                        marginVertical: 12,
-                        color: COLORS.black
-                    }}>
-                        Đăng Ký
-                    </Text>
+        <KeyboardAvoidingView
+            style={{
+                flex: 1,
+                flexDirection: 'column',
+                justifyContent: 'center',
+                backgroundColor: '#fff',
+                paddingTop: 15,
+            }}
+            behavior="padding">
+            <ScrollView >
+                <CustomAlert
+                    visible={showWarning}
+                    mess={mess}
+                    onRequestClose={() =>
+                        setShowWarning(false)
+                    }
+                    onPress={() => setShowWarning(false)}
+                    title={'ĐÓNG'}
+                    icon={icon}
+                />
+                <View style={{ flex: 1, marginHorizontal: 22 }}>
+                    <View style={{ marginVertical: 22 }}>
+                        <Text style={{
+                            fontSize: 22,
+                            fontWeight: 'bold',
+                            marginVertical: 12,
+                            color: COLORS.black
+                        }}>
+                            Đăng Ký
+                        </Text>
 
-                    <Text style={{
-                        fontSize: 16,
-                        color: COLORS.black
-                    }}>Vui lòng điền đầy đủ thông tin của tổ chức!</Text>
-                </View>
-                <View>
-                    <Text style={{
-                        fontSize: 16,
-                        fontWeight: 400,
-                        marginVertical: 8
-                    }}>Tên của tổ chức </Text>
-
-                    <CustomInput
-                        onChangeText={(fullname) => {
-                            setFullname(fullname);
-                            showFullNameError(fullname);
-                        }}
-                        placeholder='Nhập tên của tổ chức!'
-                        error={fullnameErrorMessage.length !== 0}
-                        errorMessage={fullnameErrorMessage}
-                    />
-                </View>
-                <View>
-                    <Text style={{
-                        fontSize: 16,
-                        fontWeight: 400,
-                        marginVertical: 8
-                    }}>Email</Text>
-
-                    <CustomInput
-                        onChangeText={(email) => {
-                            setEmail(email);
-                            showEmailMessage(email);
-                        }}
-                        placeholder='Nhập email của tổ chức'
-                        error={emailErrorMessage.length !== 0}
-                        errorMessage={emailErrorMessage}
-                    />
-                </View>
-                <View>
-                    <Text style={{
-                        fontSize: 16,
-                        fontWeight: 400,
-                        marginVertical: 8
-                    }}>Tài khoản</Text>
-
-                    <CustomInput
-                        onChangeText={(username) => {
-                            handleCheckUsername(username);
-                            setUsername(username);
-                            showUsernameErrorMessage(username);
-                        }}
-                        placeholder='Nhập tên đăng nhập của tổ chức'
-                        error={usernameErrorMessage.length !== 0}
-                        errorMessage={usernameErrorMessage}
-                    />
-                </View>
-                <View>
-                    <Text style={{
-                        fontSize: 16,
-                        fontWeight: 400,
-                        marginVertical: 8
-                    }}>Số điện thoại</Text>
-
-                    <CustomInput
-                        keyboardType={'numeric'}
-                        onChangeText={(phone) => {
-                            setPhone(phone);
-                            showPhonenumberErrorMessage(phone);
-                        }}
-                        placeholder='Nhập số điện thoại của tổ chức'
-                        error={phoneErrorMessage.length !== 0}
-                        errorMessage={phoneErrorMessage}
-                    />
-                </View>
-
-                <View style={{ marginBottom: 12 }}>
-                    <Text style={{
-                        fontSize: 16,
-                        fontWeight: 400,
-                        marginVertical: 8
-                    }}>Mật khẩu</Text>
-
-
-                    <CustomInput
-                        onChangeText={(password) => {
-                            setPassword(password);
-                            showPasswordMessage(password);
-                        }}
-                        placeholder='Nhập mật khẩu của tổ chức'
-                        error={passwordErrorMessage.length !== 0}
-                        errorMessage={passwordErrorMessage}
-                        secureTextEntry={isPasswordShown}
-
-                    />
-
-                    <TouchableOpacity
-                        onPress={() => setIsPasswordShown(!isPasswordShown)}
-                        style={{
-                            position: "absolute",
-                            right: 12
-                        }}
-                    >
-                        {
-                            isPasswordShown == true ? (
-                                <Ionicons name="eye-off" size={24} color={COLORS.black} />
-                            ) : (
-                                <Ionicons name="eye" size={24} color={COLORS.black} />
-                            )
-                        }
-
-                    </TouchableOpacity>
-                </View>
-
-                <View style={{
-                    flexDirection: 'row',
-                    marginVertical: 6,
-                    marginBottom: 18,
-                }}>
-                    <Checkbox
-                        style={{ marginRight: 8 }}
-                        value={isChecked}
-                        onValueChange={setIsChecked}
-                        color={isChecked ? COLORS.primary : undefined}
-                    />
-
-                    <Text>Tôi đồng ý với các Điều khoản và Điều kiện</Text>
-                </View>
-
-                <CustomButton onPress={() => handleSignup()} title='ĐĂNG KÝ' isLoading={ButtonPress} />
-
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
-                    <View
-                        style={{
-                            flex: 1,
-                            height: 1,
-                            backgroundColor: COLORS.grey,
-                            marginHorizontal: 10
-                        }}
-                    />
-
-                </View>
-
-
-
-                <View style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    marginVertical: 22
-                }}>
-                    <Text style={{ fontSize: 16, color: COLORS.black }}>Bạn đã có tài khoản</Text>
-                    <Pressable
-                        onPress={() => navigation.navigate("LoginScreen")}
-                    >
                         <Text style={{
                             fontSize: 16,
-                            color: COLORS.primary,
-                            fontWeight: "bold",
-                            marginLeft: 6
-                        }}>Đăng nhập</Text>
-                    </Pressable>
+                            color: COLORS.black
+                        }}>Vui lòng điền đầy đủ thông tin của tổ chức!</Text>
+                    </View>
+                    <View>
+                        <Text style={{
+                            fontSize: 16,
+                            fontWeight: 400,
+                            marginVertical: 8
+                        }}>Tên của tổ chức </Text>
+
+                        <CustomInput
+                            onChangeText={(fullname) => {
+                                setFullname(fullname);
+                                showFullNameError(fullname);
+                            }}
+                            placeholder='Nhập tên của tổ chức!'
+                            error={fullnameErrorMessage.length !== 0}
+                            errorMessage={fullnameErrorMessage}
+                        />
+                    </View>
+                    <View>
+                        <Text style={{
+                            fontSize: 16,
+                            fontWeight: 400,
+                            marginVertical: 8
+                        }}>Email</Text>
+
+                        <CustomInput
+                            onChangeText={(email) => {
+                                setEmail(email);
+                                showEmailMessage(email);
+                            }}
+                            placeholder='Nhập email của tổ chức'
+                            error={emailErrorMessage.length !== 0}
+                            errorMessage={emailErrorMessage}
+                        />
+                    </View>
+                    <View>
+                        <Text style={{
+                            fontSize: 16,
+                            fontWeight: 400,
+                            marginVertical: 8
+                        }}>Tài khoản</Text>
+
+                        <CustomInput
+                            onChangeText={(username) => {
+                                handleCheckUsername(username);
+                                setUsername(username);
+                                showUsernameErrorMessage(username);
+                            }}
+                            placeholder='Nhập tên đăng nhập của tổ chức'
+                            error={usernameErrorMessage.length !== 0}
+                            errorMessage={usernameErrorMessage}
+                        />
+                    </View>
+                    <View>
+                        <Text style={{
+                            fontSize: 16,
+                            fontWeight: 400,
+                            marginVertical: 8
+                        }}>Số điện thoại</Text>
+
+                        <CustomInput
+                            keyboardType={'numeric'}
+                            onChangeText={(phone) => {
+                                setPhone(phone);
+                                showPhonenumberErrorMessage(phone);
+                            }}
+                            placeholder='Nhập số điện thoại của tổ chức'
+                            error={phoneErrorMessage.length !== 0}
+                            errorMessage={phoneErrorMessage}
+                        />
+                    </View>
+
+                    <View style={{ marginBottom: 12 }}>
+                        <Text style={{
+                            fontSize: 16,
+                            fontWeight: 400,
+                            marginVertical: 8
+                        }}>Mật khẩu</Text>
+
+
+                        <CustomInputPassword
+                            onChangeText={(password) => {
+                                setPassword(password);
+                                showPasswordMessage(password);
+                            }}
+                            placeholder={'Nhập mật khẩu hiện tại'}
+                            error={passwordErrorMessage.length !== 0}
+                            errorMessage={passwordErrorMessage}
+                            secureTextEntry={isPasswordShow}
+                            isPasswordShow={isPasswordShow}
+                            onPress={() => isPasswordShow ? setIsPasswordShow(false) : setIsPasswordShow(true)}
+                        />
+                    </View>
+
+                    <View style={{
+                        flexDirection: 'row',
+                        marginVertical: 6,
+                        marginBottom: 18,
+                    }}>
+                        <Checkbox
+                            style={{ marginRight: 8 }}
+                            value={isChecked}
+                            onValueChange={setIsChecked}
+                            color={isChecked ? COLORS.primary : undefined}
+                        />
+
+                        <Text>Tôi đồng ý với các Điều khoản và Điều kiện</Text>
+                    </View>
+
+                    <CustomButton onPress={() => handleSignup()} title='ĐĂNG KÝ' isLoading={ButtonPress} />
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
+                        <View
+                            style={{
+                                flex: 1,
+                                height: 1,
+                                backgroundColor: COLORS.grey,
+                                marginHorizontal: 10
+                            }}
+                        />
+
+                    </View>
+
+
+
+                    <View style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        marginVertical: 22
+                    }}>
+                        <Text style={{ fontSize: 16, color: COLORS.black }}>Bạn đã có tài khoản</Text>
+                        <Pressable
+                            onPress={() => navigation.navigate("LoginScreen")}
+                        >
+                            <Text style={{
+                                fontSize: 16,
+                                color: COLORS.primary,
+                                fontWeight: "bold",
+                                marginLeft: 6
+                            }}>Đăng nhập</Text>
+                        </Pressable>
+                    </View>
                 </View>
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </KeyboardAvoidingView>
     )
 }
 

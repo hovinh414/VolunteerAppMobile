@@ -6,8 +6,8 @@ import {
   Image,
   Modal,
   SafeAreaView,
-  Alert,
-  Pressable
+  KeyboardAvoidingView,
+  RefreshControl
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
@@ -22,6 +22,8 @@ import CustomButton from "../../components/CustomButton";
 import CustomInputEdit from "../../components/CustomInputEdit";
 import CustomEditAddress from "../../components/CustomEditAddress";
 import CustomAlert from "../../components/CustomAlert";
+import API_URL from '../../interfaces/config'
+
 
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
@@ -58,6 +60,15 @@ const EditProfile = ({ navigation }) => {
   }
   useEffect(() => { getUserStored(); }, []);
 
+
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
   const showFullNameError = (_fullname) => {
     if (_fullname.length === 0) {
       setfullnameErrorMessage('Tên không được trống');
@@ -135,7 +146,7 @@ const EditProfile = ({ navigation }) => {
     }
 
     setButtonPress(true);
-    axios.put(('http://172.20.10.2:3000/api/v1/user?userid=' + userId), formData, {
+    axios.put((API_URL.API_URL + '/user?userid=' + userId), formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         'Authorization': token,
@@ -166,7 +177,7 @@ const EditProfile = ({ navigation }) => {
 
       const res = await axios({
         method: 'get',
-        url: 'http://172.20.10.2:3000/api/v1/checkUsername?username=' + _username,
+        url: API_URL.API_URL + '/checkUsername?username=' + _username,
       });
 
       if (res.data.status === 'SUCCESS') {
@@ -197,185 +208,190 @@ const EditProfile = ({ navigation }) => {
   };
   return (
 
-    <SafeAreaView
+    <KeyboardAvoidingView
       style={{
         flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
         backgroundColor: '#fff',
-
+        paddingTop:65,
       }}
-    >
-      <CustomEditAddress
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-        title={'CẬP NHẬT'}
-        close={() => setModalVisible(false)}
-      />
-      <CustomAlert
-        visible={showWarning}
-        mess={mess}
-        onRequestClose={() =>
-          setShowWarning(false)
-        }
-        onPress={() => setShowWarning(false)}
-        title={'ĐÓNG'}
-        icon={icon}
-      />
-
-      <View
-        style={{
-          marginHorizontal: 12,
-          flexDirection: "row",
-          justifyContent: "center",
-          paddingTop: 22,
-        }}
-      >
-        <TouchableOpacity
-
-          onPress={() => navigation.goBack()}
-          style={{
-            paddingTop: 19,
-            position: "absolute",
-            left: 0,
-          }}
-        >
-          <MaterialIcons
-            name="keyboard-arrow-left"
-            size={24}
-            color={COLORS.black}
-          />
-        </TouchableOpacity>
-
-        <Text style={{ ...FONTS.h3 }}>Chỉnh sửa thông tin</Text>
-      </View>
-
+      behavior="padding">
       <ScrollView
-        style={{ paddingHorizontal: 22 }}>
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <CustomEditAddress
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+          title={'CẬP NHẬT'}
+          close={() => setModalVisible(false)}
+        />
+        <CustomAlert
+          visible={showWarning}
+          mess={mess}
+          onRequestClose={() =>
+            setShowWarning(false)
+          }
+          onPress={() => setShowWarning(false)}
+          title={'ĐÓNG'}
+          icon={icon}
+        />
+
         <View
           style={{
-            alignItems: "center",
-            marginVertical: 22,
+            marginHorizontal: 12,
+            flexDirection: "row",
+            justifyContent: "center",
           }}
         >
-          <TouchableOpacity onPress={handleImageSelection}>
-            <Image
-              source={avatar ? { uri: avatar } : ImageAvata}
-              style={{
-                height: 140,
-                width: 140,
-                borderRadius: 85,
-              }}
-            />
+          <TouchableOpacity
 
-            <View
-              style={{
-                position: "absolute",
-                bottom: 0,
-                right: 58,
-                zIndex: 9999,
-              }}
-            >
-              <MaterialIcons
-                name="photo-camera"
-                size={24}
-                color={'black'}
+            onPress={() => navigation.goBack()}
+            style={{
+              position: "absolute",
+              left: 0,
+            }}
+          >
+            <MaterialIcons
+              name="keyboard-arrow-left"
+              size={24}
+              color={COLORS.black}
+            />
+          </TouchableOpacity>
+
+          <Text style={{ ...FONTS.h3 }}>Chỉnh sửa thông tin</Text>
+        </View>
+
+        <ScrollView
+          style={{ paddingHorizontal: 22 }}>
+          <View
+            style={{
+              alignItems: "center",
+              marginVertical: 22,
+            }}
+          >
+            <TouchableOpacity onPress={handleImageSelection}>
+              <Image
+                source={avatar ? { uri: avatar } : ImageAvata}
+                style={{
+                  height: 140,
+                  width: 140,
+                  borderRadius: 85,
+                }}
+              />
+
+              <View
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 58,
+                  zIndex: 9999,
+                }}
+              >
+                <MaterialIcons
+                  name="photo-camera"
+                  size={24}
+                  color={'black'}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <View>
+            <View>
+              <Text style={{
+                fontSize: 16,
+                fontWeight: 400,
+                marginVertical: 8
+              }}>Họ tên </Text>
+              <CustomInput
+                value={fullname}
+                onChangeText={(fullname) => {
+                  setFullname(fullname);
+                  showFullNameError(fullname);
+                }}
+                error={fullnameErrorMessage.length !== 0}
+                errorMessage={fullnameErrorMessage}
               />
             </View>
-          </TouchableOpacity>
-        </View>
+            <View>
+              <Text style={{
+                fontSize: 16,
+                fontWeight: 400,
+                marginVertical: 8
+              }}>Tên đăng nhập </Text>
+              <CustomInput
+                value={username}
+                onChangeText={(username) => {
+                  handleCheckUsername(username);
+                  setUsername(username);
+                  showUserNameError(username);
 
-        <View>
+                }}
+                error={usernameErrorMessage.length !== 0}
+                errorMessage={usernameErrorMessage}
+              />
+            </View>
+            <View>
+              <Text style={{
+                fontSize: 16,
+                fontWeight: 400,
+                marginVertical: 8
+              }}>Email</Text>
+
+              <CustomInput
+                onChangeText={(email) => {
+                  setEmail(email);
+                  showEmailMessage(email);
+                }}
+                value={email}
+                error={emailErrorMessage.length !== 0}
+                errorMessage={emailErrorMessage}
+              />
+            </View>
+            <View>
+              <Text style={{
+                fontSize: 16,
+                fontWeight: 400,
+                marginVertical: 8
+              }}>Số điện thoại</Text>
+
+              <CustomInput
+                keyboardType={'numeric'}
+                onChangeText={(phone) => {
+                  setPhone(phone);
+                  showPhonenumberErrorMessage(phone);
+                }}
+                value={phone}
+                error={phoneErrorMessage.length !== 0}
+                errorMessage={phoneErrorMessage}
+              />
+            </View>
+
+          </View>
+
           <View>
             <Text style={{
               fontSize: 16,
               fontWeight: 400,
               marginVertical: 8
-            }}>Họ tên </Text>
-            <CustomInput
-              value={fullname}
-              onChangeText={(fullname) => {
-                setFullname(fullname);
-                showFullNameError(fullname);
+            }}>Địa chỉ</Text>
+            <CustomInputEdit
+              onPress={() => setModalVisible(true)}
+              value={address}
+              onChangeText={(address) => {
+                setAddress(address);
               }}
-              error={fullnameErrorMessage.length !== 0}
-              errorMessage={fullnameErrorMessage}
-            />
-          </View>
-          <View>
-            <Text style={{
-              fontSize: 16,
-              fontWeight: 400,
-              marginVertical: 8
-            }}>Tên đăng nhập </Text>
-            <CustomInput
-              value={username}
-              onChangeText={(username) => {
-                handleCheckUsername(username);
-                setUsername(username);
-                showUserNameError(username);
-
-              }}
-              error={usernameErrorMessage.length !== 0}
-              errorMessage={usernameErrorMessage}
-            />
-          </View>
-          <View>
-            <Text style={{
-              fontSize: 16,
-              fontWeight: 400,
-              marginVertical: 8
-            }}>Email</Text>
-
-            <CustomInput
-              onChangeText={(email) => {
-                setEmail(email);
-                showEmailMessage(email);
-              }}
-              value={email}
-              error={emailErrorMessage.length !== 0}
-              errorMessage={emailErrorMessage}
-            />
-          </View>
-          <View>
-            <Text style={{
-              fontSize: 16,
-              fontWeight: 400,
-              marginVertical: 8
-            }}>Số điện thoại</Text>
-
-            <CustomInput
-              keyboardType={'numeric'}
-              onChangeText={(phone) => {
-                setPhone(phone);
-                showPhonenumberErrorMessage(phone);
-              }}
-              value={phone}
-              error={phoneErrorMessage.length !== 0}
-              errorMessage={phoneErrorMessage}
             />
           </View>
 
-        </View>
+          <CustomButton onPress={() => handleUpdateUser()} title='THAY ĐỔI THÔNG TIN' isLoading={ButtonPress} />
+        </ScrollView>
 
-        <View>
-          <Text style={{
-            fontSize: 16,
-            fontWeight: 400,
-            marginVertical: 8
-          }}>Địa chỉ</Text>
-          <CustomInputEdit
-            onPress={() => setModalVisible(true)}
-            value={address}
-            onChangeText={(address) => {
-              setAddress(address);
-            }}
-          />
-        </View>
-
-        <CustomButton onPress={() => handleUpdateUser()} title='THAY ĐỔI THÔNG TIN' isLoading={ButtonPress} />
       </ScrollView>
-
-    </SafeAreaView>
-
+    </KeyboardAvoidingView>
   );
 };
 

@@ -12,6 +12,7 @@ import ImageUpload from "../../assets/add-image.png"
 import axios from 'axios';
 import CustomButton from '../../components/CustomButton'
 import CustomAlert from '../../components/CustomAlert'
+import API_URL from '../../interfaces/config'
 
 const PostsRoute = () => (
     <View
@@ -160,7 +161,7 @@ const VerifyRoute = ({ navigation }) => {
             return;
         }
 
-        axios.put(('http://172.20.10.2:3000/api/v1/org/verify?orgId=' + orgId), formData, {
+        axios.put((API_URL.API_URL + '/org/verify?orgId=' + orgId), formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': token,
@@ -427,7 +428,7 @@ const ProfileOrganisation = ({ navigation }) => {
 
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Địa chỉ: </Text>
-                        <Text style={{ ...FONTS.body4, color: COLORS.blue, paddingRight:150, }}>
+                        <Text style={{ ...FONTS.body4, color: COLORS.blue, paddingRight:100, }}>
                             {address}
                         </Text>
                     </View>

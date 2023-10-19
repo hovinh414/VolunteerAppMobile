@@ -4,24 +4,24 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from '../../constants/colors';
 import { Ionicons } from "@expo/vector-icons";
 import Checkbox from "expo-checkbox"
-import Button from '../../components/Button';
+import CustomInputPassword from '../../components/CustomInputPassword';
 import axios from 'axios';
 import CustomInput from '../../components/CustomInput';
 import Auth from './Auth';
 import AsyncStoraged from '../../services/AsyncStoraged';
 import CustomButton from '../../components/CustomButton';
 import CustomAlert from '../../components/CustomAlert';
+import API_URL from '../../interfaces/config'
 
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
 const warning = '../../assets/warning.png';
 const LoginScreen = ({ navigation }) => {
-    const [isPasswordShown, setIsPasswordShown] = useState(true);
+    const [isPasswordShow, setIsPasswordShow] = useState(true);
     const [isChecked, setIsChecked] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-    const [token, setToken] = useState("");
     const [usernameErrorMessage, setusernameErrorMessage] = useState('');
     const [showWarning, setShowWarning] = useState(false);
     const [mess, setMess] = useState();
@@ -65,7 +65,7 @@ const LoginScreen = ({ navigation }) => {
             }
             const res = await axios({
                 method: 'post',
-                url: 'http://172.20.10.2:3000/api/v1/login',
+                url: API_URL.API_URL + '/login',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Accept': 'application/json'
@@ -156,36 +156,18 @@ const LoginScreen = ({ navigation }) => {
                     }}>Mật khẩu</Text>
 
 
-                    <CustomInput
+                    <CustomInputPassword
                         onChangeText={(password) => {
                             setPassword(password);
                             showPasswordMessage(password);
                         }}
-                        placeholder='Nhập mật khẩu của bạn'
+                        placeholder={'Nhập mật khẩu hiện tại'}
                         error={passwordErrorMessage.length !== 0}
                         errorMessage={passwordErrorMessage}
-                        secureTextEntry={isPasswordShown}
-
+                        secureTextEntry={isPasswordShow}
+                        isPasswordShow={isPasswordShow}
+                        onPress={() => isPasswordShow ? setIsPasswordShow(false) : setIsPasswordShow(true)}
                     />
-                    <TouchableOpacity
-                        onPress={() => setIsPasswordShown(!isPasswordShown)}
-                        style={{
-                            position: "absolute",
-                            right: 12
-                        }}
-                    >
-                        {
-                            isPasswordShown == true ? (
-                                <Ionicons name="eye-off" size={24} color={COLORS.black} />
-                            ) : (
-                                <Ionicons name="eye" size={24} color={COLORS.black} />
-                            )
-                        }
-
-                    </TouchableOpacity>
-
-
-
                 </View>
 
                 <View style={{
