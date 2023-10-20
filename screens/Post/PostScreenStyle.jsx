@@ -153,7 +153,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: 10,
         borderWidth: 1.5,
-        marginLeft: 30,
+        marginLeft: 50,
         borderColor: COLORS.primary,
     },
     centeredView: {
@@ -180,7 +180,7 @@ export const styles = StyleSheet.create({
             width: 0,
             height: 2,
         },
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.75,
         shadowRadius: 4,
         elevation: 5,
     },

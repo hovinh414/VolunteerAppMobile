@@ -14,6 +14,8 @@ import EditProfile from './screens/Profile/EditProfile'
 import Settings from './screens/Profile/Settings'
 import LoginScreen from './screens/Login/LoginScreen'
 import ChangePassword from './screens/Profile/ChangePassword'
+import ChangeAddress from './screens/Profile/ChangeAddress'
+
 const Stack = createNativeStackNavigator()
 
 SplashScreen.preventAutoHideAsync()
@@ -103,6 +105,16 @@ export default function App() {
                         component={ChangePassword}
                         options={{
                             headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ChangeAddress"
+                        component={ChangeAddress}
+                        options={{
+                            headerShown: false,
+                            presentation: 'modal',
+                            animationTypeForReplace: 'push',
+                            animation: 'slide_from_bottom',
                         }}
                     />
                 </Stack.Navigator>

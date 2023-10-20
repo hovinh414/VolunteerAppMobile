@@ -253,7 +253,7 @@ const Create = () => {
                                     paddingVertical: 10,
                                     marginHorizontal: 10,
                                     fontSize: 18,
-                                    marginLeft: 30,
+                                    marginLeft: 50,
                                 }}>Ngày hết hạn:</Text>
                             </View>
                             <View
@@ -319,7 +319,7 @@ const Create = () => {
                                                             backgroundColor: "#FFF",
                                                             textHeaderColor: COLORS.primary,
                                                             textDefaultColor: COLORS.black,
-                                                            selectedTextColor: COLORS.black,
+                                                            selectedTextColor: '#fff',
                                                             mainColor: COLORS.primary,
                                                             textSecondaryColor: "#FFFFFF",
                                                             borderColor: "rgba(122, 146, 165, 0.1)",

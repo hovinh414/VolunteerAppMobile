@@ -418,7 +418,7 @@ const ProfileOrganisation = ({ navigation }) => {
                         marginVertical: 12,
                     }}
                 >
-                    <Text style={{ ...FONTS.body4 }}>{fullname}</Text>
+                    <Text style={{ ...FONTS.body3 }}>{fullname}</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Email: </Text>
                         <Text style={{ ...FONTS.body4, color: COLORS.blue }}>

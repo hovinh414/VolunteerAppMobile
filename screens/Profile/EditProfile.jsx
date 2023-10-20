@@ -44,7 +44,6 @@ const EditProfile = ({ navigation }) => {
   const [token, setToken] = useState();
   const [ButtonPress, setButtonPress] = useState('');
   const [showWarning, setShowWarning] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [mess, setMess] = useState();
   const [icon, setIcon] = useState();
 
@@ -156,14 +155,14 @@ const EditProfile = ({ navigation }) => {
         if (response.data.status === 'SUCCESS') {
           AsyncStoraged.storeData(response.data.data.userResultForUpdate);
           setMess('Thay đổi thông tin thành công!');
-          setIcon('SUCCESS');
-          setShowWarning(true);
+          setIcon('SUCCESS');    
           setButtonPress(false);
-          navigation.push('BottomTabNavigation');
-
+          navigation.push('BottomTabNavigation' );
+          setShowWarning(true);
         }
       })
       .catch((error) => {
+       
         setMess('Thay đổi thông tin thất bại!');
         setIcon('FAIL');
         setShowWarning(true);
@@ -222,12 +221,6 @@ const EditProfile = ({ navigation }) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <CustomEditAddress
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-          title={'CẬP NHẬT'}
-          close={() => setModalVisible(false)}
-        />
         <CustomAlert
           visible={showWarning}
           mess={mess}
@@ -379,7 +372,7 @@ const EditProfile = ({ navigation }) => {
               marginVertical: 8
             }}>Địa chỉ</Text>
             <CustomInputEdit
-              onPress={() => setModalVisible(true)}
+              onPress={() => navigation.navigate('ChangeAddress')}
               value={address}
               onChangeText={(address) => {
                 setAddress(address);

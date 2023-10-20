@@ -74,8 +74,7 @@ const ChangePassword = ({ navigation }) => {
                 navigation.push("BottomTabNavigation");
 
             }
-        } catch (error) {
-            alert(error);
+        } catch (error){
             setMess('Thay đổi mật khẩu thất bại!');
             setIcon('FAIL');
             setShowWarning(true);

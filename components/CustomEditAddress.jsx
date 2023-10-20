@@ -341,7 +341,7 @@ const CustomEditAddress = ({ visible, close, onRequestClose, onPress, title }) =
               <View style={{
                 marginTop: 15,
               }}>
-                <CustomButton onPress={() => handleUpdateAddress()} title='CẬP NHẬT ĐỊA CHỈ' isLoading={ButtonPress} />
+                <CustomButton onPress={() => (handleUpdateAddress(),close)} title='CẬP NHẬT ĐỊA CHỈ' isLoading={ButtonPress} />
               </View>
             </View>
 
