@@ -68,6 +68,7 @@ const Create = () => {
             quality: 1,
         });
         delete result.cancelled;
+        console.log( result.assets)
         if (!result.canceled) {
 
             if (!selectedImages) {
@@ -356,10 +357,8 @@ const Create = () => {
                         <FlatList
                             data={selectedImages}
                             horizontal={true}
-                            keyExtractor={(item) => item.id}
                             renderItem={({ item, index }) => (
                                 <View
-                                    key={item.id}
                                     style={{
                                         position: 'relative',
                                         flexDirection: 'column',
@@ -367,6 +366,7 @@ const Create = () => {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                     }}
+                                    key={index}
                                 >
                                     <Image
                                         source={{ uri: item.uri }}

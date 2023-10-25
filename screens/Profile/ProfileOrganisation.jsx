@@ -204,10 +204,9 @@ const VerifyRoute = ({ navigation }) => {
             <FlatList
                 data={selectedImages}
                 horizontal={true}
-                keyExtractor={(item) => item.id}
                 renderItem={({ item, index }) => (
                     <View
-                        key={item.id}
+                        key={index}
                         style={{
                             position: 'relative',
                             flexDirection: 'column',
