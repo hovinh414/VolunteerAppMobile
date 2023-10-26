@@ -15,6 +15,9 @@ import Settings from './screens/Profile/Settings'
 import LoginScreen from './screens/Login/LoginScreen'
 import ChangePassword from './screens/Profile/ChangePassword'
 import ChangeAddress from './screens/Profile/ChangeAddress'
+import Chat from './screens/Chat/Chat'
+import ChatDetail from './screens/Chat/ChatDetail'
+
 
 const Stack = createNativeStackNavigator()
 
@@ -103,6 +106,20 @@ export default function App() {
                     <Stack.Screen
                         name="ChangePassword"
                         component={ChangePassword}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="Chat"
+                        component={Chat}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ChatDetail"
+                        component={ChatDetail}
                         options={{
                             headerShown: false,
                         }}

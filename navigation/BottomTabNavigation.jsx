@@ -8,7 +8,7 @@ import {
 } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { COLORS } from '../constants'
-import { Chat, Feed, LoginScreen, Notifications, Profile, Settings } from '../screens'
+import { ChatTest, Feed, LoginScreen, Notifications, Profile, Settings } from '../screens'
 import Create from '../screens/Post/Create'
 import { LinearGradient } from 'expo-linear-gradient'
 import AsyncStoraged from '../services/AsyncStoraged'
@@ -68,8 +68,8 @@ const BottomTabNavigation = () => {
                 }}
             />
             <Tab.Screen
-                name="Chat"
-                component={Chat}
+                name="ChatTest"
+                component={ChatTest}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return (

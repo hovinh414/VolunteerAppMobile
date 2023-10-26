@@ -6,9 +6,9 @@ import {
     FlatList,
     Image,
     TextInput,
-    Actions
+    Actions,
 } from 'react-native'
-import * as Progress from 'react-native-progress';
+import * as Progress from 'react-native-progress'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../constants'
@@ -23,11 +23,28 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { friends, posts } from '../constants/data'
 import { SliderBox } from 'react-native-image-slider-box'
 
-const post1 = [images.friend1, images.friend2, images.friend3, images.friend4, images.friend5]
-const post2 = [images.user1, images.user2, images.user3, images.user4, images.user5]
-const post3 = [images.post1, images.post2, images.post3, images.post4, images.post5]
-const Feed = () => {
-
+const post1 = [
+    images.friend1,
+    images.friend2,
+    images.friend3,
+    images.friend4,
+    images.friend5,
+]   
+const post2 = [
+    images.user1,
+    images.user2,
+    images.user3,
+    images.user4,
+    images.user5,
+]
+const post3 = [
+    images.post1,
+    images.post2,
+    images.post3,
+    images.post4,
+    images.post5,
+]
+const Feed = ({navigation}) => {
     function renderHeader() {
         return (
             <View
@@ -90,27 +107,35 @@ const Feed = () => {
                         />
                     </TouchableOpacity>
 
-                    <LinearGradient
-                        colors={['#D4145A', '#FBB03B']}
-                        style={{
-                            height: 50,
-                            width: 50,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            shadowColor: '#18274B',
-                            shadowOffset: {
-                                width: 0,
-                                height: 4.5,
-                            },
-                            shadowOpacity: 0.12,
-                            shadowRadius: 6.5,
-                            elevation: 2,
-                            borderRadius: 22,
-                            marginLeft: 12,
-                        }}
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Chat')}
                     >
-                        <Feather name="plus" size={24} color={COLORS.white} />
-                    </LinearGradient>
+                        <LinearGradient
+                            colors={['#D4145A', '#FBB03B']}
+                            style={{
+                                height: 50,
+                                width: 50,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                shadowColor: '#18274B',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 4.5,
+                                },
+                                shadowOpacity: 0.12,
+                                shadowRadius: 6.5,
+                                elevation: 2,
+                                borderRadius: 22,
+                                marginLeft: 12,
+                            }}
+                        >
+                            <Feather
+                                name="message-circle"
+                                size={24}
+                                color={COLORS.white}
+                            />
+                        </LinearGradient>
+                    </TouchableOpacity>
                 </View>
             </View>
         )
@@ -118,14 +143,14 @@ const Feed = () => {
 
     function renderSuggestionsContainer() {
         return (
-            <View style={{
-                paddingBottom: 5,
-                borderBottomWidth: 1,
-                borderBottomColor: '#fff',
-            }}>
-                <View style={{ marginVertical: 8 }}>
-
-                </View>
+            <View
+                style={{
+                    paddingBottom: 5,
+                    borderBottomWidth: 1,
+                    borderBottomColor: '#fff',
+                }}
+            >
+                <View style={{ marginVertical: 8 }}></View>
 
                 <FlatList
                     horizontal={true}
@@ -148,7 +173,6 @@ const Feed = () => {
                                     marginLeft: 12,
                                 }}
                             >
-
                                 <Image
                                     source={item.image}
                                     resizeMode="contain"
@@ -162,7 +186,6 @@ const Feed = () => {
                                     }}
                                 />
                             </TouchableOpacity>
-
                         </View>
                     )}
                 />
@@ -215,7 +238,6 @@ const Feed = () => {
                             >
                                 Hồ Thành Vinh
                             </Text>
-
                         </View>
                     </View>
 
@@ -225,8 +247,7 @@ const Feed = () => {
                         color={COLORS.black}
                     />
                 </View>
-                <View
-                >
+                <View>
                     <SliderBox
                         images={post1}
                         paginationBoxVerticalPadding={5}
@@ -272,11 +293,20 @@ const Feed = () => {
                         Hello cả nhà
                     </Text>
                     <Text style={{ ...FONTS.body4 }}>
-                        Ủng hộ đồng bào lũ lụt miền trung qua momo 0967626483 nha.
+                        Ủng hộ đồng bào lũ lụt miền trung qua momo 0967626483
+                        nha.
                     </Text>
                 </View>
-                <View style={{ paddingLeft: 10, paddingBottom: 5, }}>
-                    <Progress.Bar progress={36 / 100} color='#FF493C' height={8} width={SIZES.width - 20} unfilledColor='#F5F5F5' borderColor='#F5F5F5' borderRadius={25} />
+                <View style={{ paddingLeft: 10, paddingBottom: 5 }}>
+                    <Progress.Bar
+                        progress={36 / 100}
+                        color="#FF493C"
+                        height={8}
+                        width={SIZES.width - 20}
+                        unfilledColor="#F5F5F5"
+                        borderColor="#F5F5F5"
+                        borderRadius={25}
+                    />
                 </View>
                 <View
                     style={{
@@ -475,7 +505,6 @@ const Feed = () => {
                             >
                                 Lê Đỗ Thành Đạt
                             </Text>
-
                         </View>
                     </View>
 
@@ -507,12 +536,10 @@ const Feed = () => {
                             />
                         </View>
                     } /> */}
-                <View
-                >
+                <View>
                     <SliderBox
                         images={post2}
                         paginationBoxVerticalPadding={5}
-
                         activeOpacity={1}
                         dotColor={COLORS.primary}
                         inactiveDotColor={COLORS.white}
@@ -531,12 +558,18 @@ const Feed = () => {
                     <Text style={{ ...FONTS.body4, fontWeight: 'bold' }}>
                         Tao là Đạt
                     </Text>
-                    <Text style={{ ...FONTS.body4 }}>
-                        Hehehehehehe
-                    </Text>
+                    <Text style={{ ...FONTS.body4 }}>Hehehehehehe</Text>
                 </View>
-                <View style={{ paddingLeft: 10, paddingBottom: 5, }}>
-                    <Progress.Bar progress={100 / 150} color='#FF493C' height={8} width={SIZES.width - 20} unfilledColor='#F5F5F5' borderColor='#F5F5F5' borderRadius={25} />
+                <View style={{ paddingLeft: 10, paddingBottom: 5 }}>
+                    <Progress.Bar
+                        progress={100 / 150}
+                        color="#FF493C"
+                        height={8}
+                        width={SIZES.width - 20}
+                        unfilledColor="#F5F5F5"
+                        borderColor="#F5F5F5"
+                        borderRadius={25}
+                    />
                 </View>
                 <View
                     style={{
@@ -735,7 +768,6 @@ const Feed = () => {
                             >
                                 Nguyễn Nguyên Trung
                             </Text>
-
                         </View>
                     </View>
 
@@ -767,12 +799,10 @@ const Feed = () => {
                             />
                         </View>
                     } /> */}
-                <View
-                >
+                <View>
                     <SliderBox
                         images={post3}
                         paginationBoxVerticalPadding={5}
-
                         activeOpacity={1}
                         dotColor={COLORS.primary}
                         inactiveDotColor={COLORS.white}
@@ -795,8 +825,16 @@ const Feed = () => {
                         Bị đau mắt đỏ vào ngày 25/09/2023
                     </Text>
                 </View>
-                <View style={{ paddingLeft: 10, paddingBottom: 5, }}>
-                    <Progress.Bar progress={12 / 50} color='#FF493C' height={8} width={SIZES.width - 20} unfilledColor='#F5F5F5' borderColor='#F5F5F5' borderRadius={25} />
+                <View style={{ paddingLeft: 10, paddingBottom: 5 }}>
+                    <Progress.Bar
+                        progress={12 / 50}
+                        color="#FF493C"
+                        height={8}
+                        width={SIZES.width - 20}
+                        unfilledColor="#F5F5F5"
+                        borderColor="#F5F5F5"
+                        borderRadius={25}
+                    />
                 </View>
                 <View
                     style={{
@@ -951,7 +989,6 @@ const Feed = () => {
         )
     }
     return (
-
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
             <View style={{ flex: 1 }}>
                 {renderHeader()}
