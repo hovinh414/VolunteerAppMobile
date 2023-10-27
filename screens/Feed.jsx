@@ -131,7 +131,7 @@ const Feed = ({navigation}) => {
                         >
                             <Feather
                                 name="message-circle"
-                                size={24}
+                                size={30}
                                 color={COLORS.white}
                             />
                         </LinearGradient>

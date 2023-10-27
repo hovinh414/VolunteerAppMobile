@@ -22,7 +22,11 @@ import { COLORS, FONTS, images } from '../../constants'
 import { Camera } from 'expo-camera'
 import { shareAsync } from 'expo-sharing'
 import * as MediaLibrary from 'expo-media-library'
+import * as DocumentPicker from 'expo-document-picker'
+import { styles } from './ChatDetailStyle'
 
+const file = '../../assets/file.png'
+const video = '../../assets/video.png'
 function ChatDetail({ navigation }) {
     const [message, setMessage] = useState('')
     const [messages, setMessages] = useState([])
@@ -31,6 +35,7 @@ function ChatDetail({ navigation }) {
     const [hasCameraPermission, setHasCameraPermission] = useState()
     const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState()
     const [photo, setPhoto] = useState([])
+    const [selectedFiles, setSelectedFiles] = useState([])
 
     useEffect(() => {
         ;(async () => {
@@ -101,12 +106,27 @@ function ChatDetail({ navigation }) {
             }
         }
     }
-    function removeImage(item) {
+    function removeItems(item) {
         const newList = selectedImages.filter((listItem) => listItem !== item)
         setSelectedImage(newList)
         const newPhoto = photo.filter((listItem) => listItem !== item)
         setPhoto(newPhoto)
+        const file = selectedFiles.filter((listItem) => listItem !== item)
+        setSelectedFiles(file)
     }
+    const pickDocument = async () => {
+        const result = await DocumentPicker.getDocumentAsync()
+        console.log(result)
+        if (!result.canceled) {
+            if (!selectedFiles) {
+                setSelectedFiles(result.assets)
+            } else {
+                setSelectedFiles([...selectedFiles, ...result.assets])
+            }
+        } else {
+        }
+    }
+
     return (
         <KeyboardAvoidingView
             KeyboardAvoidingView
@@ -151,48 +171,19 @@ function ChatDetail({ navigation }) {
             />
 
             <View style={styles.viewIcon}>
-                <View
-                    style={{
-                        marginTop: 12,
-                        marginLeft:20,
-                        marginRight:20,
-                        marginBottom: 12,
-                    }}
-                >
+                <View style={styles.viewListImage}>
                     <FlatList
                         data={[...selectedImages, ...photo]}
                         horizontal={true}
                         renderItem={({ item, index }) => (
-                            <View
-                                style={{
-                                    position: 'relative',
-                                    flexDirection: 'column',
-                                    flex: 1,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                                key={index}
-                            >
+                            <View style={styles.viewImage} key={index}>
                                 <Image
                                     source={{ uri: item.uri }}
-                                    style={{
-                                        paddingVertical: 4,
-                                        marginLeft: 12,
-                                        width: 80,
-                                        height: 80,
-                                        borderRadius: 12,
-                                    }}
+                                    style={styles.image}
                                 />
                                 <TouchableOpacity
-                                    onPress={() => removeImage(item)}
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        right: 0,
-                                        backgroundColor: '#C5C7C7',
-                                        borderRadius: 12, // Bo tròn góc
-                                        padding: 5,
-                                    }}
+                                    onPress={() => removeItems(item)}
+                                    style={styles.btnRemoveImage}
                                 >
                                     <MaterialIcons
                                         name="delete"
@@ -201,6 +192,51 @@ function ChatDetail({ navigation }) {
                                     />
                                 </TouchableOpacity>
                             </View>
+                        )}
+                    />
+
+                    <FlatList
+                        data={selectedFiles}
+                        horizontal={true}
+                        renderItem={({ item, index }) => (
+                            <TouchableOpacity
+                                style={styles.viewFile}
+                                key={index}
+                            >
+                                <View style={styles.file}>
+                                    {item.mimeType === 'video/mp4' ? (
+                                        <Image
+                                            source={require(video)}
+                                            style={styles.fileIcon}
+                                        />
+                                    ) : item.mimeType === 'image/jpeg' ?
+                                     (
+                                        <Image
+                                            source={{ uri: item.uri }}
+                                            style={styles.fileIcon}
+                                        />
+                                    ): (
+                                        <Image
+                                        source={require(file)}
+                                        style={styles.fileIcon}
+                                    />
+                                    )
+                                    }
+                                    <Text style={styles.fileName}>
+                                        {item.name}
+                                    </Text>
+                                </View>
+                                <TouchableOpacity
+                                    onPress={() => removeItems(item)}
+                                    style={styles.btnRemoveFile}
+                                >
+                                    <MaterialIcons
+                                        name="delete"
+                                        size={15}
+                                        color={COLORS.black}
+                                    />
+                                </TouchableOpacity>
+                            </TouchableOpacity>
                         )}
                     />
                 </View>
@@ -233,7 +269,9 @@ function ChatDetail({ navigation }) {
                             onChangeText={(text) => setMessage(text)}
                         />
 
-                        {message || selectedImages.length !== 0 || photo.length !== 0 ? (
+                        {message ||
+                        selectedImages.length !== 0 ||
+                        photo.length !== 0 ? (
                             <TouchableOpacity onPress={handleSendMessage}>
                                 <FontAwesome
                                     name="send"
@@ -258,7 +296,7 @@ function ChatDetail({ navigation }) {
                                         style={{ marginRight: 12 }} // Tạo khoảng cách giữa icon và TextInput
                                     />
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={handleSendMessage}>
+                                <TouchableOpacity onPress={pickDocument}>
                                     <Feather
                                         name="paperclip"
                                         size={25}
@@ -273,82 +311,6 @@ function ChatDetail({ navigation }) {
             </View>
         </KeyboardAvoidingView>
     )
-}
-
-const styles = {
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        paddingTop: 51,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-        marginBottom: 10,
-        paddingRight: 12,
-        paddingLeft: 12,
-    },
-    avatarDetail: {
-        marginLeft: 10,
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-    },
-    viewIcon: {
-        borderTopWidth: 0.5,
-        borderColor: '#ccc',
-        flexDirection: 'column',
-        marginBottom: 20,
-    },
-    myMessage: {
-        backgroundColor: COLORS.primary,
-        alignSelf: 'flex-end',
-        margin: 5,
-        padding: 10,
-        borderRadius: 20,
-        marginRight: 15,
-    },
-    theirMessage: {
-        backgroundColor: '#D3D3D3',
-        alignSelf: 'flex-start',
-        margin: 5,
-        padding: 10,
-        borderRadius: 20,
-        marginLeft: 15,
-    },
-    messageMyText: {
-        color: '#fff',
-        fontSize: 16,
-    },
-    messageTheirText: {
-        color: '#000',
-        fontSize: 16,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 55,
-        marginBottom: 12,
-        marginLeft: 12,
-        padding: 8,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 20,
-        fontSize: 16,
-        
-    },
-    input: {
-        flex: 1,
-        height: 25,
-        margin: 5,
-    },
-    sendButton: {
-        color: COLORS.primary,
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginLeft: 10,
-    },
 }
 
 export default ChatDetail
