@@ -26,7 +26,7 @@ const Create = () => {
     const [address, setAddress] = useState('');
     const [token, setToken] = useState();
     const [exprirationDate, setExprirationDate] = useState('Chọn ngày');
-    const [scope, setScope] = useState('');
+    const [scope, setScope] = useState('public');
     const [content, setContent] = useState('');
     const [participants, setParticipants] = useState('');
     const [ButtonPress, setButtonPress] = useState('');
@@ -191,50 +191,6 @@ const Create = () => {
 
                     <View style={{ paddingHorizontal: 10 }}>
                         <View style={styles.content}>
-                            <Text style={styles.headerInput}>Đối tượng</Text>
-                            <RadioButton.Group
-                                onValueChange={(scope) => setScope(scope)}
-                                value={scope}>
-                                <View style={{
-                                    marginRight: 60,
-                                    flexWrap: 'wrap',
-                                    flexDirection: 'row',
-                                    marginVertical: 5,
-                                }}>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginLeft: 10,
-                                        marginRight: 50,
-
-                                    }}>
-                                        <View style={{
-                                            borderColor: COLORS.primary, // Thay 'blue' bằng màu viền bạn muốn sử dụng
-                                            borderWidth: 2,
-                                            borderRadius: 50,
-                                            marginRight: 10,
-                                        }}><RadioButton value="public" color={COLORS.primary} /></View>
-                                        <Text style={{ fontSize: 16 }}>Công khai</Text>
-                                    </View>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginLeft: 10,
-                                        marginRight: 40,
-
-                                    }}>
-                                        <View style={{
-                                            borderColor: COLORS.primary, // Thay 'blue' bằng màu viền bạn muốn sử dụng
-                                            borderWidth: 2,
-                                            borderRadius: 50,
-                                            marginRight: 10,
-                                        }}><RadioButton value="private" color={COLORS.primary} /></View>
-                                        <Text style={{ fontSize: 16 }}>Riêng tư</Text>
-                                    </View>
-                                </View>
-                            </RadioButton.Group>
 
                             <Text style={styles.headerInput}>Nhập nội dung bài viết:</Text>
                             <TextInput

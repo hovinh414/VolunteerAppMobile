@@ -8,16 +8,22 @@ import {
 } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { COLORS } from '../constants'
-import { ChatTest, Feed, LoginScreen, Notifications, Profile, Settings } from '../screens'
+import {
+    ChatTest,
+    Feed,
+    LoginScreen,
+    Notifications,
+    Profile,
+    Settings,
+} from '../screens'
 import Create from '../screens/Post/Create'
 import { LinearGradient } from 'expo-linear-gradient'
 import AsyncStoraged from '../services/AsyncStoraged'
-import ImageAvata from "../assets/hero2.jpg"
+import ImageAvata from '../assets/hero2.jpg'
 import OrganisationAvatar from '../assets/hero3.jpg'
 import ProfileOrganisation from '../screens/Profile/ProfileOrganisation'
 
 const Tab = createBottomTabNavigator()
-
 
 const screenOptions = {
     tabBarShowLabel: false,
@@ -36,20 +42,20 @@ const screenOptions = {
     },
 }
 const BottomTabNavigation = () => {
-    const [type, setType] = useState('');
-    const [avatar, setAvatar] = useState('');
+    const [type, setType] = useState('')
+    const [avatar, setAvatar] = useState('')
     const getUserStored = async () => {
-        const userStored = await AsyncStoraged.getData();
+        const userStored = await AsyncStoraged.getData()
         if (userStored === null) {
-            setType('');
+            setType('')
+        } else {
+            setType(userStored.type)
+            setAvatar(userStored.avatar)
         }
-        else {
-            setType(userStored.type);
-            setAvatar(userStored.avatar);
-        }
-
     }
-    useEffect(() => { getUserStored(); }, []);
+    useEffect(() => {
+        getUserStored()
+    }, [])
     return (
         <Tab.Navigator screenOptions={screenOptions}>
             <Tab.Screen
@@ -83,35 +89,37 @@ const BottomTabNavigation = () => {
                 }}
             />
 
-            <Tab.Screen
-                name="Create"
-                component={Create}
-                options={{
-                    tabBarIcon: ({ focused }) => {
-                        return (
-                            <LinearGradient
-                                colors={['#D4145A', '#FBB03B']}
-                                style={{
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: Platform.OS == 'ios' ? 50 : 60,
-                                    height: Platform.OS == 'ios' ? 50 : 60,
-                                    top: Platform.OS == 'ios' ? -10 : -20,
-                                    borderRadius: 22,
-                                    borderColor: '#fff',
-                                    borderWidth: 4,
-                                }}
-                            >
-                                <Feather
-                                    name="plus-circle"
-                                    size={24}
-                                    color={COLORS.white}
-                                />
-                            </LinearGradient>
-                        )
-                    },
-                }}
-            />
+            {type === 'Organization' ? (
+                <Tab.Screen
+                    name="Create"
+                    component={Create}
+                    options={{
+                        tabBarIcon: ({ focused }) => {
+                            return (
+                                <LinearGradient
+                                    colors={['#ccc', '#ccc']}
+                                    style={{
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: Platform.OS == 'ios' ? 50 : 60,
+                                        height: Platform.OS == 'ios' ? 50 : 60,
+                                        top: Platform.OS == 'ios' ? -10 : -20,
+                                        borderRadius: 22,
+                                        borderColor: '#fff',
+                                        borderWidth: 4,
+                                    }}
+                                >
+                                    <Feather
+                                        name="plus-circle"
+                                        size={24}
+                                        color={'#fff'}
+                                    />
+                                </LinearGradient>
+                            )
+                        },
+                    }}
+                />
+            ) : null}
 
             <Tab.Screen
                 name="Notifications"
@@ -128,7 +136,7 @@ const BottomTabNavigation = () => {
                     },
                 }}
             />
-            {type === 'User' ?
+            {type === 'User' || type === 'Admin' || type === 'user' ? (
                 <Tab.Screen
                     name="Profile"
                     component={Profile}
@@ -136,43 +144,50 @@ const BottomTabNavigation = () => {
                         tabBarIcon: ({ focused }) => {
                             return (
                                 <Image
-                                    source={avatar ? { uri: avatar } : ImageAvata}
+                                    source={
+                                        avatar ? { uri: avatar } : ImageAvata
+                                    }
                                     style={{
                                         height: 24,
                                         width: 24,
                                         borderWidth: 1,
                                         borderRadius: 85,
-                                        borderColor: focused ? COLORS.primary : COLORS.black,
+                                        borderColor: focused
+                                            ? COLORS.primary
+                                            : COLORS.black,
                                     }}
                                 />
                             )
                         },
                     }}
                 />
-                :
-                type === 'Organization' ?
-                    <Tab.Screen
-                        name="ProfileOrganisation"
-                        component={ProfileOrganisation}
-                        options={{
-                            tabBarIcon: ({ focused }) => {
-                                return (
-                                    <Image
-                                        source={avatar ? { uri: avatar } : ImageAvata}
-                                        style={{
-                                            height: 24,
-                                            width: 24,
-                                            borderWidth: 1,
-                                            borderRadius: 85,
-                                            borderColor: focused ? COLORS.primary : COLORS.black,
-                                        }}
-                                    />
-                                )
-                            },
-                        }}
-                    />
-                    :
-                    <Tab.Screen
+            ) : type === 'Organization' ? (
+                <Tab.Screen
+                    name="ProfileOrganisation"
+                    component={ProfileOrganisation}
+                    options={{
+                        tabBarIcon: ({ focused }) => {
+                            return (
+                                <Image
+                                    source={
+                                        avatar ? { uri: avatar } : ImageAvata
+                                    }
+                                    style={{
+                                        height: 24,
+                                        width: 24,
+                                        borderWidth: 1,
+                                        borderRadius: 85,
+                                        borderColor: focused
+                                            ? COLORS.primary
+                                            : COLORS.black,
+                                    }}
+                                />
+                            )
+                        },
+                    }}
+                />
+            ) : (
+                <Tab.Screen
                     name="LoginScreen"
                     component={LoginScreen}
                     options={{
@@ -181,18 +196,17 @@ const BottomTabNavigation = () => {
                                 <FontAwesome
                                     name="user-circle"
                                     size={24}
-                                    color={focused ? COLORS.primary : COLORS.black}
+                                    color={
+                                        focused ? COLORS.primary : COLORS.black
+                                    }
                                 />
                             )
                         },
                     }}
                 />
-            }
-
-
+            )}
         </Tab.Navigator>
     )
-
 }
 
 export default BottomTabNavigation

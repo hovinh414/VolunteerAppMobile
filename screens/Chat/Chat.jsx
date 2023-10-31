@@ -11,7 +11,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, images } from '../../constants'
 import { MaterialIcons } from '@expo/vector-icons'
 import { styles } from './ChatStyle'
-import { tr } from 'date-fns/locale'
 
 const Chat = ({ navigation }) => {
     const chat = [

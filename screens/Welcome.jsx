@@ -53,7 +53,7 @@ const Welcome = () => {
                         alignItems: 'center',
                     }}
                 >
-                    <Text style={{ ...FONTS.body2 }}>Chào mứng tới</Text>
+                    <Text style={{ ...FONTS.body2 }}>Chào mừng tới</Text>
                     <Text
                         style={{ ...FONTS.h1, marginVertical: SIZES.padding2 }}
                     >
