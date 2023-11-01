@@ -199,7 +199,7 @@ const Feed = ({ navigation }) => {
 
     const getPosts = async () => {
         axios
-            .get(API_URL.API_URL + '/posts?page=4&limit=6')
+            .get(API_URL.API_URL + '/posts?page=1&limit=6')
             .then((response) => {
                 if (response.data.status === 'SUCCESS') {
                     setPosts(response.data.data)
@@ -208,11 +208,23 @@ const Feed = ({ navigation }) => {
             .catch((error) => {
                 console.error('API Error:', error)
             })
+        
     }
     useEffect(() => {
         getPosts()
     }, [])
-    console.log(posts)
+    const getLikes = async (_postId) => {
+        axios
+            .get(API_URL.API_URL + '/post/likes/' + _postId)
+            .then((response) => {
+                if (response.data.status === 'SUCCESS') {
+                    return response.data.data.totalLikes;
+                }
+            })
+            .catch((error) => {
+                console.error('API Error:', error)
+            })
+    }
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
             <View style={{ flex: 1 }}>
@@ -373,7 +385,7 @@ const Feed = ({ navigation }) => {
                                                 marginLeft: 2,
                                             }}
                                         >
-                                            10
+                                            {getLikes(item._id).length}
                                         </Text>
                                     </View>
 

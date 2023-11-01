@@ -97,7 +97,7 @@ const BottomTabNavigation = () => {
                         tabBarIcon: ({ focused }) => {
                             return (
                                 <LinearGradient
-                                    colors={['#ccc', '#ccc']}
+                                    colors={['#D4145A', '#FBB03B']}
                                     style={{
                                         alignItems: 'center',
                                         justifyContent: 'center',
