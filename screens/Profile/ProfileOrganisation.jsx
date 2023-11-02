@@ -1,7 +1,6 @@
 import {
     View,
     Text,
-    Image,
     useWindowDimensions,
     FlatList,
     ScrollView,
@@ -22,6 +21,7 @@ import axios from 'axios'
 import CustomButton from '../../components/CustomButton'
 import CustomAlert from '../../components/CustomAlert'
 import API_URL from '../../interfaces/config'
+import { Image } from 'expo-image';
 
 const PostsRoute = () => (
     <View
@@ -329,7 +329,7 @@ const ProfileOrganisation = ({ navigation }) => {
                     <View>
                         <Image
                             source={avatar ? { uri: avatar } : ImageAvata}
-                            resizeMode="contain"
+                            contentFit="contain"
                             style={{
                                 height: 90,
                                 width: 90,

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import {
     View,
     Text,
-    Image,
     KeyboardAvoidingView,
     FlatList,
     ScrollView,
@@ -24,6 +23,8 @@ import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
 import { AntDesign } from '@expo/vector-icons'
 import CustomAlert from '../../components/CustomAlert'
 import API_URL from '../../interfaces/config'
+import { Image } from 'expo-image';
+
 
 const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
@@ -234,7 +235,7 @@ const Create = () => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                 }}
-                                onPress={() => (uploadPost('Volunteer'), setShowChoose(false))}
+                                onPress={() => (uploadPost('activity'), setShowChoose(false))}
                             >
                                 <Image
                                     source={require(empathy)}
@@ -261,7 +262,7 @@ const Create = () => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                 }}
-                                onPress={() => (uploadPost('Fund'), setShowChoose(false))}
+                                onPress={() => (uploadPost('fund'), setShowChoose(false))}
                             >
                                 <Image
                                     source={require(fundraising)}

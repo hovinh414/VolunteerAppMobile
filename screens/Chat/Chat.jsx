@@ -1,7 +1,6 @@
 import {
     View,
     Text,
-    Image,
     FlatList,
     TextInput,
     TouchableOpacity,
@@ -11,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, images } from '../../constants'
 import { MaterialIcons } from '@expo/vector-icons'
 import { styles } from './ChatStyle'
+import { Image } from 'expo-image';
 
 const Chat = ({ navigation }) => {
     const chat = [

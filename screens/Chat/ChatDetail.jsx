@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     FlatList,
     KeyboardAvoidingView,
-    Image,
     ScrollView,
     SafeAreaView,
 } from 'react-native'
@@ -24,6 +23,7 @@ import { shareAsync } from 'expo-sharing'
 import * as MediaLibrary from 'expo-media-library'
 import * as DocumentPicker from 'expo-document-picker'
 import { styles } from './ChatDetailStyle'
+import { Image } from 'expo-image';
 
 const file = '../../assets/file.png'
 const video = '../../assets/video.png'

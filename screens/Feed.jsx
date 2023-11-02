@@ -4,7 +4,6 @@ import {
     TouchableOpacity,
     ScrollView,
     FlatList,
-    Image,
     TextInput,
     Actions,
 } from 'react-native'
@@ -24,6 +23,7 @@ import { friends, posts } from '../constants/data'
 import { SliderBox } from 'react-native-image-slider-box'
 import axios from 'axios'
 import API_URL from '../interfaces/config'
+import { Image } from 'expo-image'
 
 const post1 = [
     images.friend1,
@@ -177,7 +177,7 @@ const Feed = ({ navigation }) => {
                             >
                                 <Image
                                     source={item.image}
-                                    resizeMode="contain"
+                                    contentFit="contain"
                                     style={{
                                         width: 80,
                                         height: 80,
@@ -208,23 +208,23 @@ const Feed = ({ navigation }) => {
             .catch((error) => {
                 console.error('API Error:', error)
             })
-        
     }
     useEffect(() => {
         getPosts()
     }, [])
-    const getLikes = async (_postId) => {
-        axios
-            .get(API_URL.API_URL + '/post/likes/' + _postId)
-            .then((response) => {
-                if (response.data.status === 'SUCCESS') {
-                    return response.data.data.totalLikes;
-                }
-            })
-            .catch((error) => {
-                console.error('API Error:', error)
-            })
-    }
+    // const getLikes = async (_postId) => {
+    //     try {
+    //         const response = await axios.get(
+    //             API_URL.API_URL + '/post/likes/' + _postId
+    //         )
+    //         if (response.data.status === 'SUCCESS') {
+    //             console.log(response.data)
+    //         }
+    //     } catch (error) {
+    //         console.error('API Error:', error)
+    //     }
+    // }
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
             <View style={{ flex: 1 }}>
@@ -262,7 +262,7 @@ const Feed = ({ navigation }) => {
                                     }}
                                 >
                                     <Image
-                                        source={images.user1}
+                                        source={item.ownerAvatar}
                                         style={{
                                             height: 52,
                                             width: 52,
@@ -277,7 +277,7 @@ const Feed = ({ navigation }) => {
                                                 fontWeight: 'bold',
                                             }}
                                         >
-                                            Hồ Thành Vinh
+                                            {item.ownerDisplayname}
                                         </Text>
                                     </View>
                                 </View>
@@ -298,6 +298,28 @@ const Feed = ({ navigation }) => {
                                     sliderBoxHeight={500}
                                     dotStyle={{ width: 7, height: 7 }}
                                 />
+                                {/* <FlatList
+                                    data={item}
+                                    horizontal
+                                    renderItem={({ item, index }) => (
+                                        <View
+                                            style={{
+                                                alignItems: 'center',
+                                                marginVertical: 8,
+                                            }}
+                                            key={index}
+                                        >
+                                            <Image
+                                                source={item.media}
+                                                style={{
+                                                    height: 450,
+                                                    width: 450,
+                                                    marginRight: 10,
+                                                }}
+                                            />
+                                        </View>
+                                    )}
+                                /> */}
                             </View>
 
                             <View
@@ -328,7 +350,7 @@ const Feed = ({ navigation }) => {
                             </View>
                             <View
                                 style={{
-                                    marginHorizontal: 8,
+                                    margin: 8,
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                 }}
@@ -340,13 +362,13 @@ const Feed = ({ navigation }) => {
                                 />
                                 <Text
                                     style={{
-                                        fontSize: 12,
+                                        fontSize: 13,
                                         fontFamily: 'regular',
                                         color: COLORS.primary,
                                         marginLeft: 4,
                                     }}
                                 >
-                                    Thủ Đức | 10 phút trước
+                                    {item.address}
                                 </Text>
                             </View>
 
@@ -385,7 +407,7 @@ const Feed = ({ navigation }) => {
                                                 marginLeft: 2,
                                             }}
                                         >
-                                            {getLikes(item._id).length}
+                                            {/* {getLikes(item._id)} */}
                                         </Text>
                                     </View>
 
@@ -447,7 +469,7 @@ const Feed = ({ navigation }) => {
                             >
                                 <Image
                                     source={images.user2}
-                                    resizeMode="contain"
+                                    contentFit="contain"
                                     style={{
                                         height: 52,
                                         width: 52,

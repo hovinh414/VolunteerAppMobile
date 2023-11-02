@@ -3,7 +3,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  Image,
   Modal,
   SafeAreaView,
   KeyboardAvoidingView,
@@ -23,7 +22,7 @@ import CustomInputEdit from "../../components/CustomInputEdit";
 import CustomEditAddress from "../../components/CustomEditAddress";
 import CustomAlert from "../../components/CustomAlert";
 import API_URL from '../../interfaces/config'
-
+import { Image } from 'expo-image';
 
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
