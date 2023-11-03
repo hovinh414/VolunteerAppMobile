@@ -4,7 +4,7 @@ const { height, width } = Dimensions.get('window')
 export const COLORS = {
     primary: '#FF493C',
     secondary: '#662626',
-    white: '#FFF9E8',
+    white: '#fff2cf',
     black: '#212121',
     blue: '#027DEF',
 }
@@ -43,25 +43,25 @@ export const FONTS = {
         color: COLORS.black,
     },
     h1: {
-        fontFamily: 'bold',
+        fontFamily: 'monterrat',
         fontSize: SIZES.h1,
         lineHeight: 36,
         color: COLORS.black,
     },
     h2: {
-        fontFamily: 'bold',
+        fontFamily: 'monterrat',
         fontSize: SIZES.h2,
         lineHeight: 30,
         color: COLORS.black,
     },
     h3: {
-        fontFamily: 'bold',
+        fontFamily: 'monterrat',
         fontSize: SIZES.h3,
         lineHeight: 22,
         color: COLORS.black,
     },
     h4: {
-        fontFamily: 'bold',
+        fontFamily: 'monterrat',
         fontSize: SIZES.h4,
         lineHeight: 20,
         color: COLORS.black,

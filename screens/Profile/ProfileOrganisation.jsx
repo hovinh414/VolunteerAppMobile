@@ -1,4 +1,12 @@
-import { View, Text, Image, useWindowDimensions, FlatList, ScrollView, TouchableOpacity, Modal } from 'react-native'
+import {
+    View,
+    Text,
+    useWindowDimensions,
+    FlatList,
+    ScrollView,
+    TouchableOpacity,
+    Modal,
+} from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
@@ -6,12 +14,14 @@ import { Feather, AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
 import { posts } from '../../constants/data'
 import AsyncStoraged from '../../services/AsyncStoraged'
-import * as ImagePicker from "expo-image-picker";
-import ImageAvata from "../../assets/hero2.jpg"
-import ImageUpload from "../../assets/add-image.png"
-import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker'
+import ImageAvata from '../../assets/hero2.jpg'
+import ImageUpload from '../../assets/add-image.png'
+import axios from 'axios'
 import CustomButton from '../../components/CustomButton'
-import ModalAlert from '../../components/ModalAlert'
+import CustomAlert from '../../components/CustomAlert'
+import API_URL from '../../interfaces/config'
+import { Image } from 'expo-image'
 
 const PostsRoute = () => (
     <View
@@ -87,201 +97,122 @@ const PostsRoute = () => (
         />
     </View>
 )
-const success = '../../assets/success.png';
-const fail = '../../assets/cross.png';
-const warning = '../../assets/warning.png';
+const success = '../../assets/success.png'
+const fail = '../../assets/cross.png'
+const warning = '../../assets/warning.png'
 const VerifyRoute = ({ navigation }) => {
-    const [selectedImages, setSelectedImage] = useState([]);
-    const [avatar, setAvatar] = useState();
-    const [orgId, setOrgId] = useState();
-    const [token, setToken] = useState();
-    const [ButtonPress, setButtonPress] = useState('');
-    const [showWarning, setShowWarning] = useState(false);
-    const [mess, setMess] = useState();
-    const [icon, setIcon] = useState();
+    const [selectedImages, setSelectedImage] = useState([])
+    const [avatar, setAvatar] = useState()
+    const [orgId, setOrgId] = useState()
+    const [token, setToken] = useState()
+    const [ButtonPress, setButtonPress] = useState('')
+    const [showWarning, setShowWarning] = useState(false)
+    const [mess, setMess] = useState()
+    const [icon, setIcon] = useState()
 
     const getUserStored = async () => {
-        const userStored = await AsyncStoraged.getData();
-        setOrgId(userStored._id);
+        const userStored = await AsyncStoraged.getData()
+        setOrgId(userStored._id)
     }
-    useEffect(() => { getUserStored(); }, []);
+    useEffect(() => {
+        getUserStored()
+    }, [])
 
     const getToken = async () => {
-        const token = await AsyncStoraged.getToken();
-        setToken(token);
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
     }
 
-    useEffect(() => { getToken(); }, []);
+    useEffect(() => {
+        getToken()
+    }, [])
     const handleImageSelection = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsMultipleSelection: true,
             aspect: [5, 5],
             quality: 1,
-        });
-        delete result.cancelled;
+        })
+        delete result.cancelled
         if (!result.canceled) {
-
             if (selectedImages.length + result.assets.length > 5) {
-                setIcon();
-                setMess('Số lượng ảnh phải ít hơn 5 ảnh');
-                setShowWarning(true);
+                setIcon()
+                setMess('Số lượng ảnh phải ít hơn 5 ảnh')
+                setShowWarning(true)
 
-                return;
+                return
             } else if (selectedImages.length === 0) {
-                setSelectedImage(result.assets);
-            }
-            else if (selectedImages.length + result.assets.length <= 5) {
-                setSelectedImage([...selectedImages, ...result.assets]);
+                setSelectedImage(result.assets)
+            } else if (selectedImages.length + result.assets.length <= 5) {
+                setSelectedImage([...selectedImages, ...result.assets])
             }
         }
-    };
-    function removeImage(item) {
-        const newList = selectedImages.filter((listItem) => listItem !== item);
-        setSelectedImage(newList);
     }
-    const formData = new FormData();
+    function removeImage(item) {
+        const newList = selectedImages.filter((listItem) => listItem !== item)
+        setSelectedImage(newList)
+    }
+    const formData = new FormData()
     const handleUpload = async () => {
         selectedImages.forEach((images, index) => {
             formData.append('images', {
                 uri: images.uri,
                 type: 'image/jpeg',
                 name: images.fileName,
-            });
-        });
-        console.log(formData);
-        setButtonPress(true);
+            })
+        })
+        console.log(formData)
+        setButtonPress(true)
         if (selectedImages.length === 0) {
-
-            setMess('Vui lòng chọn ảnh!');
-            setIcon();
-            setShowWarning(true);
-            setButtonPress(false);
-            return;
+            setMess('Vui lòng chọn ảnh!')
+            setIcon()
+            setShowWarning(true)
+            setButtonPress(false)
+            return
         }
 
-        axios.put(('http://172.20.10.2:3000/api/v1/org/verify?orgId=' + orgId), formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'Authorization': token,
-            },
-        })
+        axios
+            .put(API_URL.API_URL + '/org/verify?orgId=' + orgId, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: token,
+                },
+            })
             .then((response) => {
-
                 if (response.data.status === 'SUCCESS') {
                     setMess('Đăng minh chứng thành công!')
-                    setIcon(response.data.status);
-                    setShowWarning(true);
-                    setSelectedImage([]);
-                    setButtonPress(false);
-                    setAvatar(null);
+                    setIcon(response.data.status)
+                    setShowWarning(true)
+                    setSelectedImage([])
+                    setButtonPress(false)
+                    setAvatar(null)
                 }
             })
             .catch((error) => {
-                console.error('API Error:', error);
-                setMess('Đăng minh chứng thất bại!');
-                setIcon('FAIL');
-                setShowWarning(true);
-                setButtonPress(false);
-            });
-
-
+                console.error('API Error:', error)
+                setMess('Đăng minh chứng thất bại!')
+                setIcon('FAIL')
+                setShowWarning(true)
+                setButtonPress(false)
+            })
     }
 
     return (
-        <ScrollView style={{ flex: 1, paddingTop: 25, }}>
-            <Modal
+        <ScrollView style={{ flex: 1, paddingTop: 25 }}>
+            <CustomAlert
                 visible={showWarning}
-                animationType='fade'
-                transparent
-                onRequestClose={() =>
-                    setShowWarning(false)
-                }
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)'
-                    }}
-                >
-                    <View
-                        style={{
-                            width: 300,
-                            height: 200,
-                            backgroundColor: '#ffffff',
-                            borderRadius: 25,
-                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
-                            justifyContent: 'center', //
-                        }}
-                    >
-                        {
-                            icon === 'SUCCESS' ?
-                                <Image
-                                    source={require(success)}
-                                    style={{
-                                        marginTop: 15,
-                                        width: 50,
-                                        height: 50,
-                                    }}
-                                />
-                                :
-                                icon === 'FAIL' ?
-                                    <Image
-                                        source={require(fail)}
-                                        style={{
-                                            marginTop: 15,
-                                            width: 50,
-                                            height: 50,
-                                        }}
-                                    />
-                                    :
-                                    <Image
-                                        source={require(warning)}
-                                        style={{
-                                            marginTop: 15,
-                                            width: 50,
-                                            height: 50,
-                                        }}
-                                    />
-
-                        }
-                        <Text style={{
-                            fontWeight: 'bold',
-                            fontSize: 18,
-                        }}>Thông báo</Text>
-                        <Text style={{
-                            fontSize: 16,
-                        }}>{mess}</Text>
-
-                        <View style={{
-                            marginTop: 15,
-                            width: 200,
-                        }}>
-                            <CustomButton title='ĐÓNG' onPress={() => setShowWarning(false)} />
-                        </View>
-                    </View>
-
-
-                </View>
-            </Modal>
-            {/* <ModalAlert
-                visible={showWarning}
-                onRequestClose={setShowWarning(false)}
                 mess={mess}
+                onRequestClose={() => setShowWarning(false)}
+                onPress={() => setShowWarning(false)}
+                title={'ĐÓNG'}
                 icon={icon}
-                onPress={setShowWarning(false)}
-            >
-                
-            </ModalAlert> */}
+            />
             <FlatList
                 data={selectedImages}
                 horizontal={true}
-                keyExtractor={(item) => item.id}
                 renderItem={({ item, index }) => (
                     <View
-                        key={item.id}
+                        key={index}
                         style={{
                             position: 'relative',
                             flexDirection: 'column',
@@ -303,7 +234,7 @@ const VerifyRoute = ({ navigation }) => {
                         <TouchableOpacity
                             onPress={() => removeImage(item)}
                             style={{
-                                position: "absolute",
+                                position: 'absolute',
                                 top: 0,
                                 right: 0,
                                 backgroundColor: '#C5C7C7',
@@ -317,8 +248,6 @@ const VerifyRoute = ({ navigation }) => {
                                 color={COLORS.black}
                             />
                         </TouchableOpacity>
-
-
                     </View>
                 )}
             />
@@ -328,8 +257,6 @@ const VerifyRoute = ({ navigation }) => {
                     paddingBottom: 15,
                     flex: 1,
                     flexDirection: 'row',
-
-
                 }}
                 onPress={() => handleImageSelection()}
             >
@@ -341,41 +268,65 @@ const VerifyRoute = ({ navigation }) => {
                         marginRight: 15,
                     }}
                 />
-                <View style={{
-
-                    backgroundColor: '#C5C7C7',
-                    flex: 1,
-                    padding: 10,
-                    borderRadius: 5,
-                }}>
-                    <Text style={{
-                        fontStyle: 'italic',
-                        fontSize: 17,
-                        backgroundColor: 'transparent',
-
-                    }}>Minh chứng bao gồm <Text style={{
-                        fontStyle: 'italic',
-                        color: '#8B0000',
-                    }}>5 hình</Text>: </Text>
-                    <Text style={{
-                        fontStyle: 'italic',
-                        backgroundColor: 'transparent',
-
-                    }}>- 2 ảnh CCCD hoặc CMND.</Text>
-                    <Text style={{
-                        fontStyle: 'italic',
-                        backgroundColor: 'transparent',
-
-                    }}>- 3 ảnh chụp địa điểm tổ chức.</Text>
-                    <Text style={{
-                        fontStyle: 'italic',
-                        color: '#8B0000',
-                        backgroundColor: 'transparent',
-
-                    }}>* (Ảnh chụp phải rõ nét, ảnh CCCD là hình gốc không scan hay photocopy, không bị mất góc)</Text>
+                <View
+                    style={{
+                        backgroundColor: '#C5C7C7',
+                        flex: 1,
+                        padding: 10,
+                        borderRadius: 5,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontStyle: 'italic',
+                            fontSize: 17,
+                            backgroundColor: 'transparent',
+                        }}
+                    >
+                        Minh chứng bao gồm{' '}
+                        <Text
+                            style={{
+                                fontStyle: 'italic',
+                                color: '#8B0000',
+                            }}
+                        >
+                            5 hình
+                        </Text>
+                        :{' '}
+                    </Text>
+                    <Text
+                        style={{
+                            fontStyle: 'italic',
+                            backgroundColor: 'transparent',
+                        }}
+                    >
+                        - 2 ảnh CCCD hoặc CMND.
+                    </Text>
+                    <Text
+                        style={{
+                            fontStyle: 'italic',
+                            backgroundColor: 'transparent',
+                        }}
+                    >
+                        - 3 ảnh chụp địa điểm tổ chức.
+                    </Text>
+                    <Text
+                        style={{
+                            fontStyle: 'italic',
+                            color: '#8B0000',
+                            backgroundColor: 'transparent',
+                        }}
+                    >
+                        * (Ảnh chụp phải rõ nét, ảnh CCCD là hình gốc không scan
+                        hay photocopy, không bị mất góc)
+                    </Text>
                 </View>
             </TouchableOpacity>
-            <CustomButton onPress={() => handleUpload()} title='ĐĂNG MINH CHỨNG' isLoading={ButtonPress} />
+            <CustomButton
+                onPress={() => handleUpload()}
+                title="ĐĂNG MINH CHỨNG"
+                isLoading={ButtonPress}
+            />
         </ScrollView>
     )
 }
@@ -385,18 +336,20 @@ const renderScene = SceneMap({
     second: VerifyRoute,
 })
 const ProfileOrganisation = ({ navigation }) => {
-    const [avatar, setAvatar] = useState("");
-    const [fullname, setFullname] = useState("");
-    const [address, setAddress] = useState('');
-    const [email, setEmail] = useState('');
+    const [avatar, setAvatar] = useState('')
+    const [fullname, setFullname] = useState('')
+    const [address, setAddress] = useState('')
+    const [email, setEmail] = useState('')
     const getUserStored = async () => {
-        const userStored = await AsyncStoraged.getData();
-        setAvatar(userStored.avatar);
-        setFullname(userStored.fullname);
-        setAddress(userStored.address);
-        setEmail(userStored.email);
+        const userStored = await AsyncStoraged.getData()
+        setAvatar(userStored.avatar)
+        setFullname(userStored.fullname)
+        setAddress(userStored.address)
+        setEmail(userStored.email)
     }
-    useEffect(() => { getUserStored(); }, []);
+    useEffect(() => {
+        getUserStored()
+    }, [])
     function renderProfileCard() {
         return (
             <View
@@ -407,8 +360,6 @@ const ProfileOrganisation = ({ navigation }) => {
                     paddingHorizontal: 6,
                     paddingVertical: 18,
                     backgroundColor: '#FFFFFF',
-
-
                 }}
             >
                 <View
@@ -421,7 +372,7 @@ const ProfileOrganisation = ({ navigation }) => {
                     <View>
                         <Image
                             source={avatar ? { uri: avatar } : ImageAvata}
-                            resizeMode="contain"
+                            contentFit="contain"
                             style={{
                                 height: 90,
                                 width: 90,
@@ -434,11 +385,20 @@ const ProfileOrganisation = ({ navigation }) => {
 
                     <View
                         style={{
-                            flexDirection: 'column',
-                            flex: 1,
-                            marginLeft: 6,
+                            justifyContent: 'center',
+                            alignContent: 'center',
+                            alignItems: 'center',
                         }}
                     >
+                        <Text
+                            style={{
+                                ...FONTS.body3,
+                                fontSize: 16,
+                            }}
+                        >
+                            {fullname}
+                        </Text>
+
                         <View
                             style={{
                                 flex: 1,
@@ -447,17 +407,6 @@ const ProfileOrganisation = ({ navigation }) => {
                                 alignItems: 'center',
                             }}
                         >
-
-                        </View>
-
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                            }}
-                        >
-
-
                             <View
                                 style={{
                                     backgroundColor: '#FFF9E8',
@@ -468,21 +417,21 @@ const ProfileOrganisation = ({ navigation }) => {
                                     padding: 15,
                                 }}
                             >
-                                <Text style={{ ...FONTS.body4 }}>Đã tổ chức 24 hoạt động</Text>
+                                <Text style={{ ...FONTS.body4 }}>
+                                    Đã tổ chức 24 hoạt động
+                                </Text>
                             </View>
-
                         </View>
-
                     </View>
+
                     <Feather
                         style={{
-
                             paddingLeft: 10,
                         }}
                         name="menu"
                         size={24}
                         color={COLORS.black}
-                        onPress={() => navigation.navigate("Settings")}
+                        onPress={() => navigation.navigate('Settings')}
                     />
                 </View>
 
@@ -492,7 +441,6 @@ const ProfileOrganisation = ({ navigation }) => {
                         marginVertical: 12,
                     }}
                 >
-                    <Text style={{ ...FONTS.body4 }}>{fullname}</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Email: </Text>
                         <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
@@ -502,7 +450,13 @@ const ProfileOrganisation = ({ navigation }) => {
 
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Địa chỉ: </Text>
-                        <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
+                        <Text
+                            style={{
+                                ...FONTS.body4,
+                                color: COLORS.blue,
+                                paddingRight: 100,
+                            }}
+                        >
                             {address}
                         </Text>
                     </View>
@@ -516,7 +470,6 @@ const ProfileOrganisation = ({ navigation }) => {
     const [routes] = useState([
         { key: 'first', title: 'Hoạt động', icon: 'team' },
         { key: 'second', title: 'Đăng minh chứng', icon: 'upload' },
-
     ])
 
     const renderTabBar = (props) => (
@@ -541,7 +494,6 @@ const ProfileOrganisation = ({ navigation }) => {
                     {route.title}
                 </Text>
             )}
-
         />
     )
 

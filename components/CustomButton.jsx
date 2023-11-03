@@ -13,7 +13,7 @@ const CustomButton = ({ onPress, title, isLoading }) => {
             {isLoading ?
                 <ActivityIndicator size='small' color='white' /> :
                 <Text style={{
-                    fontFamily: 'bold',
+                    fontFamily: 'monterrat',
                     color: '#FFF',
                 }}>{title}</Text>}
         </TouchableOpacity>

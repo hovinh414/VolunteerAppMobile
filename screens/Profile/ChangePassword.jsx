@@ -10,13 +10,14 @@ import {
 import React, { useState, useEffect } from "react";
 import { COLORS, FONTS } from "../../constants/theme";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
-import CustomInput from "../../components/CustomInput";
+import CustomInputPassword from "../../components/CustomInputPassword";
 import Auth from "../Login/Auth";
 import axios from 'axios';
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStoraged from '../../services/AsyncStoraged'
 import CustomButton from "../../components/CustomButton";
-
+import CustomAlert from "../../components/CustomAlert";
+import API_URL from '../../interfaces/config'
 
 const success = '../../assets/success.png';
 const fail = '../../assets/cross.png';
@@ -30,7 +31,7 @@ const ChangePassword = ({ navigation }) => {
     const [newPasswordConfirmErrorMessage, setNewPasswordConfirmErrorMessage] = useState('');
     const [isPasswordShow, setIsPasswordShow] = useState(true);
     const [isNewPasswordShow, setIsNewPasswordShow] = useState(true);
-    const [isConfirmPasswordShow, setIsConfỉmPasswordShow] = useState(true);
+    const [isConfirmPasswordShow, setIsConfirmPasswordShow] = useState(true);
     const [userId, setUserId] = useState();
     const [token, setToken] = useState();
     const [ButtonPress, setButtonPress] = useState('');
@@ -55,7 +56,7 @@ const ChangePassword = ({ navigation }) => {
             setButtonPress(true);
             const res = await axios({
                 method: 'put',
-                url: 'http://172.20.10.2:3000/api/v1/user?userid=' + userId,
+                url: API_URL.API_URL + '/user?userid=' + userId,
                 headers: {
                     'Authorization': token,
                 },
@@ -73,8 +74,7 @@ const ChangePassword = ({ navigation }) => {
                 navigation.push("BottomTabNavigation");
 
             }
-        } catch (error) {
-            alert(error);
+        } catch (error){
             setMess('Thay đổi mật khẩu thất bại!');
             setIcon('FAIL');
             setShowWarning(true);
@@ -123,83 +123,16 @@ const ChangePassword = ({ navigation }) => {
 
             }}
         >
-            <Modal
+            <CustomAlert
                 visible={showWarning}
-                animationType='fade'
-                transparent
+                mess={mess}
                 onRequestClose={() =>
                     setShowWarning(false)
                 }
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)'
-                    }}
-                >
-                    <View
-                        style={{
-                            width: 300,
-                            height: 200,
-                            backgroundColor: '#ffffff',
-                            borderRadius: 25,
-                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
-                            justifyContent: 'center', //
-                            padding: 20,
-                        }}
-                    >
-                        {
-                            icon === 'SUCCESS' ?
-                                <Image
-                                    source={require(success)}
-                                    style={{
-                                        marginTop: 15,
-                                        width: 50,
-                                        height: 50,
-                                    }}
-                                />
-                                :
-                                icon === 'FAIL' ?
-                                    <Image
-                                        source={require(fail)}
-                                        style={{
-                                            marginTop: 15,
-                                            width: 50,
-                                            height: 50,
-                                        }}
-                                    />
-                                    :
-                                    <Image
-                                        source={require(warning)}
-                                        style={{
-                                            marginTop: 15,
-                                            width: 50,
-                                            height: 50,
-                                        }}
-                                    />
-
-                        }
-                        <Text style={{
-                            fontWeight: 'bold',
-                            fontSize: 18,
-                        }}>Thông báo</Text>
-                        <Text style={{
-                            fontSize: 16,
-                        }}>{mess}</Text>
-
-                        <View style={{
-                            marginTop: 15,
-                            width: 200,
-                        }}>
-                            <CustomButton title='ĐÓNG' onPress={() => setShowWarning(false)} />
-                        </View>
-                    </View>
-
-
-                </View>
-            </Modal>
+                onPress={() => setShowWarning(false)}
+                title={'ĐÓNG'}
+                icon={icon}
+            />
             <View
                 style={{
 
@@ -247,7 +180,7 @@ const ChangePassword = ({ navigation }) => {
                             fontWeight: 400,
                             marginVertical: 8
                         }}><Text style={{ color: COLORS.primary }}>*</Text> Mật khẩu hiện tại</Text>
-                        <CustomInput
+                        <CustomInputPassword
                             onChangeText={(password) => {
                                 setPassword(password);
                                 showPasswordMessage(password);
@@ -256,23 +189,10 @@ const ChangePassword = ({ navigation }) => {
                             error={passwordErrorMessage.length !== 0}
                             errorMessage={passwordErrorMessage}
                             secureTextEntry={isPasswordShow}
+                            isPasswordShow={isPasswordShow}
+                            onPress={() => isPasswordShow ? setIsPasswordShow(false) : setIsPasswordShow(true)}
                         />
-                        <TouchableOpacity
-                            onPress={() => setIsPasswordShow(!isPasswordShow)}
-                            style={{
-                                position: "absolute",
-                                right: 12
-                            }}
-                        >
-                            {
-                                isPasswordShow == true ? (
-                                    <Ionicons name="eye-off" size={24} color={COLORS.black} />
-                                ) : (
-                                    <Ionicons name="eye" size={24} color={COLORS.black} />
-                                )
-                            }
 
-                        </TouchableOpacity>
                     </View>
                     <View>
                         <Text style={{
@@ -282,7 +202,7 @@ const ChangePassword = ({ navigation }) => {
                             marginVertical: 8
                         }}><Text style={{ color: COLORS.primary }}>*</Text> Mật khẩu mới</Text>
 
-                        <CustomInput
+                        <CustomInputPassword
                             onChangeText={(newPassword) => {
                                 setNewPassword(newPassword);
                                 showNewPasswordMessage(newPassword);
@@ -291,23 +211,10 @@ const ChangePassword = ({ navigation }) => {
                             error={newPasswordErrorMessage.length !== 0}
                             errorMessage={newPasswordErrorMessage}
                             secureTextEntry={isNewPasswordShow}
+                            isPasswordShow={isNewPasswordShow}
+                            onPress={() => isNewPasswordShow ? setIsNewPasswordShow(false) : setIsNewPasswordShow(true)}
                         />
-                        <TouchableOpacity
-                            onPress={() => setIsNewPasswordShow(!isNewPasswordShow)}
-                            style={{
-                                position: "absolute",
-                                right: 12
-                            }}
-                        >
-                            {
-                                isNewPasswordShow == true ? (
-                                    <Ionicons name="eye-off" size={24} color={COLORS.black} />
-                                ) : (
-                                    <Ionicons name="eye" size={24} color={COLORS.black} />
-                                )
-                            }
 
-                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -321,7 +228,7 @@ const ChangePassword = ({ navigation }) => {
                         marginVertical: 8
                     }}><Text style={{ color: COLORS.primary }}>*</Text> Nhập lại mật khẩu mới</Text>
 
-                    <CustomInput
+                    <CustomInputPassword
                         placeholder={'Nhập lại mật khẩu mới'}
                         onChangeText={(passwordConfirm) => {
                             setPasswordConfirm(passwordConfirm);
@@ -330,24 +237,9 @@ const ChangePassword = ({ navigation }) => {
                         error={newPasswordConfirmErrorMessage.length !== 0}
                         errorMessage={newPasswordConfirmErrorMessage}
                         secureTextEntry={isConfirmPasswordShow}
-
+                        isPasswordShow={isConfirmPasswordShow}
+                        onPress={() => isConfirmPasswordShow ? setIsConfirmPasswordShow(false) : setIsConfirmPasswordShow(true)}
                     />
-                    <TouchableOpacity
-                        onPress={() => setIsConfỉmPasswordShow(!isConfirmPasswordShow)}
-                        style={{
-                            position: "absolute",
-                            right: 12
-                        }}
-                    >
-                        {
-                            isConfirmPasswordShow == true ? (
-                                <Ionicons name="eye-off" size={24} color={COLORS.black} />
-                            ) : (
-                                <Ionicons name="eye" size={24} color={COLORS.black} />
-                            )
-                        }
-
-                    </TouchableOpacity>
                 </View>
 
                 <CustomButton onPress={() => handleUpdatePassword()} title='ĐỔI MẬT KHẨU' isLoading={ButtonPress} />

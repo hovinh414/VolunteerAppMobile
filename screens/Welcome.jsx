@@ -33,7 +33,7 @@ const Welcome = () => {
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
             <View
                 style={{
-                    padding:100,
+                    padding:50,
                     flex: 1,
                     marginHorizontal: 22,
                     alignItems: 'center',
@@ -53,7 +53,7 @@ const Welcome = () => {
                         alignItems: 'center',
                     }}
                 >
-                    <Text style={{ ...FONTS.body2 }}>Chào mứng tới</Text>
+                    <Text style={{ ...FONTS.body2 }}>Chào mừng tới</Text>
                     <Text
                         style={{ ...FONTS.h1, marginVertical: SIZES.padding2 }}
                     >

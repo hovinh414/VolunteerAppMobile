@@ -14,19 +14,24 @@ import EditProfile from './screens/Profile/EditProfile'
 import Settings from './screens/Profile/Settings'
 import LoginScreen from './screens/Login/LoginScreen'
 import ChangePassword from './screens/Profile/ChangePassword'
-import ProfileOrganisation from './screens/Profile/ProfileOrganisation'
+import ChangeAddress from './screens/Profile/ChangeAddress'
+import Chat from './screens/Chat/Chat'
+import ChatDetail from './screens/Chat/ChatDetail'
+
+
 const Stack = createNativeStackNavigator()
 
 SplashScreen.preventAutoHideAsync()
 export default function App() {
     const [fontsLoaded] = useFonts({
         black: require('./assets/fonts/Poppins-Black.ttf'),
-        regular: require('./assets/fonts/Poppins-Regular.ttf'),
+        regular: require('./assets/fonts/Montserrat-Regular.ttf'),
         bold: require('./assets/fonts/Poppins-Bold.ttf'),
         medium: require('./assets/fonts/Poppins-Medium.ttf'),
         mediumItalic: require('./assets/fonts/Poppins-MediumItalic.ttf'),
         semiBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
         semiBoldItalic: require('./assets/fonts/Poppins-SemiBoldItalic.ttf'),
+        monterrat: require('./assets/fonts/Montserrat-Bold.ttf'),
     })
 
     const onLayoutRootView = useCallback(async () => {
@@ -105,7 +110,30 @@ export default function App() {
                             headerShown: false,
                         }}
                     />
-                    
+                    <Stack.Screen
+                        name="Chat"
+                        component={Chat}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ChatDetail"
+                        component={ChatDetail}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ChangeAddress"
+                        component={ChangeAddress}
+                        options={{
+                            headerShown: false,
+                            presentation: 'modal',
+                            animationTypeForReplace: 'push',
+                            animation: 'slide_from_bottom',
+                        }}
+                    />
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>

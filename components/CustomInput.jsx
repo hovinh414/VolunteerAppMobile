@@ -8,7 +8,7 @@ const CustomInput = ({value, placeholder, keyboardType, secureTextEntry, onChang
         <View style={{
                         width: "100%",
                         height: 48,
-                        borderColor: error ? COLORS.primary : COLORS.black,
+                        borderColor: error ? COLORS.primary : '#A9A9A9',
                         borderWidth: 1,
                         borderRadius: 16,
                         alignItems: "center",

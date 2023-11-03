@@ -1,4 +1,4 @@
-import { View, Text, Image, useWindowDimensions, FlatList, ScrollView } from 'react-native'
+import { View, Text, useWindowDimensions, FlatList, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
@@ -7,6 +7,7 @@ import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
 import { posts } from '../../constants/data'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import ImageAvata from "../../assets/hero2.jpg"
+import { Image } from 'expo-image';
 
 const PostsRoute = () => (
     <View
@@ -132,7 +133,7 @@ const Profile = ({navigation}) => {
                     <View>
                         <Image
                             source={avatar ? {uri: avatar} : ImageAvata}
-                            resizeMode="contain"
+                            contentFit="contain"
                             style={{
                                 height: 90,
                                 width: 90,
@@ -203,7 +204,7 @@ const Profile = ({navigation}) => {
                         marginVertical: 12,
                     }}
                 >
-                    <Text style={{ ...FONTS.body4 }}>{fullname}</Text>
+                    <Text style={{ ...FONTS.body3 }}>{fullname}</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Email: </Text>
                         <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
@@ -213,7 +214,7 @@ const Profile = ({navigation}) => {
 
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Địa chỉ: </Text>
-                        <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
+                        <Text style={{ ...FONTS.body4, color: COLORS.blue, paddingRight:100, }}>
                             {address}
                         </Text>
                     </View>
