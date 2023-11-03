@@ -205,45 +205,71 @@ const Feed = ({ navigation }) => {
             }
         }
 
-        return (
-            <View
-                style={{
-                    flexDirection: 'row',
+        if (token !== null) {
+            return (
+                <View
+                    style={{
+                        flexDirection: 'row',
 
-                    alignItems: 'center',
-                    marginRight: SIZES.padding2,
-                }}
-            >
-                <TouchableOpacity onPress={handleLikeClick}>
-                    {isLiked ? (
-                        <FontAwesome
-                            name="heart"
-                            size={20}
-                            color={COLORS.primary}
-                        />
-                    ) : (
+                        alignItems: 'center',
+                        marginRight: SIZES.padding2,
+                    }}
+                >
+                    <TouchableOpacity onPress={handleLikeClick}>
+                        {isLiked ? (
+                            <FontAwesome
+                                name="heart"
+                                size={20}
+                                color={COLORS.primary}
+                            />
+                        ) : (
+                            <Feather
+                                name="heart"
+                                size={20}
+                                color={COLORS.black}
+                            />
+                        )}
+                    </TouchableOpacity>
+                    <Text style={{ ...FONTS.body4, marginLeft: 5 }}>
+                        {totalLike}
+                    </Text>
+                </View>
+            )
+        } else {
+            return (
+                <View
+                    style={{
+                        flexDirection: 'row',
+
+                        alignItems: 'center',
+                        marginRight: SIZES.padding2,
+                    }}
+                >
+                    <TouchableOpacity>
                         <Feather name="heart" size={20} color={COLORS.black} />
-                    )}
-                </TouchableOpacity>
-                <Text style={{ ...FONTS.body4, marginLeft: 5 }}>
-                    {totalLike}
-                </Text>
-            </View>
-        )
+                    </TouchableOpacity>
+                    <Text style={{ ...FONTS.body4, marginLeft: 5 }}>
+                        {totalLike}
+                    </Text>
+                </View>
+            )
+        }
     }
     function DaysDifference({ createdAt }) {
-        const [daysDifference, setDaysDifference] = useState(null);
-    
+        const [daysDifference, setDaysDifference] = useState(null)
+
         useEffect(() => {
-            const currentDate = new Date();
-            const targetDate = new Date(createdAt);
-            const timeDifference = targetDate - currentDate;
-            const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-            setDaysDifference(daysDifference);
-        }, [createdAt]);
-    
+            const currentDate = new Date()
+            const targetDate = new Date(createdAt)
+            const timeDifference = targetDate - currentDate
+            const daysDifference = Math.floor(
+                timeDifference / (1000 * 60 * 60 * 24)
+            )
+            setDaysDifference(daysDifference)
+        }, [createdAt])
+
         if (daysDifference === null) {
-            return null; // Hoặc thay thế bằng UI mặc định khác nếu cần
+            return null // Hoặc thay thế bằng UI mặc định khác nếu cần
         }
         if (daysDifference <= 0) {
             return (
@@ -257,9 +283,8 @@ const Feed = ({ navigation }) => {
                 >
                     Đã hết hạn đăng ký
                 </Text>
-            );
-        }
-        else {
+            )
+        } else {
             return (
                 <Text
                     style={{
@@ -271,11 +296,10 @@ const Feed = ({ navigation }) => {
                 >
                     Còn lại: {daysDifference} ngày
                 </Text>
-            );
+            )
         }
-        
     }
-    
+
     function renderSuggestionsContainer() {
         return (
             <View
@@ -570,7 +594,7 @@ const Feed = ({ navigation }) => {
                                     size={21}
                                     color={COLORS.blue}
                                 />
-                                <DaysDifference createdAt={item.createdAt}/>
+                                <DaysDifference createdAt={item.createdAt} />
                                 {/* <Text
                                     style={{
                                         fontSize: 13,

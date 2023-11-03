@@ -16,8 +16,11 @@ import AsyncStoraged from '../../services/AsyncStoraged'
 
 const question = '../../assets/question.png'
 const Settings = ({ navigation }) => {
-    const removeData = async () => {
+    const removeData = async () => {  
         await AsyncStoraged.removeData()
+    }
+    const removeToken = async () => {  
+        await AsyncStoraged.removeToken()
     }
     const [showWarning, setShowWarning] = useState(false)
     const [mess, setMess] = useState()
@@ -208,6 +211,7 @@ const Settings = ({ navigation }) => {
                                     title="ĐỒNG Ý"
                                     onPress={() => (
                                         removeData(),
+                                        removeToken(),
                                         navigation.push('BottomTabNavigation'),
                                         setShowWarning(false)
                                     )}
