@@ -5,7 +5,7 @@ import {
     ScrollView,
     FlatList,
     TextInput,
-    Actions,
+    RefreshControl,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
 import React, { useState, useEffect } from 'react'
@@ -25,6 +25,7 @@ import axios from 'axios'
 import API_URL from '../interfaces/config'
 import { Image } from 'expo-image'
 import AsyncStoraged from '../services/AsyncStoraged'
+import { useFocusEffect } from '@react-navigation/native'
 
 const post1 = [
     images.friend1,
@@ -230,7 +231,51 @@ const Feed = ({ navigation }) => {
             </View>
         )
     }
-
+    function DaysDifference({ createdAt }) {
+        const [daysDifference, setDaysDifference] = useState(null);
+    
+        useEffect(() => {
+            const currentDate = new Date();
+            const targetDate = new Date(createdAt);
+            const timeDifference = targetDate - currentDate;
+            const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            setDaysDifference(daysDifference);
+        }, [createdAt]);
+    
+        if (daysDifference === null) {
+            return null; // Hoặc thay thế bằng UI mặc định khác nếu cần
+        }
+        if (daysDifference <= 0) {
+            return (
+                <Text
+                    style={{
+                        fontSize: 14,
+                        fontFamily: 'regular',
+                        color: COLORS.blue,
+                        marginLeft: 4,
+                    }}
+                >
+                    Đã hết hạn đăng ký
+                </Text>
+            );
+        }
+        else {
+            return (
+                <Text
+                    style={{
+                        fontSize: 14,
+                        fontFamily: 'regular',
+                        color: COLORS.blue,
+                        marginLeft: 4,
+                    }}
+                >
+                    Còn lại: {daysDifference} ngày
+                </Text>
+            );
+        }
+        
+    }
+    
     function renderSuggestionsContainer() {
         return (
             <View
@@ -309,7 +354,11 @@ const Feed = ({ navigation }) => {
     useEffect(() => {
         getPosts()
     }, [])
-
+    useFocusEffect(
+        React.useCallback(() => {
+            onRefresh() // Gọi hàm làm mới khi màn hình được focus
+        }, [])
+    )
     const likePost = async (_postId) => {
         try {
             const res = await axios({
@@ -348,7 +397,13 @@ const Feed = ({ navigation }) => {
             }
         }
     }
-
+    const [refreshing, setRefreshing] = useState(false)
+    const onRefresh = () => {
+        setRefreshing(true)
+        getPosts().then(() => {
+            setRefreshing(false)
+        })
+    }
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
             <View style={{ flex: 1 }}>
@@ -356,6 +411,12 @@ const Feed = ({ navigation }) => {
                 {renderSuggestionsContainer()}
                 <FlatList
                     data={posts}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => onRefresh()} // Định nghĩa hàm xử lý khi làm mới
+                        />
+                    }
                     renderItem={({ item, index }) => (
                         <View
                             key={index}
@@ -482,7 +543,7 @@ const Feed = ({ navigation }) => {
                             >
                                 <Ionicons
                                     name="location-outline"
-                                    size={21}
+                                    size={22}
                                     color={COLORS.primary}
                                 />
                                 <Text
@@ -495,6 +556,31 @@ const Feed = ({ navigation }) => {
                                 >
                                     {item.address}
                                 </Text>
+                            </View>
+                            <View
+                                style={{
+                                    marginHorizontal: 8,
+                                    marginBottom: 8,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Ionicons
+                                    name="calendar-outline"
+                                    size={21}
+                                    color={COLORS.blue}
+                                />
+                                <DaysDifference createdAt={item.createdAt}/>
+                                {/* <Text
+                                    style={{
+                                        fontSize: 13,
+                                        fontFamily: 'regular',
+                                        color: COLORS.blue,
+                                        marginLeft: 4,
+                                    }}
+                                >
+                                    Còn lại: {item.address}
+                                </Text> */}
                             </View>
 
                             {/* Posts likes and comments */}
@@ -513,7 +599,11 @@ const Feed = ({ navigation }) => {
                                         flexDirection: 'row',
                                     }}
                                 >
-                                    <LikeButton postId={item._id} unLikePost={unLikePost} likePost={likePost}/>
+                                    <LikeButton
+                                        postId={item._id}
+                                        unLikePost={unLikePost}
+                                        likePost={likePost}
+                                    />
                                     <View
                                         style={{
                                             flexDirection: 'row',

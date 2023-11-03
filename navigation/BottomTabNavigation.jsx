@@ -20,7 +20,7 @@ import Create from '../screens/Post/Create'
 import { LinearGradient } from 'expo-linear-gradient'
 import AsyncStoraged from '../services/AsyncStoraged'
 import ImageAvata from '../assets/hero2.jpg'
-import OrganisationAvatar from '../assets/hero3.jpg'
+
 import ProfileOrganisation from '../screens/Profile/ProfileOrganisation'
 import { Image } from 'expo-image';
 

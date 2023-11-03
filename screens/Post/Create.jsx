@@ -23,8 +23,7 @@ import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
 import { AntDesign } from '@expo/vector-icons'
 import CustomAlert from '../../components/CustomAlert'
 import API_URL from '../../interfaces/config'
-import { Image } from 'expo-image';
-
+import { Image } from 'expo-image'
 
 const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
@@ -101,7 +100,6 @@ const Create = () => {
         setSelectedImage([])
         setParticipants(null)
         setContent(null)
-        setScope(null)
     }
     const [refreshing, setRefreshing] = React.useState(false)
 
@@ -197,7 +195,7 @@ const Create = () => {
                             height: 250,
                             backgroundColor: '#ffffff',
                             borderRadius: 25,
-                            alignItems: 'center', 
+                            alignItems: 'center',
                             justifyContent: 'center',
                             padding: 20,
                             position: 'relative',
@@ -205,9 +203,9 @@ const Create = () => {
                     >
                         <TouchableOpacity
                             style={{
-                                position: 'absolute', 
-                                top: 10, 
-                                right: 10, 
+                                position: 'absolute',
+                                top: 10,
+                                right: 10,
                             }}
                             onPress={() => setShowChoose(false)}
                         >
@@ -235,7 +233,9 @@ const Create = () => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                 }}
-                                onPress={() => (uploadPost('activity'), setShowChoose(false))}
+                                onPress={() => (
+                                    uploadPost('activity'), setShowChoose(false)
+                                )}
                             >
                                 <Image
                                     source={require(empathy)}
@@ -262,7 +262,9 @@ const Create = () => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                 }}
-                                onPress={() => (uploadPost('fund'), setShowChoose(false))}
+                                onPress={() => (
+                                    uploadPost('fund'), setShowChoose(false)
+                                )}
                             >
                                 <Image
                                     source={require(fundraising)}
