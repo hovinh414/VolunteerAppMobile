@@ -33,7 +33,7 @@ const Welcome = () => {
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
             <View
                 style={{
-                    padding:100,
+                    padding:50,
                     flex: 1,
                     marginHorizontal: 22,
                     alignItems: 'center',

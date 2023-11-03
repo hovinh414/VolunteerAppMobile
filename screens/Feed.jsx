@@ -15,7 +15,7 @@ import {
     MaterialIcons,
     Ionicons,
     Feather,
-    Foundation,
+    FontAwesome,
     MaterialCommunityIcons,
 } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -24,6 +24,7 @@ import { SliderBox } from 'react-native-image-slider-box'
 import axios from 'axios'
 import API_URL from '../interfaces/config'
 import { Image } from 'expo-image'
+import AsyncStoraged from '../services/AsyncStoraged'
 
 const post1 = [
     images.friend1,
@@ -142,6 +143,93 @@ const Feed = ({ navigation }) => {
             </View>
         )
     }
+    function LikeButton({ postId, likePost, unLikePost, onLikeUnlike }) {
+        const [isLiked, setIsLiked] = useState(false)
+        const [totalLike, setTotalLike] = useState(0)
+        const checkLikes = async () => {
+            try {
+                const res = await axios({
+                    method: 'get',
+                    url: API_URL.API_URL + '/post/like?postId=' + postId,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: token,
+                    },
+                })
+
+                if (res.data.message === 'User not like this post before') {
+                    setIsLiked(false)
+                } else {
+                    setIsLiked(true)
+                }
+            } catch (error) {
+                console.log(error)
+                setIsLiked(false)
+            }
+        }
+
+        useEffect(() => {
+            checkLikes()
+        }, [])
+        const fetchLikes = async () => {
+            try {
+                const response = await axios.get(
+                    API_URL.API_URL + '/post/likes/' + postId
+                )
+
+                if (response.data.status === 'SUCCESS') {
+                    setTotalLike(response.data.data.totalLikes)
+                }
+            } catch (error) {
+                console.error('API Error:', error)
+            }
+        }
+
+        useEffect(() => {
+            fetchLikes()
+        }, [])
+        const handleLikeClick = async () => {
+            try {
+                if (isLiked) {
+                    await unLikePost(postId)
+                    setIsLiked(false)
+                } else {
+                    await likePost(postId)
+                    setIsLiked(true)
+                }
+
+                fetchLikes() // Gọi hàm này sau khi thực hiện like/unlike thành công
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        return (
+            <View
+                style={{
+                    flexDirection: 'row',
+
+                    alignItems: 'center',
+                    marginRight: SIZES.padding2,
+                }}
+            >
+                <TouchableOpacity onPress={handleLikeClick}>
+                    {isLiked ? (
+                        <FontAwesome
+                            name="heart"
+                            size={20}
+                            color={COLORS.primary}
+                        />
+                    ) : (
+                        <Feather name="heart" size={20} color={COLORS.black} />
+                    )}
+                </TouchableOpacity>
+                <Text style={{ ...FONTS.body4, marginLeft: 5 }}>
+                    {totalLike}
+                </Text>
+            </View>
+        )
+    }
 
     function renderSuggestionsContainer() {
         return (
@@ -196,7 +284,16 @@ const Feed = ({ navigation }) => {
     }
 
     const [posts, setPosts] = useState([])
+    const [token, setToken] = useState('')
 
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
+    }
+
+    useEffect(() => {
+        getToken()
+    }, [])
     const getPosts = async () => {
         axios
             .get(API_URL.API_URL + '/posts?page=1&limit=6')
@@ -212,18 +309,45 @@ const Feed = ({ navigation }) => {
     useEffect(() => {
         getPosts()
     }, [])
-    // const getLikes = async (_postId) => {
-    //     try {
-    //         const response = await axios.get(
-    //             API_URL.API_URL + '/post/likes/' + _postId
-    //         )
-    //         if (response.data.status === 'SUCCESS') {
-    //             console.log(response.data)
-    //         }
-    //     } catch (error) {
-    //         console.error('API Error:', error)
-    //     }
-    // }
+
+    const likePost = async (_postId) => {
+        try {
+            const res = await axios({
+                method: 'post',
+                url: API_URL.API_URL + '/post/like',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+                data: {
+                    postId: _postId,
+                },
+            })
+        } catch (error) {
+            if (error) {
+                console.log(error)
+            }
+        }
+    }
+    const unLikePost = async (_postId) => {
+        try {
+            const res = await axios({
+                method: 'put',
+                url: API_URL.API_URL + '/post/unlike',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+                data: {
+                    postId: _postId,
+                },
+            })
+        } catch (error) {
+            if (error) {
+                console.log(error)
+            }
+        }
+    }
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
@@ -234,6 +358,7 @@ const Feed = ({ navigation }) => {
                     data={posts}
                     renderItem={({ item, index }) => (
                         <View
+                            key={index}
                             style={{
                                 backgroundColor: '#fff',
                                 flexDirection: 'column',
@@ -388,29 +513,7 @@ const Feed = ({ navigation }) => {
                                         flexDirection: 'row',
                                     }}
                                 >
-                                    <View
-                                        style={{
-                                            flexDirection: 'row',
-
-                                            alignItems: 'center',
-                                            marginRight: SIZES.padding2,
-                                        }}
-                                    >
-                                        <Feather
-                                            name="heart"
-                                            size={20}
-                                            color={COLORS.black}
-                                        />
-                                        <Text
-                                            style={{
-                                                ...FONTS.body4,
-                                                marginLeft: 2,
-                                            }}
-                                        >
-                                            {/* {getLikes(item._id)} */}
-                                        </Text>
-                                    </View>
-
+                                    <LikeButton postId={item._id} unLikePost={unLikePost} likePost={likePost}/>
                                     <View
                                         style={{
                                             flexDirection: 'row',

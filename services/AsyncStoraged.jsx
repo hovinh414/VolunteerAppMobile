@@ -22,6 +22,7 @@ class AsyncStoraged {
     removeData = async () => {
         try {
             await AsyncStorage.removeItem('Authorized');
+            await AsyncStorage.removeItem('Token');
         } catch (e) {
             console.error(e);
         }

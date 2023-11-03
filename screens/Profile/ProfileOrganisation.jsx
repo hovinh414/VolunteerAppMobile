@@ -21,7 +21,7 @@ import axios from 'axios'
 import CustomButton from '../../components/CustomButton'
 import CustomAlert from '../../components/CustomAlert'
 import API_URL from '../../interfaces/config'
-import { Image } from 'expo-image';
+import { Image } from 'expo-image'
 
 const PostsRoute = () => (
     <View
@@ -207,7 +207,50 @@ const VerifyRoute = ({ navigation }) => {
                 title={'ĐÓNG'}
                 icon={icon}
             />
-
+            <FlatList
+                data={selectedImages}
+                horizontal={true}
+                renderItem={({ item, index }) => (
+                    <View
+                        key={index}
+                        style={{
+                            position: 'relative',
+                            flexDirection: 'column',
+                            flex: 1,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <Image
+                            source={{ uri: item.uri }}
+                            style={{
+                                paddingVertical: 4,
+                                marginLeft: 12,
+                                width: 140,
+                                height: 140,
+                                borderRadius: 12,
+                            }}
+                        />
+                        <TouchableOpacity
+                            onPress={() => removeImage(item)}
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                right: 0,
+                                backgroundColor: '#C5C7C7',
+                                borderRadius: 12, // Bo tròn góc
+                                padding: 5,
+                            }}
+                        >
+                            <MaterialIcons
+                                name="delete"
+                                size={20}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                )}
+            />
             <TouchableOpacity
                 style={{
                     paddingTop: 25,
@@ -342,9 +385,9 @@ const ProfileOrganisation = ({ navigation }) => {
 
                     <View
                         style={{
-                            justifyContent:'center',
-                            alignContent:'center',
-                            alignItems:'center',
+                            justifyContent: 'center',
+                            alignContent: 'center',
+                            alignItems: 'center',
                         }}
                     >
                         <Text
