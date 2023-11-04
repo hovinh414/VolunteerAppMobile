@@ -192,7 +192,7 @@ const VerifyRoute = ({ navigation }) => {
                 }
             })
             .catch((error) => {
-                console.error('API Error:', error)
+                console.log('API Error:', error)
                 setMess('Đăng minh chứng thất bại!')
                 setIcon('FAIL')
                 setShowWarning(true)

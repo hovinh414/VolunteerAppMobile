@@ -133,6 +133,7 @@ const Signup = ({ navigation }) => {
 
             })
         } catch (error) {
+            console.log('API Error:', error)
             setMess('Đăng ký thất bại!');
             setIcon('FAIL');
             setShowWarning(true);

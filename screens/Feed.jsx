@@ -182,7 +182,7 @@ const Feed = ({ navigation }) => {
                     setTotalLike(response.data.data.totalLikes)
                 }
             } catch (error) {
-                console.error('API Error:', error)
+                console.log('API Error:', error)
             }
         }
 
@@ -255,18 +255,18 @@ const Feed = ({ navigation }) => {
             )
         }
     }
-    function DaysDifference({ createdAt }) {
+    function DaysDifference({ exprirationDate }) {
         const [daysDifference, setDaysDifference] = useState(null)
 
         useEffect(() => {
             const currentDate = new Date()
-            const targetDate = new Date(createdAt)
+            const targetDate = new Date(exprirationDate)
             const timeDifference = targetDate - currentDate
             const daysDifference = Math.floor(
                 timeDifference / (1000 * 60 * 60 * 24)
             )
             setDaysDifference(daysDifference)
-        }, [createdAt])
+        }, [exprirationDate])
 
         if (daysDifference === null) {
             return null // Hoặc thay thế bằng UI mặc định khác nếu cần
@@ -372,7 +372,7 @@ const Feed = ({ navigation }) => {
                 }
             })
             .catch((error) => {
-                console.error('API Error:', error)
+                console.log('API Error:', error)
             })
     }
     useEffect(() => {
@@ -428,6 +428,31 @@ const Feed = ({ navigation }) => {
             setRefreshing(false)
         })
     }
+    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const fetchNextPage = async () => {
+        if (!isFetchingNextPage && currentPage < 10) {
+            setIsFetchingNextPage(true)
+            
+            try {
+                const response = await axios.get(
+                    `${API_URL.API_URL}/posts?page=${currentPage + 1}&limit=6`
+                )
+                if (response.data.status === 'SUCCESS') {
+                    setPosts([...posts, ...response.data.data])
+                    setCurrentPage(currentPage + 1)
+                }
+                else {
+                    setPosts([...posts, ...response.data.data])
+                }
+            } catch (error) {
+                console.log('API Error:', error);
+            } finally {
+                setIsFetchingNextPage(false)
+            }
+        }
+    }
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
             <View style={{ flex: 1 }}>
@@ -435,10 +460,12 @@ const Feed = ({ navigation }) => {
                 {renderSuggestionsContainer()}
                 <FlatList
                     data={posts}
+                    onEndReached={fetchNextPage}
+                    onEndReachedThreshold={0.1}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={() => onRefresh()} // Định nghĩa hàm xử lý khi làm mới
+                            onRefresh={onRefresh}
                         />
                     }
                     renderItem={({ item, index }) => (
@@ -594,7 +621,7 @@ const Feed = ({ navigation }) => {
                                     size={21}
                                     color={COLORS.blue}
                                 />
-                                <DaysDifference createdAt={item.createdAt} />
+                                <DaysDifference exprirationDate={item.exprirationDate} />
                                 {/* <Text
                                     style={{
                                         fontSize: 13,

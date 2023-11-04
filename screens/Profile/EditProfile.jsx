@@ -161,7 +161,7 @@ const EditProfile = ({ navigation }) => {
         }
       })
       .catch((error) => {
-       
+        console.log('API Error:', error)
         setMess('Thay đổi thông tin thất bại!');
         setIcon('FAIL');
         setShowWarning(true);

@@ -100,8 +100,8 @@ const ChangeAddress = () => {
                 }
                 setStateData(stateArray)
             })
-            .catch(function (error) {
-                console.log(error)
+            .catch((error) => {
+                console.log('API Error:', error)
             })
     }
 

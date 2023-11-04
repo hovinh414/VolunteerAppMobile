@@ -75,6 +75,7 @@ const ChangePassword = ({ navigation }) => {
 
             }
         } catch (error){
+            console.log('API Error:', error)
             setMess('Thay đổi mật khẩu thất bại!');
             setIcon('FAIL');
             setShowWarning(true);

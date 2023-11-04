@@ -112,7 +112,6 @@ const Create = () => {
 
     const formData = new FormData()
     const uploadPost = async (_type) => {
-        console.log(_type)
         selectedImages.forEach((images, index) => {
             formData.append('images', {
                 uri: images.uri,
@@ -157,7 +156,7 @@ const Create = () => {
                 }
             })
             .catch((error) => {
-                console.error('API Error:', error)
+                console.log('API Error:', error)
                 setMess('Đăng bài viết thất bại!')
                 setIcon('FAIL')
                 setShowWarning(true)

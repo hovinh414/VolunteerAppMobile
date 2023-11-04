@@ -91,6 +91,7 @@ const LoginScreen = ({ navigation }) => {
 
         } catch (error) {
             if (error) {
+                console.log('API Error:', error)
                 setMess('Sai thông tin đăng nhập!');
                 setIcon('FAIL');
                 setShowWarning(true);
