@@ -27,6 +27,7 @@ import { Image } from 'expo-image'
 import AsyncStoraged from '../services/AsyncStoraged'
 import { useFocusEffect } from '@react-navigation/native'
 
+
 const post1 = [
     images.friend1,
     images.friend2,
@@ -455,6 +456,7 @@ const Feed = ({ navigation }) => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+        
             <View style={{ flex: 1 }}>
                 {renderHeader()}
                 {renderSuggestionsContainer()}
@@ -603,6 +605,7 @@ const Feed = ({ navigation }) => {
                                         fontFamily: 'regular',
                                         color: COLORS.primary,
                                         marginLeft: 4,
+                                        marginRight:10
                                     }}
                                 >
                                     {item.address}

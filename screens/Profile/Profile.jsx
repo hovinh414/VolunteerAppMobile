@@ -119,8 +119,6 @@ const Profile = ({navigation}) => {
                     paddingHorizontal: 6,
                     paddingVertical: 18,
                     backgroundColor: '#FFFFFF',
-                    
-
                 }}
             >
                 <View
@@ -132,7 +130,7 @@ const Profile = ({navigation}) => {
                     {/* Profile image container */}
                     <View>
                         <Image
-                            source={avatar ? {uri: avatar} : ImageAvata}
+                            source={avatar ? { uri: avatar } : ImageAvata}
                             contentFit="contain"
                             style={{
                                 height: 90,
@@ -146,11 +144,20 @@ const Profile = ({navigation}) => {
 
                     <View
                         style={{
-                            flexDirection: 'column',
-                            flex: 1,
-                            marginLeft: 6,
+                            justifyContent: 'center',
+                            alignContent: 'center',
+                            alignItems: 'center',
                         }}
                     >
+                        <Text
+                            style={{
+                                ...FONTS.body3,
+                                fontSize: 16,
+                            }}
+                        >
+                            {fullname}
+                        </Text>
+
                         <View
                             style={{
                                 flex: 1,
@@ -159,17 +166,6 @@ const Profile = ({navigation}) => {
                                 alignItems: 'center',
                             }}
                         >
-                            
-                        </View>
-
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                            }}
-                        >
-                            
-                            
                             <View
                                 style={{
                                     backgroundColor: '#FFF9E8',
@@ -180,22 +176,22 @@ const Profile = ({navigation}) => {
                                     padding: 15,
                                 }}
                             >
-                                <Text style={{ ...FONTS.body4 }}>Đã tham gia 24 hoạt động</Text>
+                                <Text style={{ ...FONTS.body4 }}>
+                                    Đã tổ chức 24 hoạt động
+                                </Text>
                             </View>
-                            
                         </View>
-                        
                     </View>
+
                     <Feather
-                                style={{
-                                    
-                                    paddingLeft: 10,
-                                }}
-                                name="menu"
-                                size={24}
-                                color={COLORS.black}
-                                onPress={() => navigation.navigate("Settings")}
-                            />
+                        style={{
+                            paddingLeft: 10,
+                        }}
+                        name="menu"
+                        size={24}
+                        color={COLORS.black}
+                        onPress={() => navigation.navigate('Settings')}
+                    />
                 </View>
 
                 <View
@@ -204,7 +200,6 @@ const Profile = ({navigation}) => {
                         marginVertical: 12,
                     }}
                 >
-                    <Text style={{ ...FONTS.body3 }}>{fullname}</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Email: </Text>
                         <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
@@ -214,7 +209,13 @@ const Profile = ({navigation}) => {
 
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{ ...FONTS.body4 }}>Địa chỉ: </Text>
-                        <Text style={{ ...FONTS.body4, color: COLORS.blue, paddingRight:100, }}>
+                        <Text
+                            style={{
+                                ...FONTS.body4,
+                                color: COLORS.blue,
+                                paddingRight: 100,
+                            }}
+                        >
                             {address}
                         </Text>
                     </View>
