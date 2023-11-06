@@ -33,8 +33,7 @@ import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 
 
-
-
+const share = '../../assets/share.png'
 const PostsRoute = () => {
     const [orgId, setOrgId] = useState()
     const [posts, setPosts] = useState([])
@@ -260,9 +259,9 @@ const PostsRoute = () => {
             })
     }
     useEffect(() => {
-        getPosts();
-    }, [orgId]); // Ensure that orgId is updated as expected
-    
+        getPosts()
+    }, [orgId]) // Ensure that orgId is updated as expected
+
     const [refreshing, setRefreshing] = useState(false)
     const onRefresh = () => {
         setRefreshing(true)
@@ -446,7 +445,7 @@ const PostsRoute = () => {
                                     fontFamily: 'regular',
                                     color: COLORS.primary,
                                     marginLeft: 4,
-                                    marginRight:10
+                                    marginRight: 10,
                                 }}
                             >
                                 {item.address}
@@ -465,6 +464,7 @@ const PostsRoute = () => {
                                 size={21}
                                 color={COLORS.blue}
                             />
+                            
                             <DaysDifference
                                 exprirationDate={item.exprirationDate}
                             />
@@ -494,7 +494,7 @@ const PostsRoute = () => {
                                 <View
                                     style={{
                                         flexDirection: 'row',
-
+                                        marginRight: SIZES.padding2,
                                         alignItems: 'center',
                                     }}
                                 >
@@ -512,32 +512,43 @@ const PostsRoute = () => {
                                         03
                                     </Text>
                                 </View>
+                                <View
+                                        style={{
+                                            flexDirection: 'row',
+
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <Image
+                                            source={require(share)}
+                                            style={{
+                                                width: 20,
+                                                height: 20,
+                                            }}
+                                        />
+                                    </View>
                             </View>
 
                             <View style={{ flexDirection: 'row' }}>
-                                <View>
+                                <TouchableOpacity
+                                    style={{
+                                        backgroundColor: COLORS.primary,
+                                        borderRadius: 10,
+                                        padding: 8,
+                                    }}
+                                >
                                     <Text
                                         style={{
-                                            ...FONTS.body4,
-                                            fontWeight: 'bold',
+                                            color: 'white',
+                                            textAlign: 'center',
+                                            fontWeight: '500',
                                         }}
                                     >
-                                        Tham gia 36/100
+                                        Tham Gia
                                     </Text>
-                                </View>
-                                <View
-                                    style={{
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        marginLeft: 10,
-                                    }}
-                                ></View>
+                                </TouchableOpacity>
                             </View>
                         </View>
-
-
-
                     </View>
                 )}
             />
@@ -647,7 +658,7 @@ const VerifyRoute = ({ navigation }) => {
     }
 
     return (
-        <ScrollView style={{ flex: 1, paddingTop: 25,marginHorizontal: 22, }}>
+        <ScrollView style={{ flex: 1, paddingTop: 25, marginHorizontal: 22 }}>
             <CustomAlert
                 visible={showWarning}
                 mess={mess}
@@ -766,8 +777,8 @@ const VerifyRoute = ({ navigation }) => {
                             backgroundColor: 'transparent',
                         }}
                     >
-                        * (Ảnh chụp phải rõ nét, ảnh CCCD là hình gốc không
-                        scan hay photocopy, không bị mất góc)
+                        * (Ảnh chụp phải rõ nét, ảnh CCCD là hình gốc không scan
+                        hay photocopy, không bị mất góc)
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -790,7 +801,7 @@ const ProfileOrganisation = ({ navigation }) => {
     const [address, setAddress] = useState('')
     const [email, setEmail] = useState('')
     const [isActive, setIsActive] = useState(false)
-    const [routes, setRoute] = useState([]);
+    const [routes, setRoute] = useState([])
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
@@ -921,47 +932,42 @@ const ProfileOrganisation = ({ navigation }) => {
     const [index, setIndex] = useState(0)
     useEffect(() => {
         if (!isActive) {
-          setRoute([
-            { key: 'first', title: 'Hoạt động', icon: 'team' },
-            { key: 'second', title: 'Đăng minh chứng', icon: 'upload' },
-          ]);
+            setRoute([
+                { key: 'first', title: 'Hoạt động', icon: 'team' },
+                { key: 'second', title: 'Đăng minh chứng', icon: 'upload' },
+            ])
         } else {
-          setRoute([
-            { key: 'first', title: 'Hoạt động', icon: 'team' },
-          ]);
+            setRoute([{ key: 'first', title: 'Hoạt động', icon: 'team' }])
         }
-      }, [isActive]);
-      
+    }, [isActive])
+
     const renderTabBar = (props) => {
-        return routes.length === 1
-          ? null
-          : (
+        return routes.length === 1 ? null : (
             <TabBar
-              {...props}
-              indicatorStyle={{
-                backgroundColor: COLORS.primary,
-              }}
-              renderIcon={({ route, focused, color }) => (
-                <AntDesign
-                  name={route.icon}
-                  size={20}
-                  color={focused ? COLORS.black : 'gray'}
-                />
-              )}
-              style={{
-                backgroundColor: '#fff',
-                height: 64,
-              }}
-              renderLabel={({ focused, route }) => (
-                <Text style={[{ color: focused ? COLORS.black : 'gray' }]}>
-                  {route.title}
-                </Text>
-              )}
+                {...props}
+                indicatorStyle={{
+                    backgroundColor: COLORS.primary,
+                }}
+                renderIcon={({ route, focused, color }) => (
+                    <AntDesign
+                        name={route.icon}
+                        size={20}
+                        color={focused ? COLORS.black : 'gray'}
+                    />
+                )}
+                style={{
+                    backgroundColor: '#fff',
+                    height: 64,
+                }}
+                renderLabel={({ focused, route }) => (
+                    <Text style={[{ color: focused ? COLORS.black : 'gray' }]}>
+                        {route.title}
+                    </Text>
+                )}
             />
-          );
-      };
-      
-    
+        )
+    }
+
     return (
         <SafeAreaView
             style={{

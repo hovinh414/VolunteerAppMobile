@@ -17,7 +17,8 @@ import ChangePassword from './screens/Profile/ChangePassword'
 import ChangeAddress from './screens/Profile/ChangeAddress'
 import Chat from './screens/Chat/Chat'
 import ChatDetail from './screens/Chat/ChatDetail'
-
+import DetailPost from './screens/Post/DetailPost'
+import ViewDetailImage from './screens/Post/ViewDetailImage'
 
 const Stack = createNativeStackNavigator()
 
@@ -120,6 +121,20 @@ export default function App() {
                     <Stack.Screen
                         name="ChatDetail"
                         component={ChatDetail}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="DetailPost"
+                        component={DetailPost}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ViewDetailImage"
+                        component={ViewDetailImage}
                         options={{
                             headerShown: false,
                         }}

@@ -6,6 +6,7 @@ import {
     FlatList,
     TextInput,
     RefreshControl,
+    Button,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
 import React, { useState, useEffect } from 'react'
@@ -27,28 +28,7 @@ import { Image } from 'expo-image'
 import AsyncStoraged from '../services/AsyncStoraged'
 import { useFocusEffect } from '@react-navigation/native'
 
-
-const post1 = [
-    images.friend1,
-    images.friend2,
-    images.friend3,
-    images.friend4,
-    images.friend5,
-]
-const post2 = [
-    images.user1,
-    images.user2,
-    images.user3,
-    images.user4,
-    images.user5,
-]
-const post3 = [
-    images.post1,
-    images.post2,
-    images.post3,
-    images.post4,
-    images.post5,
-]
+const share = '../assets/share.png'
 const Feed = ({ navigation }) => {
     function renderHeader() {
         return (
@@ -88,6 +68,7 @@ const Feed = ({ navigation }) => {
                     }}
                 >
                     <TouchableOpacity
+                        onPress={() => navigation.navigate('DetailPost')}
                         style={{
                             height: 50,
                             width: 50,
@@ -355,6 +336,7 @@ const Feed = ({ navigation }) => {
 
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
+    const [avatar, setAvatar] = useState('')
 
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -363,6 +345,13 @@ const Feed = ({ navigation }) => {
 
     useEffect(() => {
         getToken()
+    }, [])
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setAvatar(userStored.avatar)
+    }
+    useEffect(() => {
+        getUserStored()
     }, [])
     const getPosts = async () => {
         axios
@@ -403,6 +392,22 @@ const Feed = ({ navigation }) => {
             }
         }
     }
+    const joinActivity = async (_activityId) => {
+        try {
+            const res = await axios({
+                method: 'put',
+                url: API_URL.API_URL + '/activity/' + _activityId,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            })
+        } catch (error) {
+            if (error) {
+                console.log(error)
+            }
+        }
+    }
     const unLikePost = async (_postId) => {
         try {
             const res = await axios({
@@ -434,7 +439,7 @@ const Feed = ({ navigation }) => {
     const fetchNextPage = async () => {
         if (!isFetchingNextPage && currentPage < 10) {
             setIsFetchingNextPage(true)
-            
+
             try {
                 const response = await axios.get(
                     `${API_URL.API_URL}/posts?page=${currentPage + 1}&limit=6`
@@ -442,21 +447,33 @@ const Feed = ({ navigation }) => {
                 if (response.data.status === 'SUCCESS') {
                     setPosts([...posts, ...response.data.data])
                     setCurrentPage(currentPage + 1)
-                }
-                else {
+                } else {
                     setPosts([...posts, ...response.data.data])
                 }
             } catch (error) {
-                console.log('API Error:', error);
+                console.log('API Error:', error)
             } finally {
                 setIsFetchingNextPage(false)
             }
         }
     }
+    const [detail, setDetail] = useState({})
+    const viewDetailPost = async (_postId) => {
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/post/' + _postId
+            )
+            if (response.data.status === 'SUCCESS') {
+                setDetail(response.data.data)
+                navigation.navigate('DetailPost', response.data.data )
+            }
+        } catch (error) {
+            console.log('API Error:', error)
+        }
+    }
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-        
             <View style={{ flex: 1 }}>
                 {renderHeader()}
                 {renderSuggestionsContainer()}
@@ -484,7 +501,7 @@ const Feed = ({ navigation }) => {
                             }}
                         >
                             {/* Post header */}
-                            <View
+                            <TouchableOpacity
                                 style={{
                                     flexDirection: 'row',
                                     justifyContent: 'space-between',
@@ -492,6 +509,7 @@ const Feed = ({ navigation }) => {
                                     marginTop: 12,
                                     paddingBottom: 10,
                                 }}
+                                onPress={() => viewDetailPost(item._id)}
                             >
                                 <View
                                     style={{
@@ -526,7 +544,7 @@ const Feed = ({ navigation }) => {
                                     size={24}
                                     color={COLORS.black}
                                 />
-                            </View>
+                            </TouchableOpacity>
                             <View>
                                 <SliderBox
                                     images={item.media}
@@ -537,6 +555,7 @@ const Feed = ({ navigation }) => {
                                     sliderBoxHeight={500}
                                     dotStyle={{ width: 7, height: 7 }}
                                 />
+
                                 {/* <FlatList
                                     data={item}
                                     horizontal
@@ -605,7 +624,7 @@ const Feed = ({ navigation }) => {
                                         fontFamily: 'regular',
                                         color: COLORS.primary,
                                         marginLeft: 4,
-                                        marginRight:10
+                                        marginRight: 10,
                                     }}
                                 >
                                     {item.address}
@@ -624,17 +643,9 @@ const Feed = ({ navigation }) => {
                                     size={21}
                                     color={COLORS.blue}
                                 />
-                                <DaysDifference exprirationDate={item.exprirationDate} />
-                                {/* <Text
-                                    style={{
-                                        fontSize: 13,
-                                        fontFamily: 'regular',
-                                        color: COLORS.blue,
-                                        marginLeft: 4,
-                                    }}
-                                >
-                                    Còn lại: {item.address}
-                                </Text> */}
+                                <DaysDifference
+                                    exprirationDate={item.exprirationDate}
+                                />
                             </View>
 
                             {/* Posts likes and comments */}
@@ -661,7 +672,7 @@ const Feed = ({ navigation }) => {
                                     <View
                                         style={{
                                             flexDirection: 'row',
-
+                                            marginRight: SIZES.padding2,
                                             alignItems: 'center',
                                         }}
                                     >
@@ -679,69 +690,90 @@ const Feed = ({ navigation }) => {
                                             03
                                         </Text>
                                     </View>
-                                </View>
-
-                                <View style={{ flexDirection: 'row' }}>
-                                    <View>
-                                        <Text
-                                            style={{
-                                                ...FONTS.body4,
-                                                fontWeight: 'bold',
-                                            }}
-                                        >
-                                            Tham gia 36/100
-                                        </Text>
-                                    </View>
                                     <View
                                         style={{
                                             flexDirection: 'row',
+
                                             alignItems: 'center',
-                                            justifyContent: 'center',
-                                            marginLeft: 10,
                                         }}
-                                    ></View>
+                                    >
+                                        <Image
+                                            source={require(share)}
+                                            style={{
+                                                width: 20,
+                                                height: 20,
+                                            }}
+                                        />
+                                    </View>
+                                </View>
+
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    {/* Tham gia hoạt động */}
+                                    <TouchableOpacity
+                                        style={{
+                                            backgroundColor: COLORS.primary,
+                                            borderRadius: 10,
+                                            padding: 8,
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                color: 'white',
+                                                textAlign: 'center',
+                                                fontWeight: '500',
+                                            }}
+                                        >
+                                            Tham Gia
+                                        </Text>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
 
                             {/* comment section */}
 
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    marginHorizontal: 8,
-                                    paddingVertical: 18,
-                                    borderTopWidth: 1,
-                                    borderTopColor: '#FFF',
-                                }}
-                            >
-                                <Image
-                                    source={images.user2}
-                                    contentFit="contain"
-                                    style={{
-                                        height: 52,
-                                        width: 52,
-                                        borderRadius: 26,
-                                    }}
-                                />
-
+                            {!avatar ? null : (
                                 <View
                                     style={{
-                                        flex: 1,
-                                        height: 52,
-                                        borderRadius: 26,
-                                        borderWidth: 1,
-                                        borderColor: '#CCC',
-                                        marginLeft: 12,
-                                        paddingLeft: 12,
-                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                        marginHorizontal: 8,
+                                        paddingVertical: 18,
+                                        borderTopWidth: 1,
+                                        borderTopColor: '#FFF',
                                     }}
                                 >
-                                    <TextInput
-                                        placeholder="Thêm bình luận"
-                                        placeholderTextColor="#CCC"
+                                    <Image
+                                        source={avatar}
+                                        contentFit="contain"
+                                        style={{
+                                            height: 52,
+                                            width: 52,
+                                            borderRadius: 26,
+                                        }}
                                     />
+
+                                    <View
+                                        style={{
+                                            flex: 1,
+                                            height: 52,
+                                            borderRadius: 26,
+                                            borderWidth: 1,
+                                            borderColor: '#CCC',
+                                            marginLeft: 12,
+                                            paddingLeft: 12,
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        <TextInput
+                                            placeholder="Thêm bình luận"
+                                            placeholderTextColor="#CCC"
+                                        />
+                                    </View>
                                 </View>
-                            </View>
+                            )}
                         </View>
                     )}
                 />
