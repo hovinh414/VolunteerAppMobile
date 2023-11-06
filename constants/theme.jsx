@@ -2,7 +2,7 @@ import { Dimensions } from 'react-native'
 const { height, width } = Dimensions.get('window')
 
 export const COLORS = {
-    primary: '#FF493C',
+    primary: '#FF0035',
     secondary: '#662626',
     white: '#fff2cf',
     black: '#212121',
@@ -89,6 +89,11 @@ export const FONTS = {
         fontSize: SIZES.body4,
         lineHeight: 20,
         color: COLORS.black,
+    },
+    body5: {
+        fontFamily: 'regularBold',
+        fontSize: SIZES.body4,
+        lineHeight: 20,
     },
 }
 

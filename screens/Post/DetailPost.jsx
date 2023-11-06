@@ -65,14 +65,49 @@ const DetailPost = ({ navigation, route }) => {
             )
         }
     }
-    const handleNavigate = data => {
+    function LongText({ content, maxLength }) {
+        const [isFullTextVisible, setIsFullTextVisible] = useState(false)
+
+        // Hàm này được gọi khi người dùng bấm vào nút "Xem thêm" hoặc "Thu gọn"
+        const toggleTextVisibility = () => {
+            setIsFullTextVisible(!isFullTextVisible)
+        }
+
+        // Hiển thị nội dung đầy đủ hoặc ngắn gọn tùy thuộc vào trạng thái
+        const displayText = isFullTextVisible
+            ? content
+            : content.slice(0, maxLength)
+
+        return (
+            <View>
+                <Text
+                    style={{
+                        fontSize: 16,
+                        textAlign: 'justify',
+                    }}
+                >
+                    {displayText}
+                </Text>
+                {content.length > maxLength && (
+                    <TouchableOpacity onPress={toggleTextVisibility}>
+                        <Text
+                            style={{ fontWeight: '500', color: COLORS.primary }}
+                        >
+                            {isFullTextVisible ? '...Thu gọn' : '...Xem thêm'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        )
+    }
+    const handleNavigate = (data) => {
         // console.log(item)
-        navigation.navigate('ViewDetailImage', data);
-      };
+        navigation.navigate('ViewDetailImage', data)
+    }
     return (
         <ScrollView
             style={{
-                backgroundColor:'#fff'
+                backgroundColor: '#fff',
             }}
         >
             <View style={{ flex: 1, marginBottom: 15 }}>
@@ -364,14 +399,7 @@ const DetailPost = ({ navigation, route }) => {
                 >
                     Câu chuyện
                 </Text>
-                <Text
-                    style={{
-                        fontSize: 16,
-                        textAlign: 'justify',
-                    }}
-                >
-                    {items.content}
-                </Text>
+                <LongText maxLength={250} content={items.content}/>
             </View>
             <View
                 style={{

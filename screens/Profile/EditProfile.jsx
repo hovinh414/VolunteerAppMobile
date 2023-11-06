@@ -6,7 +6,7 @@ import {
   Modal,
   SafeAreaView,
   KeyboardAvoidingView,
-  RefreshControl
+  RefreshControl,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import axios from 'axios';

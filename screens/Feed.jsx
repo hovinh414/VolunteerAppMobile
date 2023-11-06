@@ -281,7 +281,35 @@ const Feed = ({ navigation }) => {
             )
         }
     }
+    function LongText({ content, maxLength }) {
+        const [isFullTextVisible, setIsFullTextVisible] = useState(false)
 
+        // Hàm này được gọi khi người dùng bấm vào nút "Xem thêm" hoặc "Thu gọn"
+        const toggleTextVisibility = () => {
+            setIsFullTextVisible(!isFullTextVisible)
+        }
+
+        // Hiển thị nội dung đầy đủ hoặc ngắn gọn tùy thuộc vào trạng thái
+        const displayText = isFullTextVisible
+            ? content
+            : content.slice(0, maxLength)
+
+        return (
+            <View>
+                <Text style={{ ...FONTS.body4 }}>{displayText}</Text>
+
+                {content.length > maxLength && (
+                    <TouchableOpacity onPress={toggleTextVisibility}>
+                        <Text
+                            style={{ fontWeight: '500', color: COLORS.primary }}
+                        >
+                            {isFullTextVisible ? '...Thu gọn' : '...Xem thêm'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        )
+    }
     function renderSuggestionsContainer() {
         return (
             <View
@@ -530,7 +558,7 @@ const Feed = ({ navigation }) => {
                                     <View style={{ marginLeft: 12 }}>
                                         <Text
                                             style={{
-                                                ...FONTS.body3,
+                                                ...FONTS.body5,
                                                 fontWeight: 'bold',
                                             }}
                                         >
@@ -580,19 +608,20 @@ const Feed = ({ navigation }) => {
                                 /> */}
                             </View>
 
+                            <View
+                                style={{
+                                    marginHorizontal: 8,
+                                    marginVertical: 8,
+                                }}
+                            >
+                                <LongText
+                                    maxLength={150}
+                                    content={item.content}
+                                />
+                            </View>
                             <TouchableOpacity
                                 onPress={() => viewDetailPost(item._id)}
                             >
-                                <View
-                                    style={{
-                                        marginHorizontal: 8,
-                                        marginVertical: 8,
-                                    }}
-                                >
-                                    <Text style={{ ...FONTS.body4 }}>
-                                        {item.content}
-                                    </Text>
-                                </View>
                                 <View
                                     style={{
                                         paddingLeft: 10,
@@ -721,14 +750,14 @@ const Feed = ({ navigation }) => {
                                         style={{
                                             backgroundColor: COLORS.primary,
                                             borderRadius: 10,
-                                            padding: 8,
+                                            padding: 5,
                                         }}
                                     >
                                         <Text
                                             style={{
+                                                ...FONTS.body5,
                                                 color: 'white',
-                                                textAlign: 'center',
-                                                fontWeight: '500',
+                                                
                                             }}
                                         >
                                             Tham Gia
