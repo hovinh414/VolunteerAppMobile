@@ -465,7 +465,7 @@ const Feed = ({ navigation }) => {
             )
             if (response.data.status === 'SUCCESS') {
                 setDetail(response.data.data)
-                navigation.navigate('DetailPost', response.data.data )
+                navigation.navigate('DetailPost', response.data.data)
             }
         } catch (error) {
             console.log('API Error:', error)
@@ -580,73 +580,77 @@ const Feed = ({ navigation }) => {
                                 /> */}
                             </View>
 
-                            <View
-                                style={{
-                                    marginHorizontal: 8,
-                                    marginVertical: 8,
-                                }}
+                            <TouchableOpacity
+                                onPress={() => viewDetailPost(item._id)}
                             >
-                                <Text style={{ ...FONTS.body4 }}>
-                                    {item.content}
-                                </Text>
-                            </View>
-                            <View
-                                style={{
-                                    paddingLeft: 10,
-                                    paddingBottom: 5,
-                                }}
-                            >
-                                <Progress.Bar
-                                    progress={36 / 100}
-                                    color="#FF493C"
-                                    height={8}
-                                    width={SIZES.width - 20}
-                                    unfilledColor="#F5F5F5"
-                                    borderColor="#F5F5F5"
-                                    borderRadius={25}
-                                />
-                            </View>
-                            <View
-                                style={{
-                                    margin: 8,
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Ionicons
-                                    name="location-outline"
-                                    size={22}
-                                    color={COLORS.primary}
-                                />
-                                <Text
+                                <View
                                     style={{
-                                        fontSize: 13,
-                                        fontFamily: 'regular',
-                                        color: COLORS.primary,
-                                        marginLeft: 4,
-                                        marginRight: 10,
+                                        marginHorizontal: 8,
+                                        marginVertical: 8,
                                     }}
                                 >
-                                    {item.address}
-                                </Text>
-                            </View>
-                            <View
-                                style={{
-                                    marginHorizontal: 8,
-                                    marginBottom: 8,
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Ionicons
-                                    name="calendar-outline"
-                                    size={21}
-                                    color={COLORS.blue}
-                                />
-                                <DaysDifference
-                                    exprirationDate={item.exprirationDate}
-                                />
-                            </View>
+                                    <Text style={{ ...FONTS.body4 }}>
+                                        {item.content}
+                                    </Text>
+                                </View>
+                                <View
+                                    style={{
+                                        paddingLeft: 10,
+                                        paddingBottom: 5,
+                                    }}
+                                >
+                                    <Progress.Bar
+                                        progress={36 / 100}
+                                        color="#FF493C"
+                                        height={8}
+                                        width={SIZES.width - 20}
+                                        unfilledColor="#F5F5F5"
+                                        borderColor="#F5F5F5"
+                                        borderRadius={25}
+                                    />
+                                </View>
+                                <View
+                                    style={{
+                                        margin: 8,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="location-outline"
+                                        size={22}
+                                        color={COLORS.primary}
+                                    />
+                                    <Text
+                                        style={{
+                                            fontSize: 13,
+                                            fontFamily: 'regular',
+                                            color: COLORS.primary,
+                                            marginLeft: 4,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        {item.address}
+                                    </Text>
+                                </View>
+                                <View
+                                    style={{
+                                        marginHorizontal: 8,
+                                        marginBottom: 8,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="calendar-outline"
+                                        size={21}
+                                        color={COLORS.blue}
+                                    />
+                                    <DaysDifference
+                                        exprirationDate={item.exprirationDate}
+                                    />
+                                </View>
+                            </TouchableOpacity>
 
                             {/* Posts likes and comments */}
 

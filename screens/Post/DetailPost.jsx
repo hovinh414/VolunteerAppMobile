@@ -25,7 +25,6 @@ import { SliderBox } from 'react-native-image-slider-box'
 
 const DetailPost = ({ navigation, route }) => {
     const items = route.params
-    console.log(items.media)
     function DaysDifference({ exprirationDate }) {
         const [daysDifference, setDaysDifference] = useState(null)
 
