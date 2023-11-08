@@ -246,7 +246,148 @@ const Feed = ({ navigation }) => {
             )
         }
     }
-    
+    function JoinButton({ joinActivity, _isJoin, _activityId }) {
+        console.log(_isJoin)
+        const [isJoin, setIsJoin] = useState(_isJoin)
+        const handleJoinCLick = async () => {
+            try {
+                await joinActivity(_activityId)
+                setIsJoin(true)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        if (token !== null) {
+            return (
+                <View
+                    style={{
+                        flexDirection: 'row',
+                    }}
+                >
+                    <Modal
+                        visible={showWarning}
+                        animationType="fade"
+                        transparent
+                        onRequestClose={() => setShowWarning(false)}
+                    >
+                        <View
+                            style={{
+                                flex: 1,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                shadowColor: '#000',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 2,
+                                },
+                                shadowOpacity: 0.75,
+                                shadowRadius: 4,
+                                elevation: 5,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    width: 300,
+                                    height: 200,
+                                    backgroundColor: '#ffffff',
+                                    borderRadius: 25,
+                                    alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
+                                    justifyContent: 'center', //
+                                }}
+                            >
+                                <Image
+                                    source={require(question)}
+                                    style={{
+                                        marginTop: 15,
+                                        width: 50,
+                                        height: 50,
+                                    }}
+                                />
+                                <Text
+                                    style={{
+                                        marginTop: 15,
+                                        fontWeight: 'bold',
+                                        fontSize: 18,
+                                    }}
+                                >
+                                    Bạn có muốn tham gia hoạt động?
+                                </Text>
+
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        marginTop: 30,
+                                    }}
+                                >
+                                    <View
+                                        style={{
+                                            width: 80,
+                                            marginRight: 15,
+                                        }}
+                                    >
+                                        <CustomButtonV2
+                                            title="ĐÓNG"
+                                            onPress={() =>
+                                                setShowWarning(false)
+                                            }
+                                        />
+                                    </View>
+                                    <View
+                                        style={{
+                                            width: 80,
+                                        }}
+                                    >
+                                        <CustomButton
+                                            title="ĐỒNG Ý"
+                                            onPress={handleJoinCLick}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
+                    {/* Tham gia hoạt động */}
+                    {type === 'Organization' || !type ? null : isJoin ? (
+                        <View
+                            style={{
+                                backgroundColor: '#ccc',
+                                borderRadius: 10,
+                                padding: 5,
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    ...FONTS.body5,
+                                    color: 'black',
+                                }}
+                            >
+                                Đã tham gia
+                            </Text>
+                        </View>
+                    ) : (
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: COLORS.primary,
+                                borderRadius: 10,
+                                padding: 5,
+                            }}
+                            onPress={() => setShowWarning(true)}
+                        >
+                            <Text
+                                style={{
+                                    ...FONTS.body5,
+                                    color: 'white',
+                                }}
+                            >
+                                Tham Gia
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            )
+        }
+    }
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
     const [avatar, setAvatar] = useState('')
@@ -291,12 +432,7 @@ const Feed = ({ navigation }) => {
     }
     useEffect(() => {
         getPosts()
-    }, [])
-    useFocusEffect(
-        React.useCallback(() => {
-            onRefresh() // Gọi hàm làm mới khi màn hình được focus
-        }, [])
-    )
+    }, [token])
     const likePost = async (_postId) => {
         try {
             const res = await axios({
@@ -317,8 +453,8 @@ const Feed = ({ navigation }) => {
         }
     }
     const [showWarning, setShowWarning] = useState(false)
-    const [mess, setMess] = useState()
-    const joinActivity = async (_activityId, _postId) => {
+    const joinActivity = async (_activityId) => {
+        console.log(_activityId)
         try {
             const res = await axios({
                 method: 'put',
@@ -330,6 +466,7 @@ const Feed = ({ navigation }) => {
             })
             console.log(res.data.status)
             if (res.data.status === 'SUCCESS') {
+                console.log(res.data)
                 setShowWarning(false)
                 onRefresh()
             }
@@ -367,7 +504,7 @@ const Feed = ({ navigation }) => {
         })
     }
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
-    const [currentPage, setCurrentPage] = useState(1)
+    const [currentPage, setCurrentPage] = useState(0)
     console.log(currentPage)
     const fetchNextPage = async () => {
         if (!isFetchingNextPage) {
@@ -481,84 +618,102 @@ const Feed = ({ navigation }) => {
                 config
             )
             if (response.data.status === 'SUCCESS') {
-                navigation.navigate('ProfileUser', response.data.data.profileResult)
+                navigation.navigate(
+                    'ProfileUser',
+                    response.data.data.profileResult
+                )
             }
         } catch (error) {
             console.log('API Error:', error)
         }
     }
-    const RenderItem = ({ item, index }) => {
-        return (
-            <View
-                key={index}
-                style={{
-                    backgroundColor: '#fff',
-                    flexDirection: 'column',
-                    width: '100%',
-                    borderWidth: 1,
-                    borderTopColor: '#FDF6ED',
-                    borderColor: '#fff',
-                    marginVertical: 12,
-                }}
-            >
-                {/* Post header */}
-                <TouchableOpacity
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginTop: 12,
-                        paddingBottom: 10,
-                    }}
-                    onPress={() => viewDetailPost(item._id)}
-                >
-                    <TouchableOpacity
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginHorizontal: 8,
-                        }}
-                        onPress={() => viewProfile(item.ownerId)}
-                    >
-                        <Image
-                            source={item.ownerAvatar}
-                            style={{
-                                height: 52,
-                                width: 52,
-                                borderRadius: 20,
-                            }}
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+            <View style={{ flex: 1 }}>
+                {renderHeader()}
+
+                <FlatList
+                    data={posts}
+                    ListHeaderComponent={<RenderSuggestionsContainer />}
+                    onEndReached={fetchNextPage}
+                    onEndReachedThreshold={0.4}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
                         />
-
-                        <View style={{ marginLeft: 12 }}>
-                            <Text
+                    }
+                    renderItem={({ item, index }) => (
+                        <View
+                            key={index}
+                            style={{
+                                backgroundColor: '#fff',
+                                flexDirection: 'column',
+                                width: '100%',
+                                borderWidth: 1,
+                                borderTopColor: '#FDF6ED',
+                                borderColor: '#fff',
+                                marginVertical: 12,
+                            }}
+                        >
+                            {/* Post header */}
+                            <TouchableOpacity
                                 style={{
-                                    ...FONTS.body5,
-                                    fontWeight: 'bold',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginTop: 12,
+                                    paddingBottom: 10,
                                 }}
+                                onPress={() => viewDetailPost(item._id)}
                             >
-                                {item.ownerDisplayname}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        marginHorizontal: 8,
+                                    }}
+                                    onPress={() => viewProfile(item.ownerId)}
+                                >
+                                    <Image
+                                        source={item.ownerAvatar}
+                                        style={{
+                                            height: 52,
+                                            width: 52,
+                                            borderRadius: 20,
+                                        }}
+                                    />
 
-                    <MaterialCommunityIcons
-                        name="dots-vertical"
-                        size={24}
-                        color={COLORS.black}
-                    />
-                </TouchableOpacity>
-                <View>
-                    <SliderBox
-                        images={item.media}
-                        paginationBoxVerticalPadding={5}
-                        activeOpacity={1}
-                        dotColor={COLORS.primary}
-                        inactiveDotColor={COLORS.white}
-                        sliderBoxHeight={500}
-                        dotStyle={{ width: 7, height: 7 }}
-                    />
+                                    <View style={{ marginLeft: 12 }}>
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                fontWeight: 'bold',
+                                            }}
+                                        >
+                                            {item.ownerDisplayname}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
 
-                    {/* <FlatList
+                                <MaterialCommunityIcons
+                                    name="dots-vertical"
+                                    size={24}
+                                    color={COLORS.black}
+                                />
+                            </TouchableOpacity>
+                            <View>
+                                <SliderBox
+                                    images={item.media}
+                                    paginationBoxVerticalPadding={5}
+                                    activeOpacity={1}
+                                    dotColor={COLORS.primary}
+                                    inactiveDotColor={COLORS.white}
+                                    sliderBoxHeight={500}
+                                    dotStyle={{ width: 7, height: 7 }}
+                                />
+
+                                {/* <FlatList
                                     data={item}
                                     horizontal
                                     renderItem={({ item, index }) => (
@@ -580,329 +735,191 @@ const Feed = ({ navigation }) => {
                                         </View>
                                     )}
                                 /> */}
-                </View>
+                            </View>
 
-                <View
-                    style={{
-                        marginHorizontal: 8,
-                        marginVertical: 8,
-                    }}
-                >
-                    <LongText maxLength={150} content={item.content} />
-                </View>
-                <TouchableOpacity onPress={() => viewDetailPost(item._id)}>
-                    <View
-                        style={{
-                            paddingLeft: 10,
-                            paddingBottom: 5,
-                        }}
-                    >
-                        <Progress.Bar
-                            progress={item.totalUserJoin / item.participants}
-                            color="#FF493C"
-                            height={8}
-                            width={SIZES.width - 20}
-                            unfilledColor="#F5F5F5"
-                            borderColor="#F5F5F5"
-                            borderRadius={25}
-                        />
-                    </View>
-                    <View
-                        style={{
-                            margin: 8,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Ionicons
-                            name="location-outline"
-                            size={22}
-                            color={COLORS.primary}
-                        />
-                        <Text
-                            style={{
-                                fontSize: 13,
-                                fontFamily: 'regular',
-                                color: COLORS.primary,
-                                marginLeft: 4,
-                                marginRight: 10,
-                            }}
-                        >
-                            {item.address}
-                        </Text>
-                    </View>
-                    <View
-                        style={{
-                            marginHorizontal: 8,
-                            marginBottom: 8,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Ionicons
-                            name="calendar-outline"
-                            size={21}
-                            color={COLORS.blue}
-                        />
-                        <DaysDifference
-                            exprirationDate={item.exprirationDate}
-                        />
-                    </View>
-                </TouchableOpacity>
-
-                {/* Posts likes and comments */}
-
-                <View
-                    style={{
-                        marginHorizontal: 8,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        paddingBottom: 6,
-                    }}
-                >
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                        }}
-                    >
-                        <LikeButton
-                            postId={item._id}
-                            unLikePost={unLikePost}
-                            likePost={likePost}
-                        />
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginRight: SIZES.padding2,
-                                alignItems: 'center',
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="message-text-outline"
-                                size={20}
-                                color={COLORS.black}
-                            />
-                            <Text
-                                style={{
-                                    ...FONTS.body4,
-                                    marginLeft: 2,
-                                }}
-                            >
-                                {item.numOfComment}
-                            </Text>
-                        </View>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Image
-                                source={require(share)}
-                                style={{
-                                    width: 20,
-                                    height: 20,
-                                }}
-                            />
-                        </View>
-                    </View>
-
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                        }}
-                    >
-                        <Modal
-                            visible={showWarning}
-                            animationType="fade"
-                            transparent
-                            onRequestClose={() => setShowWarning(false)}
-                        >
                             <View
                                 style={{
-                                    flex: 1,
-                                    justifyContent: 'center',
+                                    marginHorizontal: 8,
+                                    marginVertical: 8,
+                                }}
+                            >
+                                <LongText
+                                    maxLength={150}
+                                    content={item.content}
+                                />
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => viewDetailPost(item._id)}
+                            >
+                                <View
+                                    style={{
+                                        paddingLeft: 10,
+                                        paddingBottom: 5,
+                                    }}
+                                >
+                                    <Progress.Bar
+                                        progress={
+                                            item.totalUserJoin /
+                                            item.participants
+                                        }
+                                        color="#FF493C"
+                                        height={8}
+                                        width={SIZES.width - 20}
+                                        unfilledColor="#F5F5F5"
+                                        borderColor="#F5F5F5"
+                                        borderRadius={25}
+                                    />
+                                </View>
+                                <View
+                                    style={{
+                                        margin: 8,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="location-outline"
+                                        size={22}
+                                        color={COLORS.primary}
+                                    />
+                                    <Text
+                                        style={{
+                                            fontSize: 13,
+                                            fontFamily: 'regular',
+                                            color: COLORS.primary,
+                                            marginLeft: 4,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        {item.address}
+                                    </Text>
+                                </View>
+                                <View
+                                    style={{
+                                        marginHorizontal: 8,
+                                        marginBottom: 8,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Ionicons
+                                        name="calendar-outline"
+                                        size={21}
+                                        color={COLORS.blue}
+                                    />
+                                    <DaysDifference
+                                        exprirationDate={item.exprirationDate}
+                                    />
+                                </View>
+                            </TouchableOpacity>
+
+                            {/* Posts likes and comments */}
+
+                            <View
+                                style={{
+                                    marginHorizontal: 8,
+                                    flexDirection: 'row',
                                     alignItems: 'center',
-                                    shadowColor: '#000',
-                                    shadowOffset: {
-                                        width: 0,
-                                        height: 2,
-                                    },
-                                    shadowOpacity: 0.75,
-                                    shadowRadius: 4,
-                                    elevation: 5,
+                                    justifyContent: 'space-between',
+                                    paddingBottom: 6,
                                 }}
                             >
                                 <View
                                     style={{
-                                        width: 300,
-                                        height: 200,
-                                        backgroundColor: '#ffffff',
-                                        borderRadius: 25,
-                                        alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
-                                        justifyContent: 'center', //
+                                        flexDirection: 'row',
                                     }}
                                 >
-                                    <Image
-                                        source={require(question)}
-                                        style={{
-                                            marginTop: 15,
-                                            width: 50,
-                                            height: 50,
-                                        }}
+                                    <LikeButton
+                                        postId={item._id}
+                                        unLikePost={unLikePost}
+                                        likePost={likePost}
                                     />
-                                    <Text
-                                        style={{
-                                            marginTop: 15,
-                                            fontWeight: 'bold',
-                                            fontSize: 18,
-                                        }}
-                                    >
-                                        Bạn có muốn tham gia hoạt động?
-                                    </Text>
-
                                     <View
                                         style={{
                                             flexDirection: 'row',
-                                            marginTop: 30,
+                                            marginRight: SIZES.padding2,
+                                            alignItems: 'center',
                                         }}
                                     >
-                                        <View
+                                        <MaterialCommunityIcons
+                                            name="message-text-outline"
+                                            size={20}
+                                            color={COLORS.black}
+                                        />
+                                        <Text
                                             style={{
-                                                width: 80,
-                                                marginRight: 15,
+                                                ...FONTS.body4,
+                                                marginLeft: 2,
                                             }}
                                         >
-                                            <CustomButtonV2
-                                                title="ĐÓNG"
-                                                onPress={() =>
-                                                    setShowWarning(false)
-                                                }
-                                            />
-                                        </View>
-                                        <View
+                                            {item.numOfComment}
+                                        </Text>
+                                    </View>
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <Image
+                                            source={require(share)}
                                             style={{
-                                                width: 80,
+                                                width: 20,
+                                                height: 20,
                                             }}
-                                        >
-                                            <CustomButton
-                                                title="ĐỒNG Ý"
-                                                onPress={() =>
-                                                    joinActivity(
-                                                        item.activityId
-                                                    )
-                                                }
-                                            />
-                                        </View>
+                                        />
                                     </View>
                                 </View>
+                                <JoinButton _activityId={item.activityId} _isJoin={item.isJoin} joinActivity={joinActivity}/>
                             </View>
-                        </Modal>
-                        {/* Tham gia hoạt động */}
-                        {type === 'Organization' ? null : !item.isJoin ? (
-                            <TouchableOpacity
-                                style={{
-                                    backgroundColor: COLORS.primary,
-                                    borderRadius: 10,
-                                    padding: 5,
-                                }}
-                                onPress={() => setShowWarning(true)}
-                            >
-                                <Text
+
+                            {/* comment section */}
+
+                            {!avatar ? null : (
+                                <View
                                     style={{
-                                        ...FONTS.body5,
-                                        color: 'white',
+                                        flexDirection: 'row',
+                                        marginHorizontal: 8,
+                                        paddingVertical: 18,
+                                        borderTopWidth: 1,
+                                        borderTopColor: '#FFF',
                                     }}
                                 >
-                                    Tham Gia
-                                </Text>
-                            </TouchableOpacity>
-                        ) : (
-                            <View
-                                style={{
-                                    backgroundColor: '#ccc',
-                                    borderRadius: 10,
-                                    padding: 5,
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        ...FONTS.body5,
-                                        color: 'black',
-                                    }}
-                                >
-                                    Đã tham gia
-                                </Text>
-                            </View>
-                        )}
-                    </View>
-                </View>
+                                    <Image
+                                        source={
+                                            avatar
+                                                ? { uri: avatar }
+                                                : ImageAvata
+                                        }
+                                        contentFit="contain"
+                                        style={{
+                                            height: 52,
+                                            width: 52,
+                                            borderRadius: 26,
+                                        }}
+                                    />
 
-                {/* comment section */}
-
-                {!avatar ? null : (
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            marginHorizontal: 8,
-                            paddingVertical: 18,
-                            borderTopWidth: 1,
-                            borderTopColor: '#FFF',
-                        }}
-                    >
-                        <Image
-                            source={avatar ? { uri: avatar } : ImageAvata}
-                            contentFit="contain"
-                            style={{
-                                height: 52,
-                                width: 52,
-                                borderRadius: 26,
-                            }}
-                        />
-
-                        <View
-                            style={{
-                                flex: 1,
-                                height: 52,
-                                borderRadius: 26,
-                                borderWidth: 1,
-                                borderColor: '#CCC',
-                                marginLeft: 12,
-                                paddingLeft: 12,
-                                justifyContent: 'center',
-                            }}
-                        >
-                            <TextInput
-                                placeholder="Thêm bình luận"
-                                placeholderTextColor="#CCC"
-                            />
+                                    <View
+                                        style={{
+                                            flex: 1,
+                                            height: 52,
+                                            borderRadius: 26,
+                                            borderWidth: 1,
+                                            borderColor: '#CCC',
+                                            marginLeft: 12,
+                                            paddingLeft: 12,
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        <TextInput
+                                            placeholder="Thêm bình luận"
+                                            placeholderTextColor="#CCC"
+                                        />
+                                    </View>
+                                </View>
+                            )}
                         </View>
-                    </View>
-                )}
-            </View>
-        )
-    }
-    console.log(posts)
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <View style={{ flex: 1 }}>
-                {renderHeader()}
-
-                <FlatList
-                    data={posts}
-                    ListHeaderComponent={<RenderSuggestionsContainer />}
-                    onEndReached={fetchNextPage}
-                    onEndReachedThreshold={0.1}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                        />
-                    }
-                    renderItem={({ item, index }) => (
-                        <RenderItem item={item} index={index} />
                     )}
                 />
             </View>

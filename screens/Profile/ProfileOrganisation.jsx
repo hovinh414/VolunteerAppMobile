@@ -6,6 +6,7 @@ import {
     ScrollView,
     TouchableOpacity,
     RefreshControl,
+    Modal,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -27,17 +28,20 @@ import ImageAvata from '../../assets/hero2.jpg'
 import ImageUpload from '../../assets/add-image.png'
 import axios from 'axios'
 import CustomButton from '../../components/CustomButton'
+import CustomButtonV2 from '../../components/CustomButtonV2'
 import CustomAlert from '../../components/CustomAlert'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 import { useNavigation } from '@react-navigation/native'
 const share = '../../assets/share.png'
 const cover = '../../assets/cover.jpg'
+const question = '../../assets/question.png'
 const PostsRoute = () => {
     const [orgId, setOrgId] = useState()
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
-
+    const [type, setType] = useState('')
+    const [showWarning, setShowWarning] = useState(false)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
@@ -48,6 +52,7 @@ const PostsRoute = () => {
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setOrgId(userStored._id)
+        setType(userStored.type)
     }
     useEffect(() => {
         getUserStored()
@@ -245,6 +250,27 @@ const PostsRoute = () => {
             }
         }
     }
+    const joinActivity = async (_activityId) => {
+        try {
+            const res = await axios({
+                method: 'put',
+                url: API_URL.API_URL + '/activity/' + _activityId,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            })
+            console.log(res.data.status)
+            if (res.data.status === 'SUCCESS') {
+                setShowWarning(false)
+                onRefresh()
+            }
+        } catch (error) {
+            if (error) {
+                console.log(error)
+            }
+        }
+    }
     const getPosts = async () => {
         axios
             .get(API_URL.API_URL + '/posts/' + orgId + '?page=1&limit=4')
@@ -344,6 +370,88 @@ const PostsRoute = () => {
                 paddingTop: 12,
             }}
         >
+            <Modal
+                visible={showWarning}
+                animationType="fade"
+                transparent
+                onRequestClose={() => setShowWarning(false)}
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        shadowColor: '#000',
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.75,
+                        shadowRadius: 4,
+                        elevation: 5,
+                    }}
+                >
+                    <View
+                        style={{
+                            width: 300,
+                            height: 200,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 25,
+                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
+                            justifyContent: 'center', //
+                        }}
+                    >
+                        <Image
+                            source={require(question)}
+                            style={{
+                                marginTop: 15,
+                                width: 50,
+                                height: 50,
+                            }}
+                        />
+                        <Text
+                            style={{
+                                marginTop: 15,
+                                fontWeight: 'bold',
+                                fontSize: 18,
+                            }}
+                        >
+                            Bạn có muốn tham gia hoạt động?
+                        </Text>
+
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                marginTop: 30,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    width: 80,
+                                    marginRight: 15,
+                                }}
+                            >
+                                <CustomButtonV2
+                                    title="ĐÓNG"
+                                    onPress={() => setShowWarning(false)}
+                                />
+                            </View>
+                            <View
+                                style={{
+                                    width: 80,
+                                }}
+                            >
+                                <CustomButton
+                                    title="ĐỒNG Ý"
+                                    onPress={() =>
+                                        joinActivity(item.activityId)
+                                    }
+                                />
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
             <FlatList
                 data={posts}
                 onEndReached={fetchNextPage}
@@ -575,23 +683,43 @@ const PostsRoute = () => {
                             </View>
 
                             <View style={{ flexDirection: 'row' }}>
-                                <TouchableOpacity
-                                    style={{
-                                        backgroundColor: COLORS.primary,
-                                        borderRadius: 10,
-                                        padding: 8,
-                                    }}
-                                >
-                                    <Text
+                                {type ===
+                                'Organization' ? null : !item.isJoin ? (
+                                    <TouchableOpacity
                                         style={{
-                                            color: 'white',
-                                            textAlign: 'center',
-                                            fontWeight: '500',
+                                            backgroundColor: COLORS.primary,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                        }}
+                                        onPress={() => setShowWarning(true)}
+                                    >
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                color: 'white',
+                                            }}
+                                        >
+                                            Tham Gia
+                                        </Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <View
+                                        style={{
+                                            backgroundColor: '#ccc',
+                                            borderRadius: 10,
+                                            padding: 5,
                                         }}
                                     >
-                                        Tham Gia
-                                    </Text>
-                                </TouchableOpacity>
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                color: 'black',
+                                            }}
+                                        >
+                                            Đã tham gia
+                                        </Text>
+                                    </View>
+                                )}
                             </View>
                         </View>
                     </View>
@@ -847,6 +975,7 @@ const ProfileOrganisation = ({ navigation }) => {
     const [email, setEmail] = useState('')
     const [isActive, setIsActive] = useState(false)
     const [routes, setRoute] = useState([])
+    const [phone, setPhone] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
@@ -854,6 +983,7 @@ const ProfileOrganisation = ({ navigation }) => {
         setAddress(userStored.address)
         setEmail(userStored.email)
         setIsActive(userStored.isActiveOrganization)
+        setPhone(userStored.phone)
     }
     useEffect(() => {
         getUserStored()
@@ -911,7 +1041,7 @@ const ProfileOrganisation = ({ navigation }) => {
                     style={{
                         width: '100%',
                         position: 'relative',
-                        height: '63%',
+                        height: '68%',
                     }}
                 >
                     <Image
@@ -931,11 +1061,7 @@ const ProfileOrganisation = ({ navigation }) => {
                         }}
                         onPress={() => navigation.navigate('Settings')}
                     >
-                        <Feather
-                            name="menu"
-                            size={28}
-                            color={COLORS.black}
-                        />
+                        <Feather name="menu" size={28} color={COLORS.black} />
                     </TouchableOpacity>
                     <View style={{ alignItems: 'center', top: -67 }}>
                         <Image
@@ -987,28 +1113,71 @@ const ProfileOrganisation = ({ navigation }) => {
                             </Text>
                         )}
 
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginVertical: 6,
-                                marginHorizontal: 100,
-                                alignItems: 'center',
-                            }}
-                        >
-                            <MaterialIcons
-                                name="location-on"
-                                size={24}
-                                color="black"
-                            />
-                            <Text
+                        <View style={{ flexDirection: 'column' }}>
+                            <View
                                 style={{
-                                    ...FONTS.body4,
-                                    marginLeft: 4,
-                                    textAlign: 'justify',
+                                    flexDirection: 'row',
+                                    marginVertical: 6,
+                                    marginHorizontal: 100,
+                                    alignItems: 'center',
                                 }}
                             >
-                                {address}
-                            </Text>
+                                <Ionicons
+                                    name="location-outline"
+                                    size={22}
+                                    color="black"
+                                />
+                                <Text
+                                    style={{
+                                        ...FONTS.body4,
+                                        marginLeft: 4,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {address}
+                                </Text>
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    marginBottom: 6,
+                                    marginHorizontal: 100,
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <MaterialCommunityIcons
+                                    name="email-outline"
+                                    size={20}
+                                    color="black"
+                                />
+                                <Text
+                                    style={{
+                                        ...FONTS.body4,
+                                        marginLeft: 4,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {email}
+                                </Text>
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    marginHorizontal: 100,
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Feather name="phone" size={20} color="black" />
+                                <Text
+                                    style={{
+                                        ...FONTS.body4,
+                                        marginLeft: 4,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {phone}
+                                </Text>
+                            </View>
                         </View>
                         <View style={{ flexDirection: 'row', paddingTop: 15 }}>
                             <TouchableOpacity

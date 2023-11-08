@@ -9,7 +9,13 @@ import {
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
-import { Feather, AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import {
+    Feather,
+    AntDesign,
+    Ionicons,
+    MaterialIcons,
+    MaterialCommunityIcons,
+} from '@expo/vector-icons'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
 import { posts } from '../../constants/data'
 import AsyncStoraged from '../../services/AsyncStoraged'
@@ -23,73 +29,7 @@ const PostsRoute = () => (
             flex: 1,
             paddingTop: 12,
         }}
-    >
-        <FlatList
-            data={posts}
-            numColumns={3}
-            renderItem={({ item, index }) => (
-                <View
-                    style={{
-                        flex: 1,
-                        aspectRatio: 1,
-                        margin: 3,
-                    }}
-                >
-                    <Image
-                        key={index}
-                        source={item.image}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: 12,
-                        }}
-                    />
-
-                    <View
-                        style={{
-                            position: 'absolute',
-                            bottom: 4,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                marginHorizontal: 6,
-                            }}
-                        >
-                            <Ionicons
-                                name="eye"
-                                size={14}
-                                color={COLORS.white}
-                            />
-                            <Text style={{ color: COLORS.white }}>
-                                {item.numOfViews}
-                            </Text>
-                        </View>
-
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Ionicons
-                                name="heart-outline"
-                                size={14}
-                                color={COLORS.white}
-                            />
-                            <Text style={{ color: COLORS.white }}>
-                                {item.numOfViews}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-            )}
-        />
-    </View>
+    ></View>
 )
 
 const InfoRoute = () => {
@@ -105,12 +45,14 @@ const Profile = ({ navigation }) => {
     const [fullname, setFullname] = useState('')
     const [address, setAddress] = useState('')
     const [email, setEmail] = useState('')
+    const [phone, setPhone] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
         setFullname(userStored.fullname)
         setAddress(userStored.address)
         setEmail(userStored.email)
+        setPhone(userStored.phone)
     }
     useEffect(() => {
         getUserStored()
@@ -119,7 +61,7 @@ const Profile = ({ navigation }) => {
     const layout = useWindowDimensions()
     const [index, setIndex] = useState(0)
     const [routes] = useState([
-        { key: 'first', title: 'Bài đăng', icon: 'home' },
+        { key: 'first', title: 'Chưa biết để cái gì', icon: 'home' },
         { key: 'second', title: 'Thông tin', icon: 'user' },
     ])
 
@@ -160,7 +102,7 @@ const Profile = ({ navigation }) => {
                     style={{
                         width: '100%',
                         position: 'relative',
-                        height: '63%',
+                        height: '68%',
                     }}
                 >
                     <Image
@@ -180,11 +122,7 @@ const Profile = ({ navigation }) => {
                         }}
                         onPress={() => navigation.navigate('Settings')}
                     >
-                        <Feather
-                            name="menu"
-                            size={28}
-                            color={COLORS.black}
-                        />
+                        <Feather name="menu" size={28} color={COLORS.black} />
                     </TouchableOpacity>
                     <View style={{ alignItems: 'center', top: -67 }}>
                         <Image
@@ -207,28 +145,71 @@ const Profile = ({ navigation }) => {
                             {fullname}
                         </Text>
 
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginVertical: 6,
-                                marginHorizontal: 100,
-                                alignItems: 'center',
-                            }}
-                        >
-                            <MaterialIcons
-                                name="location-on"
-                                size={24}
-                                color="black"
-                            />
-                            <Text
+                        <View style={{ flexDirection: 'column' }}>
+                            <View
                                 style={{
-                                    ...FONTS.body4,
-                                    marginLeft: 4,
-                                    textAlign: 'justify',
+                                    flexDirection: 'row',
+                                    marginVertical: 6,
+                                    marginHorizontal: 100,
+                                    alignItems: 'center',
                                 }}
                             >
-                                {address}
-                            </Text>
+                                <Ionicons
+                                    name="location-outline"
+                                    size={22}
+                                    color="black"
+                                />
+                                <Text
+                                    style={{
+                                        ...FONTS.body4,
+                                        marginLeft: 4,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {address}
+                                </Text>
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    marginBottom: 6,
+                                    marginHorizontal: 100,
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <MaterialCommunityIcons
+                                    name="email-outline"
+                                    size={20}
+                                    color="black"
+                                />
+                                <Text
+                                    style={{
+                                        ...FONTS.body4,
+                                        marginLeft: 4,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {email}
+                                </Text>
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    marginHorizontal: 100,
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Feather name="phone" size={20} color="black" />
+                                <Text
+                                    style={{
+                                        ...FONTS.body4,
+                                        marginLeft: 4,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {phone}
+                                </Text>
+                            </View>
                         </View>
                         <View style={{ flexDirection: 'row', paddingTop: 15 }}>
                             <TouchableOpacity

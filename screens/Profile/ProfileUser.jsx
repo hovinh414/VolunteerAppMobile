@@ -28,14 +28,15 @@ import { Image } from 'expo-image'
 import { useNavigation } from '@react-navigation/native'
 import LongText from '../Feed/LongText'
 import DaysDifference from '../Feed/DaysDifference'
+import Cover from '../../assets/cover.jpg'
 
 const share = '../../assets/share.png'
-const cover = '../../assets/cover.jpg'
 
 const ProfileUser = ({ route }) => {
     const items = route.params
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
+    const [totalFollows, setTotalFollow] = useState(items.followers)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
@@ -154,7 +155,141 @@ const ProfileUser = ({ route }) => {
             )
         }
     }
+    const [isFollow, setIsFollow] = useState(items.isFollow)
+    function FollowButton({ handleFollow, handleUnFollow }) {
+        const handleFollowCLick = async () => {
+            try {
+                if (isFollow) {
+                    await handleUnFollow()
+                } else {
+                    await handleFollow()
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
 
+        if (token !== null) {
+            return (
+                <View style={{ flexDirection: 'row', paddingTop: 15 }}>
+                    <TouchableOpacity onPress={handleFollowCLick}>
+                        {isFollow ? (
+                            <View
+                                style={{
+                                    width: 124,
+                                    height: 36,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: '#ccc',
+                                    borderRadius: 15,
+                                    marginHorizontal: 10,
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        ...FONTS.body5,
+                                        color: '#000',
+                                    }}
+                                >
+                                    Đã theo dõi
+                                </Text>
+                            </View>
+                        ) : (
+                            <View
+                                style={{
+                                    width: 124,
+                                    height: 36,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: COLORS.primary,
+                                    borderRadius: 15,
+                                    marginHorizontal: 10,
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        ...FONTS.body5,
+                                        color: '#fff',
+                                    }}
+                                >
+                                    Theo dõi
+                                </Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={{
+                            width: 36,
+                            height: 36,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#DCDCDC',
+                            borderRadius: 15,
+                            marginRight: 5,
+                        }}
+                    >
+                        <Feather
+                            name="heart"
+                            size={20}
+                            color={COLORS.primary}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            width: 36,
+                            height: 36,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#DCDCDC',
+                            borderRadius: 15,
+                            marginRight: 5,
+                        }}
+                    >
+                        <Feather
+                            name="message-square"
+                            size={20}
+                            color={COLORS.primary}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            width: 36,
+                            height: 36,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#DCDCDC',
+                            borderRadius: 15,
+                            marginRight: 5,
+                        }}
+                    >
+                        <AntDesign
+                            name="sharealt"
+                            size={20}
+                            color={COLORS.primary}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            width: 36,
+                            height: 36,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#DCDCDC',
+                            borderRadius: 15,
+                            marginRight: 5,
+                        }}
+                    >
+                        <Feather
+                            name="more-horizontal"
+                            size={20}
+                            color={COLORS.primary}
+                        />
+                    </TouchableOpacity>
+                </View>
+            )
+        } 
+    }
     const likePost = async (_postId) => {
         try {
             const res = await axios({
@@ -207,7 +342,7 @@ const ProfileUser = ({ route }) => {
     }
     useEffect(() => {
         getPosts()
-    }, [items._id]) // Ensure that orgId is updated as expected
+    }, [token])
 
     const [refreshing, setRefreshing] = useState(false)
     const onRefresh = () => {
@@ -218,7 +353,6 @@ const ProfileUser = ({ route }) => {
     }
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
     const [currentPage, setCurrentPage] = useState(0)
-    console.log(currentPage)
     const fetchNextPage = async () => {
         if (!isFetchingNextPage && currentPage < 10) {
             setIsFetchingNextPage(true)
@@ -255,6 +389,54 @@ const ProfileUser = ({ route }) => {
             console.log('API Error:', error)
         }
     }
+    const handleFollow = async () => {
+        try {
+            const res = await axios({
+                method: 'post',
+                url: API_URL.API_URL + '/user/follow',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+                data: {
+                    followingId: items._id,
+                },
+            })
+            console.log(res.data.status)
+            if (res.data.status === 'SUCCESS') {
+                setTotalFollow(res.data.data.totalFollow)
+                setIsFollow(true)
+            }
+        } catch (error) {
+            if (error) {
+                console.log(error)
+            }
+        }
+    }
+    const handleUnFollow = async () => {
+        try {
+            const res = await axios({
+                method: 'post',
+                url: API_URL.API_URL + '/user/unfollow',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+                data: {
+                    followingId: items._id,
+                },
+            })
+            console.log(res.data.status)
+            if (res.data.status === 'SUCCESS') {
+                setTotalFollow(res.data.data.totalFollow)
+                setIsFollow(false)
+            }
+        } catch (error) {
+            if (error) {
+                console.log(error)
+            }
+        }
+    }
     const RenderProfileCard = () => {
         return (
             <View
@@ -264,7 +446,7 @@ const ProfileUser = ({ route }) => {
                 }}
             >
                 <Image
-                    source={require(cover)}
+                    source={Cover}
                     contentFit="cover"
                     style={{
                         height: 228,
@@ -338,119 +520,76 @@ const ProfileUser = ({ route }) => {
                         </Text>
                     )}
 
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            marginVertical: 6,
-                            marginHorizontal: 100,
-                            alignItems: 'center',
-                        }}
-                    >
-                        <MaterialIcons
-                            name="location-on"
-                            size={24}
-                            color="black"
-                        />
-                        <Text
+                    <View style={{ flexDirection: 'column' }}>
+                        <View
                             style={{
-                                ...FONTS.body4,
-                                marginLeft: 4,
-                                textAlign: 'justify',
-                            }}
-                        >
-                            {items.address}
-                        </Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', paddingTop: 15 }}>
-                        <TouchableOpacity
-                            style={{
-                                width: 124,
-                                height: 36,
+                                flexDirection: 'row',
+                                marginVertical: 6,
+                                marginHorizontal: 100,
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: COLORS.primary,
-                                borderRadius: 15,
-                                marginHorizontal: 10,
                             }}
                         >
+                            <Ionicons
+                                name="location-outline"
+                                size={22}
+                                color="black"
+                            />
                             <Text
                                 style={{
-                                    ...FONTS.body5,
-                                    color: '#fff',
+                                    ...FONTS.body4,
+                                    marginLeft: 4,
+                                    textAlign: 'justify',
                                 }}
                             >
-                                Theo dõi
+                                {items.address}
                             </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
+                        </View>
+                        <View
                             style={{
-                                width: 36,
-                                height: 36,
+                                flexDirection: 'row',
+                                marginBottom: 6,
+                                marginHorizontal: 100,
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: '#DCDCDC',
-                                borderRadius: 15,
-                                marginRight: 5,
                             }}
                         >
-                            <Feather
-                                name="heart"
+                            <MaterialCommunityIcons
+                                name="email-outline"
                                 size={20}
-                                color={COLORS.primary}
+                                color="black"
                             />
-                        </TouchableOpacity>
-                        <TouchableOpacity
+                            <Text
+                                style={{
+                                    ...FONTS.body4,
+                                    marginLeft: 4,
+                                    textAlign: 'justify',
+                                }}
+                            >
+                                {items.email}
+                            </Text>
+                        </View>
+                        <View
                             style={{
-                                width: 36,
-                                height: 36,
+                                flexDirection: 'row',
+                                marginHorizontal: 100,
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: '#DCDCDC',
-                                borderRadius: 15,
-                                marginRight: 5,
                             }}
                         >
-                            <Feather
-                                name="message-square"
-                                size={20}
-                                color={COLORS.primary}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{
-                                width: 36,
-                                height: 36,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: '#DCDCDC',
-                                borderRadius: 15,
-                                marginRight: 5,
-                            }}
-                        >
-                            <AntDesign
-                                name="sharealt"
-                                size={20}
-                                color={COLORS.primary}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{
-                                width: 36,
-                                height: 36,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: '#DCDCDC',
-                                borderRadius: 15,
-                                marginRight: 5,
-                            }}
-                        >
-                            <Feather
-                                name="more-horizontal"
-                                size={20}
-                                color={COLORS.primary}
-                            />
-                        </TouchableOpacity>
+                            <Feather name="phone" size={20} color="black" />
+                            <Text
+                                style={{
+                                    ...FONTS.body4,
+                                    marginLeft: 4,
+                                    textAlign: 'justify',
+                                }}
+                            >
+                                {items.phone}
+                            </Text>
+                        </View>
                     </View>
+                    <FollowButton
+                        handleFollow={handleFollow}
+                        handleUnFollow={handleUnFollow}
+                    />
                     <View
                         style={{
                             paddingTop: 8,
@@ -472,7 +611,7 @@ const ProfileUser = ({ route }) => {
                                     color: COLORS.black,
                                 }}
                             >
-                                200
+                                {totalFollows}
                             </Text>
                             <Text
                                 style={{

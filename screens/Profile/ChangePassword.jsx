@@ -42,8 +42,15 @@ const ChangePassword = ({ navigation }) => {
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData();
         setUserId(userStored._id);
-        setToken(userStored.accessToken);
     }
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
+    }
+
+    useEffect(() => {
+        getToken()
+    }, [])
     useEffect(() => { getUserStored(); }, []);
     const handleUpdatePassword = async () => {
         try {
@@ -68,7 +75,7 @@ const ChangePassword = ({ navigation }) => {
 
             if (res.data.status === 'SUCCESS') {
                 setMess('Thay đổi mật khẩu thành công!');
-                setIcon('SUCCSESS');
+                setIcon('SUCCESS');
                 setShowWarning(true);
                 setButtonPress(false);
                 navigation.push("BottomTabNavigation");

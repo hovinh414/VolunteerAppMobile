@@ -124,7 +124,6 @@ const Create = () => {
         formData.append('content', content)
         formData.append('participants', participants)
         formData.append('type', _type)
-        console.log(formData)
         setButtonPress(true)
 
         if (
