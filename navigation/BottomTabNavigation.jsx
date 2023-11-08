@@ -10,12 +10,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { COLORS } from '../constants'
 import {
     ChatTest,
-    Feed,
     LoginScreen,
     Notifications,
     Profile,
     Settings,
 } from '../screens'
+import Feed from '../screens/Feed'
 import Create from '../screens/Post/Create'
 import { LinearGradient } from 'expo-linear-gradient'
 import AsyncStoraged from '../services/AsyncStoraged'

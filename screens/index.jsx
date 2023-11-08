@@ -16,10 +16,11 @@ import Chat from './Chat/Chat'
 import ChatDetail from './Chat/ChatDetail'
 import DetailPost from './Post/DetailPost'
 import ViewDetailImage from './Post/ViewDetailImage'
+import ProfileUser from './Profile/ProfileUser'
 
 
 export { Feed, Create, Profile, Notifications, 
     Welcome, Chat, LoginScreen, Signup, 
     SignupType, SignupOrganisation, EditProfile, 
     Settings, ChangePassword, ProfileOrganisation, 
-    ChatTest, ChatDetail, DetailPost, ViewDetailImage }
+    ChatTest, ChatDetail, DetailPost, ViewDetailImage, ProfileUser }

@@ -312,7 +312,7 @@ const DetailPost = ({ navigation, route }) => {
                 }}
             >
                 <Progress.Bar
-                    progress={36 / items.participants}
+                    progress={items.totalUserJoin / items.participants}
                     color="#FF493C"
                     height={8}
                     width={SIZES.width - 45}
@@ -337,7 +337,7 @@ const DetailPost = ({ navigation, route }) => {
                         }}
                     >
                         {' '}
-                        36/{items.participants} người
+                        {items.totalUserJoin}/{items.participants} người
                     </Text>
                 </Text>
             </View>
@@ -399,7 +399,7 @@ const DetailPost = ({ navigation, route }) => {
                 >
                     Câu chuyện
                 </Text>
-                <LongText maxLength={250} content={items.content}/>
+                <LongText maxLength={250} content={items.content} />
             </View>
             <View
                 style={{
@@ -453,16 +453,43 @@ const DetailPost = ({ navigation, route }) => {
                         </View>
                     )}
                 />
-                <View
-                    style={{
-                        marginBottom: 50,
-                    }}
-                >
-                    <CustomButton
-                        onPress={() => console.log('OK')}
-                        title="THAM GIA"
-                    />
-                </View>
+                {items.isJoin ? (
+                    <View
+                        style={{
+                            marginBottom: 50,
+                        }}
+                    >
+                        <View
+                            style={{
+                                backgroundColor: '#ccc',
+                                height: 44,
+                                borderRadius: 16,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontFamily: 'monterrat',
+                                    color: '#000',
+                                }}
+                            >
+                                ĐÃ THAM GIA
+                            </Text>
+                        </View>
+                    </View>
+                ) : (
+                    <View
+                        style={{
+                            marginBottom: 50,
+                        }}
+                    >
+                        <CustomButton
+                            onPress={() => console.log('OK')}
+                            title="THAM GIA"
+                        />
+                    </View>
+                )}
             </View>
         </ScrollView>
     )

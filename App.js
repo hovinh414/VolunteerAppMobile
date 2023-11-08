@@ -19,6 +19,7 @@ import Chat from './screens/Chat/Chat'
 import ChatDetail from './screens/Chat/ChatDetail'
 import DetailPost from './screens/Post/DetailPost'
 import ViewDetailImage from './screens/Post/ViewDetailImage'
+import ProfileUser from './screens/Profile/ProfileUser'
 
 const Stack = createNativeStackNavigator()
 
@@ -136,6 +137,13 @@ export default function App() {
                     <Stack.Screen
                         name="ViewDetailImage"
                         component={ViewDetailImage}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ProfileUser"
+                        component={ProfileUser}
                         options={{
                             headerShown: false,
                         }}

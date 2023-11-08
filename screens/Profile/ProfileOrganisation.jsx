@@ -29,7 +29,8 @@ import axios from 'axios'
 import CustomButton from '../../components/CustomButton'
 import CustomAlert from '../../components/CustomAlert'
 import API_URL from '../../interfaces/config'
-import { Image } from 'expo-image';
+import { Image } from 'expo-image'
+import { useNavigation } from '@react-navigation/native'
 const share = '../../assets/share.png'
 const cover = '../../assets/cover.jpg'
 const PostsRoute = () => {
@@ -58,7 +59,7 @@ const PostsRoute = () => {
             try {
                 const res = await axios({
                     method: 'get',
-                    url: API_URL.API_URL + '/post/like?postId=' + postId,
+                    url: API_URL.API_URL + '/post/like/' + postId,
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: token,
@@ -292,6 +293,50 @@ const PostsRoute = () => {
             }
         }
     }
+    const navigation = useNavigation()
+    const viewDetailPost = async (_postId) => {
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/post/' + _postId
+            )
+            if (response.data.status === 'SUCCESS') {
+                navigation.navigate('DetailPost', response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error:', error)
+        }
+    }
+    function LongText({ content, maxLength }) {
+        const [isFullTextVisible, setIsFullTextVisible] = useState(false)
+
+        // Hàm này được gọi khi người dùng bấm vào nút "Xem thêm" hoặc "Thu gọn"
+        const toggleTextVisibility = () => {
+            setIsFullTextVisible(!isFullTextVisible)
+        }
+
+        // Hiển thị nội dung đầy đủ hoặc ngắn gọn tùy thuộc vào trạng thái
+        const displayText = isFullTextVisible
+            ? content
+            : content.slice(0, maxLength)
+
+        return (
+            <View>
+                <Text style={{ fontSize: 16, textAlign: 'justify' }}>
+                    {displayText}
+                </Text>
+
+                {content.length > maxLength && (
+                    <TouchableOpacity onPress={toggleTextVisibility}>
+                        <Text
+                            style={{ fontWeight: '500', color: COLORS.primary }}
+                        >
+                            {isFullTextVisible ? '...Thu gọn' : '...Xem thêm'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        )
+    }
     return (
         <View
             style={{
@@ -322,7 +367,7 @@ const PostsRoute = () => {
                         }}
                     >
                         {/* Post header */}
-                        <View
+                        <TouchableOpacity
                             style={{
                                 flexDirection: 'row',
                                 justifyContent: 'space-between',
@@ -330,6 +375,7 @@ const PostsRoute = () => {
                                 marginTop: 12,
                                 paddingBottom: 10,
                             }}
+                            onPress={() => viewDetailPost(item._id)}
                         >
                             <View
                                 style={{
@@ -364,7 +410,7 @@ const PostsRoute = () => {
                                 size={24}
                                 color={COLORS.black}
                             />
-                        </View>
+                        </TouchableOpacity>
                         <View>
                             <SliderBox
                                 images={item.media}
@@ -405,68 +451,69 @@ const PostsRoute = () => {
                                 marginVertical: 8,
                             }}
                         >
-                            <Text style={{ ...FONTS.body4 }}>
-                                {item.content}
-                            </Text>
+                            <LongText maxLength={150} content={item.content} />
                         </View>
-                        <View
-                            style={{
-                                paddingLeft: 10,
-                                paddingBottom: 5,
-                            }}
+                        <TouchableOpacity
+                            onPress={() => viewDetailPost(item._id)}
                         >
-                            <Progress.Bar
-                                progress={36 / 100}
-                                color="#FF493C"
-                                height={8}
-                                width={SIZES.width - 20}
-                                unfilledColor="#F5F5F5"
-                                borderColor="#F5F5F5"
-                                borderRadius={25}
-                            />
-                        </View>
-                        <View
-                            style={{
-                                margin: 8,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Ionicons
-                                name="location-outline"
-                                size={22}
-                                color={COLORS.primary}
-                            />
-                            <Text
+                            <View
                                 style={{
-                                    fontSize: 13,
-                                    fontFamily: 'regular',
-                                    color: COLORS.primary,
-                                    marginLeft: 4,
-                                    marginRight: 10,
+                                    paddingLeft: 10,
+                                    paddingBottom: 5,
                                 }}
                             >
-                                {item.address}
-                            </Text>
-                        </View>
-                        <View
-                            style={{
-                                marginHorizontal: 8,
-                                marginBottom: 8,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Ionicons
-                                name="calendar-outline"
-                                size={21}
-                                color={COLORS.blue}
-                            />
-
-                            <DaysDifference
-                                exprirationDate={item.exprirationDate}
-                            />
-                        </View>
+                                <Progress.Bar
+                                    progress={36 / 100}
+                                    color="#FF493C"
+                                    height={8}
+                                    width={SIZES.width - 20}
+                                    unfilledColor="#F5F5F5"
+                                    borderColor="#F5F5F5"
+                                    borderRadius={25}
+                                />
+                            </View>
+                            <View
+                                style={{
+                                    margin: 8,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Ionicons
+                                    name="location-outline"
+                                    size={22}
+                                    color={COLORS.primary}
+                                />
+                                <Text
+                                    style={{
+                                        fontSize: 13,
+                                        fontFamily: 'regular',
+                                        color: COLORS.primary,
+                                        marginLeft: 4,
+                                        marginRight: 10,
+                                    }}
+                                >
+                                    {item.address}
+                                </Text>
+                            </View>
+                            <View
+                                style={{
+                                    marginHorizontal: 8,
+                                    marginBottom: 8,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Ionicons
+                                    name="calendar-outline"
+                                    size={21}
+                                    color={COLORS.blue}
+                                />
+                                <DaysDifference
+                                    exprirationDate={item.exprirationDate}
+                                />
+                            </View>
+                        </TouchableOpacity>
 
                         {/* Posts likes and comments */}
 
@@ -869,7 +916,7 @@ const ProfileOrganisation = ({ navigation }) => {
                 >
                     <Image
                         source={require(cover)}
-                        resizeMode="cover"
+                        contentFit="cover"
                         style={{
                             height: 228,
                             width: '100%',
@@ -885,7 +932,7 @@ const ProfileOrganisation = ({ navigation }) => {
                         onPress={() => navigation.navigate('Settings')}
                     >
                         <Feather
-                            name="settings"
+                            name="menu"
                             size={28}
                             color={COLORS.black}
                         />
@@ -893,7 +940,7 @@ const ProfileOrganisation = ({ navigation }) => {
                     <View style={{ alignItems: 'center', top: -67 }}>
                         <Image
                             source={avatar}
-                            resizeMode="contain"
+                            contentFit="contain"
                             style={{
                                 height: 135,
                                 width: 135,

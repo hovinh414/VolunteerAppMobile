@@ -165,7 +165,7 @@ const Profile = ({ navigation }) => {
                 >
                     <Image
                         source={require(cover)}
-                        resizeMode="cover"
+                        contentFit="cover"
                         style={{
                             height: 228,
                             width: '100%',
@@ -181,7 +181,7 @@ const Profile = ({ navigation }) => {
                         onPress={() => navigation.navigate('Settings')}
                     >
                         <Feather
-                            name="settings"
+                            name="menu"
                             size={28}
                             color={COLORS.black}
                         />
@@ -189,7 +189,7 @@ const Profile = ({ navigation }) => {
                     <View style={{ alignItems: 'center', top: -67 }}>
                         <Image
                             source={avatar ? { uri: avatar } : ImageAvata}
-                            resizeMode="contain"
+                            contentFit="contain"
                             style={{
                                 height: 135,
                                 width: 135,
