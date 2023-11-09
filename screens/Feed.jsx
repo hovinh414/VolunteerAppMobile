@@ -44,7 +44,6 @@ const Feed = ({ navigation, route }) => {
 
         return unsubscribe
     }, [navigation])
-    console.log(navigation)
     const onRefreshPost = () => {
         setCurrentPage(0)
         setPosts([])

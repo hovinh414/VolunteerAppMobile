@@ -34,6 +34,7 @@ const share = '../../assets/share.png'
 
 const ProfileUser = ({ route }) => {
     const items = route.params
+
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
     const [totalFollows, setTotalFollow] = useState(items.followers)
@@ -44,6 +45,19 @@ const ProfileUser = ({ route }) => {
     useEffect(() => {
         getToken()
     }, [])
+    React.useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            onRefreshPost()
+        })
+
+        return unsubscribe
+    }, [navigation])
+    const onRefreshPost = () => {
+        setCurrentPage(0)
+        setPosts([])
+        getPosts()
+    }
+
     function LikeButton({ postId, likePost, unLikePost, onLikeUnlike }) {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
@@ -288,7 +302,7 @@ const ProfileUser = ({ route }) => {
                     </TouchableOpacity>
                 </View>
             )
-        } 
+        }
     }
     const likePost = async (_postId) => {
         try {
@@ -329,8 +343,13 @@ const ProfileUser = ({ route }) => {
         }
     }
     const getPosts = async () => {
+        const config = {
+            headers: {
+                Authorization: token,
+            },
+        }
         axios
-            .get(API_URL.API_URL + '/posts/' + items._id + '?page=1&limit=4')
+            .get(API_URL.API_URL + '/posts/' + items._id + '?page=1&limit=4',config)
             .then((response) => {
                 if (response.data.status === 'SUCCESS') {
                     setPosts(response.data.data)
@@ -356,12 +375,18 @@ const ProfileUser = ({ route }) => {
     const fetchNextPage = async () => {
         if (!isFetchingNextPage && currentPage < 10) {
             setIsFetchingNextPage(true)
-
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            }
             try {
                 const response = await axios.get(
                     `${API_URL.API_URL}/posts/` +
                         items._id +
-                        `?page=${currentPage + 1}&limit=4`
+                        `?page=${currentPage + 1}&limit=4`,
+                    config
                 )
                 if (response.data.status === 'SUCCESS') {
                     setPosts([...posts, ...response.data.data])
@@ -378,9 +403,16 @@ const ProfileUser = ({ route }) => {
     }
     const navigation = useNavigation()
     const viewDetailPost = async (_postId) => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        }
         try {
             const response = await axios.get(
-                API_URL.API_URL + '/post/' + _postId
+                API_URL.API_URL + '/post/' + _postId,
+                config
             )
             if (response.data.status === 'SUCCESS') {
                 navigation.navigate('DetailPost', response.data.data)
@@ -402,7 +434,6 @@ const ProfileUser = ({ route }) => {
                     followingId: items._id,
                 },
             })
-            console.log(res.data.status)
             if (res.data.status === 'SUCCESS') {
                 setTotalFollow(res.data.data.totalFollow)
                 setIsFollow(true)
@@ -680,6 +711,14 @@ const ProfileUser = ({ route }) => {
             </View>
         )
     }
+    const [type, setType] = useState('')
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setType(userStored.type)
+    }
+    useEffect(() => {
+        getUserStored()
+    }, [])
     return (
         <SafeAreaView
             style={{
@@ -689,8 +728,8 @@ const ProfileUser = ({ route }) => {
         >
             <FlatList
                 data={posts}
-                onEndReached={fetchNextPage}
                 ListHeaderComponent={<RenderProfileCard />}
+                onEndReached={fetchNextPage}
                 onEndReachedThreshold={0.4}
                 refreshControl={
                     <RefreshControl
@@ -708,6 +747,7 @@ const ProfileUser = ({ route }) => {
                             borderWidth: 1,
                             borderTopColor: '#FDF6ED',
                             borderColor: '#fff',
+                            marginVertical: 12,
                         }}
                     >
                         {/* Post header */}
@@ -721,12 +761,14 @@ const ProfileUser = ({ route }) => {
                             }}
                             onPress={() => viewDetailPost(item._id)}
                         >
-                            <View
+                            <TouchableOpacity
                                 style={{
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                     marginHorizontal: 8,
                                 }}
+                                // onPress={() => viewProfile(item.ownerId)}
+                                onPress={() => console.log(item.isJoin)}
                             >
                                 <Image
                                     source={item.ownerAvatar}
@@ -747,7 +789,7 @@ const ProfileUser = ({ route }) => {
                                         {item.ownerDisplayname}
                                     </Text>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
 
                             <MaterialCommunityIcons
                                 name="dots-vertical"
@@ -765,6 +807,7 @@ const ProfileUser = ({ route }) => {
                                 sliderBoxHeight={500}
                                 dotStyle={{ width: 7, height: 7 }}
                             />
+
                             {/* <FlatList
                                     data={item}
                                     horizontal
@@ -807,7 +850,9 @@ const ProfileUser = ({ route }) => {
                                 }}
                             >
                                 <Progress.Bar
-                                    progress={36 / 100}
+                                    progress={
+                                        item.totalUserJoin / item.participants
+                                    }
                                     color="#FF493C"
                                     height={8}
                                     width={SIZES.width - 20}
@@ -898,7 +943,7 @@ const ProfileUser = ({ route }) => {
                                             marginLeft: 2,
                                         }}
                                     >
-                                        03
+                                        {item.numOfComment}
                                     </Text>
                                 </View>
                                 <View
@@ -917,25 +962,48 @@ const ProfileUser = ({ route }) => {
                                     />
                                 </View>
                             </View>
-
-                            <View style={{ flexDirection: 'row' }}>
-                                <TouchableOpacity
-                                    style={{
-                                        backgroundColor: COLORS.primary,
-                                        borderRadius: 10,
-                                        padding: 8,
-                                    }}
-                                >
-                                    <Text
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                }}
+                            >
+                                {type === 'Organization' ||
+                                !type ? null : item.isJoin ? (
+                                    <View
                                         style={{
-                                            color: 'white',
-                                            textAlign: 'center',
-                                            fontWeight: '500',
+                                            backgroundColor: '#ccc',
+                                            borderRadius: 10,
+                                            padding: 5,
                                         }}
                                     >
-                                        Tham Gia
-                                    </Text>
-                                </TouchableOpacity>
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                color: 'black',
+                                            }}
+                                        >
+                                            Đã tham gia
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <TouchableOpacity
+                                        style={{
+                                            backgroundColor: COLORS.primary,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                        }}
+                                        onPress={() => viewDetailPost(item._id)}
+                                    >
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                color: 'white',
+                                            }}
+                                        >
+                                            Tham Gia
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         </View>
                     </View>
