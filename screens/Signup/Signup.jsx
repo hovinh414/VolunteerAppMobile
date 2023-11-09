@@ -20,10 +20,8 @@ import CustomInput from '../../components/CustomInput'
 import CustomButton from '../../components/CustomButton'
 import CustomAlert from '../../components/CustomAlert'
 import API_URL from '../../interfaces/config'
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
-const success = '../../assets/success.png'
-const fail = '../../assets/cross.png'
-const warning = '../../assets/warning.png'
 const Signup = ({ navigation }) => {
     const [isPasswordShow, setIsPasswordShow] = useState(true)
     const [isChecked, setIsChecked] = useState(false)
@@ -39,9 +37,6 @@ const Signup = ({ navigation }) => {
     const [emailErrorMessage, setEmailErrorMessage] = useState('')
     const [phoneErrorMessage, setPhoneErrorMessage] = useState('')
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('')
-    const [showWarning, setShowWarning] = useState(false)
-    const [mess, setMess] = useState()
-    const [icon, setIcon] = useState()
     const [ButtonPress, setButtonPress] = useState('')
     const showFullNameError = (_fullname) => {
         if (_fullname.length === 0) {
@@ -104,14 +99,21 @@ const Signup = ({ navigation }) => {
     const handleSignup = async () => {
         try {
             if (!username || !password || !email || !phone || !fullname) {
-                setMess('Vui lòng nhập đầy đủ thông tin!')
-                setIcon()
-                setShowWarning(true)
+                Toast.show({
+                    type: 'warning',
+                    text1: 'Cảnh báo',
+                    text2: 'Vui lòng nhập đầy đủ thông tin!',
+                    visibilityTime: 2500,
+                })
                 return
             } else if (isChecked === false) {
-                setMess('Vui lòng đồng ý với các điều khoản!')
-                setIcon()
-                setShowWarning(true)
+                Toast.show({
+                    type: 'warning',
+                    text1: 'Cảnh báo',
+                    text2: 'Vui lòng đồng ý với các điều khoản!',
+                    visibilityTime: 2500,
+                })
+
                 return
             }
             setButtonPress(true)
@@ -124,22 +126,72 @@ const Signup = ({ navigation }) => {
                 phone
             ).then((res) => {
                 if (res.data.status === 'SUCCESS') {
-                    setMess('Đăng ký thành công!')
-                    setIcon('SUCCESS')
-                    setShowWarning(true)
-                    navigation.navigate('LoginScreen')
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Đăng ký thành công',
+                        visibilityTime: 2500,
+                        autoHide: true,
+                        onHide: () => {
+
+                            navigation.navigate('LoginScreen')
+                        },
+                    })
                     setButtonPress(false)
                 }
             })
         } catch (error) {
             console.log('API Error:', error)
-            setMess('Đăng ký thất bại!')
-            setIcon('FAIL')
-            setShowWarning(true)
+            Toast.show({
+                type: 'error',
+                text1: 'Thất bại',
+                text2: 'Đăng ký thất bại!',
+                visibilityTime: 2500,
+            })
             setButtonPress(false)
         }
     }
+    const toastConfig = {
+        success: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#6dcf81' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
 
+        error: (props) => (
+            <ErrorToast
+                {...props}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#FFE600' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+    }
     return (
         <KeyboardAvoidingView
             style={{
@@ -151,15 +203,14 @@ const Signup = ({ navigation }) => {
             }}
             behavior="padding"
         >
-            <ScrollView>
-                <CustomAlert
-                    visible={showWarning}
-                    mess={mess}
-                    onRequestClose={() => setShowWarning(false)}
-                    onPress={() => setShowWarning(false)}
-                    title={'ĐÓNG'}
-                    icon={icon}
-                />
+            <View
+                style={{
+                    zIndex: 2,
+                }}
+            >
+                <Toast config={toastConfig} />
+            </View>
+            <ScrollView style={{zIndex:1}} >
                 <View style={{ flex: 1, marginHorizontal: 22 }}>
                     <View style={{ marginVertical: 22 }}>
                         <Text

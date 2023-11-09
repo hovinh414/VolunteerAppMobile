@@ -21,6 +21,8 @@ import { posts } from '../../constants/data'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import ImageAvata from '../../assets/hero2.jpg'
 import { Image } from 'expo-image'
+import { useFocusEffect } from '@react-navigation/native'
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const cover = '../../assets/cover.jpg'
 const PostsRoute = () => (
@@ -40,7 +42,7 @@ const renderScene = SceneMap({
     first: PostsRoute,
     second: InfoRoute,
 })
-const Profile = ({ navigation }) => {
+const Profile = ({ navigation, route }) => {
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
     const [address, setAddress] = useState('')
@@ -89,7 +91,56 @@ const Profile = ({ navigation }) => {
             )}
         />
     )
+    const onRefresh = () => {
+        getUserStored()
+    }
+    useFocusEffect(
+        React.useCallback(() => {
+            // Thực hiện các công việc cần thiết để làm mới màn hình ở đây (ví dụ, gọi hàm onRefresh).
+            onRefresh()
+        }, [route])
+    )
+    const toastConfig = {
+        success: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#6dcf81' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
 
+        error: (props) => (
+            <ErrorToast
+                {...props}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#FFE600' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+    }
     return (
         <SafeAreaView
             style={{

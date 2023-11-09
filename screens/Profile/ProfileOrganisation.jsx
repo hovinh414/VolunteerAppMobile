@@ -24,15 +24,16 @@ import { SliderBox } from 'react-native-image-slider-box'
 import * as Progress from 'react-native-progress'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import * as ImagePicker from 'expo-image-picker'
-import ImageAvata from '../../assets/hero2.jpg'
 import ImageUpload from '../../assets/add-image.png'
 import axios from 'axios'
 import CustomButton from '../../components/CustomButton'
 import CustomButtonV2 from '../../components/CustomButtonV2'
-import CustomAlert from '../../components/CustomAlert'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect } from '@react-navigation/native'
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
+
 const share = '../../assets/share.png'
 const cover = '../../assets/cover.jpg'
 const question = '../../assets/question.png'
@@ -728,18 +729,11 @@ const PostsRoute = () => {
         </View>
     )
 }
-const success = '../../assets/success.png'
-const fail = '../../assets/cross.png'
-const warning = '../../assets/warning.png'
 const VerifyRoute = ({ navigation }) => {
     const [selectedImages, setSelectedImage] = useState([])
-    const [avatar, setAvatar] = useState()
 
     const [token, setToken] = useState()
     const [ButtonPress, setButtonPress] = useState('')
-    const [showWarning, setShowWarning] = useState(false)
-    const [mess, setMess] = useState()
-    const [icon, setIcon] = useState()
     const [orgId, setOrgId] = useState()
     const [isActive, setIsActive] = useState(false)
     const getUserStored = async () => {
@@ -769,9 +763,12 @@ const VerifyRoute = ({ navigation }) => {
         delete result.cancelled
         if (!result.canceled) {
             if (selectedImages.length + result.assets.length > 5) {
-                setIcon()
-                setMess('Số lượng ảnh phải ít hơn 5 ảnh')
-                setShowWarning(true)
+                Toast.show({
+                    type: 'warning',
+                    text1: 'Cảnh báo',
+                    text2: 'Số lượng ảnh phải ít hơn 5!',
+                    visibilityTime: 2500,
+                })
 
                 return
             } else if (selectedImages.length === 0) {
@@ -797,9 +794,12 @@ const VerifyRoute = ({ navigation }) => {
         console.log(formData)
         setButtonPress(true)
         if (selectedImages.length === 0) {
-            setMess('Vui lòng chọn ảnh!')
-            setIcon()
-            setShowWarning(true)
+            Toast.show({
+                type: 'warning',
+                text1: 'Cảnh báo',
+                text2: 'Vui lòng chọn ảnh!',
+                visibilityTime: 2500,
+            })
             setButtonPress(false)
             return
         }
@@ -813,153 +813,152 @@ const VerifyRoute = ({ navigation }) => {
             })
             .then((response) => {
                 if (response.data.status === 'SUCCESS') {
-                    setMess('Đăng minh chứng thành công!')
-                    setIcon(response.data.status)
-                    setShowWarning(true)
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Đăng minh chứng thành công!',
+                        visibilityTime: 2500,
+                    })
                     setSelectedImage([])
                     setButtonPress(false)
-                    setAvatar(null)
                 }
             })
             .catch((error) => {
                 console.log('API Error:', error)
-                setMess('Đăng minh chứng thất bại!')
-                setIcon('FAIL')
-                setShowWarning(true)
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thất bại',
+                    text2: 'Thay đổi minh chứng thất bại!',
+                    visibilityTime: 2500,
+                })
                 setButtonPress(false)
             })
     }
 
     return (
-        <ScrollView style={{ flex: 1, paddingTop: 25, marginHorizontal: 22 }}>
-            <CustomAlert
-                visible={showWarning}
-                mess={mess}
-                onRequestClose={() => setShowWarning(false)}
-                onPress={() => setShowWarning(false)}
-                title={'ĐÓNG'}
-                icon={icon}
-            />
-            <FlatList
-                data={selectedImages}
-                horizontal={true}
-                renderItem={({ item, index }) => (
-                    <View
-                        key={index}
-                        style={{
-                            position: 'relative',
-                            flexDirection: 'column',
-                            flex: 1,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <Image
-                            source={{ uri: item.uri }}
+        <ScrollView style={{ flex: 1, marginHorizontal: 22 }}>
+            <View style={{ zIndex: 0, paddingBottom:50, }}>
+                <FlatList
+                    data={selectedImages}
+                    horizontal={true}
+                    renderItem={({ item, index }) => (
+                        <View
+                            key={index}
                             style={{
-                                paddingVertical: 4,
-                                marginLeft: 12,
-                                width: 140,
-                                height: 140,
-                                borderRadius: 12,
-                            }}
-                        />
-                        <TouchableOpacity
-                            onPress={() => removeImage(item)}
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                right: 0,
-                                backgroundColor: '#C5C7C7',
-                                borderRadius: 12, // Bo tròn góc
-                                padding: 5,
+                                position: 'relative',
+                                flexDirection: 'column',
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}
                         >
-                            <MaterialIcons
-                                name="delete"
-                                size={20}
-                                color={COLORS.black}
+                            <Image
+                                source={{ uri: item.uri }}
+                                style={{
+                                    paddingVertical: 4,
+                                    marginLeft: 12,
+                                    width: 140,
+                                    height: 140,
+                                    borderRadius: 12,
+                                }}
                             />
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
-            <TouchableOpacity
-                style={{
-                    paddingTop: 25,
-                    paddingBottom: 15,
-                    flex: 1,
-                    flexDirection: 'row',
-                }}
-                onPress={() => handleImageSelection()}
-            >
-                <Image
-                    source={avatar ? { uri: avatar } : ImageUpload}
-                    style={{
-                        height: 110,
-                        width: 110,
-                        marginRight: 15,
-                    }}
+                            <TouchableOpacity
+                                onPress={() => removeImage(item)}
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 0,
+                                    backgroundColor: '#C5C7C7',
+                                    borderRadius: 12, // Bo tròn góc
+                                    padding: 5,
+                                }}
+                            >
+                                <MaterialIcons
+                                    name="delete"
+                                    size={20}
+                                    color={COLORS.black}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 />
-                <View
+                <TouchableOpacity
                     style={{
-                        backgroundColor: '#C5C7C7',
+                        paddingTop: 25,
+                        paddingBottom: 15,
                         flex: 1,
-                        padding: 10,
-                        borderRadius: 5,
+                        flexDirection: 'row',
                     }}
+                    onPress={() => handleImageSelection()}
                 >
-                    <Text
+                    <Image
+                        source={ImageUpload}
                         style={{
-                            fontStyle: 'italic',
-                            fontSize: 17,
-                            backgroundColor: 'transparent',
+                            height: 100,
+                            width: 100,
+                            marginRight: 15,
+                        }}
+                    />
+                    <View
+                        style={{
+                            backgroundColor: '#C5C7C7',
+                            flex: 1,
+                            padding: 10,
+                            borderRadius: 5,
                         }}
                     >
-                        Minh chứng bao gồm{' '}
+                        <Text
+                            style={{
+                                fontStyle: 'italic',
+                                fontSize: 17,
+                                backgroundColor: 'transparent',
+                            }}
+                        >
+                            Minh chứng bao gồm{' '}
+                            <Text
+                                style={{
+                                    fontStyle: 'italic',
+                                    color: '#8B0000',
+                                }}
+                            >
+                                5 hình
+                            </Text>
+                            :{' '}
+                        </Text>
+                        <Text
+                            style={{
+                                fontStyle: 'italic',
+                                backgroundColor: 'transparent',
+                            }}
+                        >
+                            - 2 ảnh CCCD hoặc CMND.
+                        </Text>
+                        <Text
+                            style={{
+                                fontStyle: 'italic',
+                                backgroundColor: 'transparent',
+                            }}
+                        >
+                            - 3 ảnh chụp địa điểm tổ chức.
+                        </Text>
                         <Text
                             style={{
                                 fontStyle: 'italic',
                                 color: '#8B0000',
+                                backgroundColor: 'transparent',
                             }}
                         >
-                            5 hình
+                            * (Ảnh chụp phải rõ nét, ảnh CCCD là hình gốc không
+                            scan hay photocopy, không bị mất góc)
                         </Text>
-                        :{' '}
-                    </Text>
-                    <Text
-                        style={{
-                            fontStyle: 'italic',
-                            backgroundColor: 'transparent',
-                        }}
-                    >
-                        - 2 ảnh CCCD hoặc CMND.
-                    </Text>
-                    <Text
-                        style={{
-                            fontStyle: 'italic',
-                            backgroundColor: 'transparent',
-                        }}
-                    >
-                        - 3 ảnh chụp địa điểm tổ chức.
-                    </Text>
-                    <Text
-                        style={{
-                            fontStyle: 'italic',
-                            color: '#8B0000',
-                            backgroundColor: 'transparent',
-                        }}
-                    >
-                        * (Ảnh chụp phải rõ nét, ảnh CCCD là hình gốc không scan
-                        hay photocopy, không bị mất góc)
-                    </Text>
-                </View>
-            </TouchableOpacity>
-            <CustomButton
-                onPress={() => handleUpload()}
-                title="ĐĂNG MINH CHỨNG"
-                isLoading={ButtonPress}
-            />
+                    </View>
+                </TouchableOpacity>
+                <CustomButton
+                    onPress={() => handleUpload()}
+                    title="ĐĂNG MINH CHỨNG"
+                    isLoading={ButtonPress}
+                />
+            </View>
         </ScrollView>
     )
 }
@@ -968,7 +967,7 @@ const renderScene = SceneMap({
     first: PostsRoute,
     second: VerifyRoute,
 })
-const ProfileOrganisation = ({ navigation }) => {
+const ProfileOrganisation = ({ navigation, route }) => {
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
     const [address, setAddress] = useState('')
@@ -1028,7 +1027,56 @@ const ProfileOrganisation = ({ navigation }) => {
             />
         )
     }
+    const onRefresh = () => {
+        getUserStored()
+    }
+    useFocusEffect(
+        React.useCallback(() => {
+            // Thực hiện các công việc cần thiết để làm mới màn hình ở đây (ví dụ, gọi hàm onRefresh).
+            onRefresh()
+        }, [route])
+    )
+    const toastConfig = {
+        success: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#6dcf81' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
 
+        error: (props) => (
+            <ErrorToast
+                {...props}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#FFE600' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+    }
     return (
         <SafeAreaView
             style={{
@@ -1036,6 +1084,13 @@ const ProfileOrganisation = ({ navigation }) => {
                 backgroundColor: '#fff',
             }}
         >
+            <View
+                style={{
+                    zIndex: 2,
+                }}
+            >
+                <Toast config={toastConfig} />
+            </View>
             <View>
                 <View
                     style={{

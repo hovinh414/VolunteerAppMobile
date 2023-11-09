@@ -48,6 +48,7 @@
     "react-native-progress": "^5.0.0",
     "react-native-select-dropdown": "^3.4.0",
     "react-native-tab-view": "^3.5.2",
+    "react-native-toast-message": "^2.1.7",
     "react-native-web": "~0.19.6",
     "react-router-dom": "^6.16.0",
     "react-sweetalert2": "^0.6.0",

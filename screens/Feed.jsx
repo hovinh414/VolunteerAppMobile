@@ -32,9 +32,24 @@ import CustomButton from '../components/CustomButton'
 import CustomButtonV2 from '../components/CustomButtonV2'
 import LongText from './Feed/LongText'
 import DaysDifference from './Feed/DaysDifference'
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
+
 const share = '../assets/share.png'
 const question = '../assets/question.png'
-const Feed = ({ navigation }) => {
+const Feed = ({ navigation, route }) => {
+    React.useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            onRefreshPost()
+        })
+
+        return unsubscribe
+    }, [navigation])
+    console.log(navigation)
+    const onRefreshPost = () => {
+        setCurrentPage(0)
+        setPosts([])
+        getPosts()
+    }
     function renderHeader() {
         return (
             <View
@@ -89,7 +104,7 @@ const Feed = ({ navigation }) => {
                             elevation: 2,
                             borderRadius: 22,
                         }}
-                        onPress={() => navigation.navigate('ProfileUser')}
+                        onPress={() => console.log('Filter')}
                     >
                         <Ionicons
                             name="filter"
@@ -246,149 +261,7 @@ const Feed = ({ navigation }) => {
             )
         }
     }
-    function JoinButton({ joinActivity, _isJoin, _activityId }) {
-        console.log(_isJoin)
-        const [isJoin, setIsJoin] = useState(_isJoin)
-        const handleJoinCLick = async () => {
-            try {
-                await joinActivity(_activityId)
-                setIsJoin(true)
-            } catch (error) {
-                console.log(error)
-            }
-        }
-
-        if (token !== null) {
-            return (
-                <View
-                    style={{
-                        flexDirection: 'row',
-                    }}
-                >
-                    <Modal
-                        visible={showWarning}
-                        animationType="fade"
-                        transparent
-                        onRequestClose={() => setShowWarning(false)}
-                    >
-                        <View
-                            style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                shadowColor: '#000',
-                                shadowOffset: {
-                                    width: 0,
-                                    height: 2,
-                                },
-                                shadowOpacity: 0.75,
-                                shadowRadius: 4,
-                                elevation: 5,
-                            }}
-                        >
-                            <View
-                                style={{
-                                    width: 300,
-                                    height: 200,
-                                    backgroundColor: '#ffffff',
-                                    borderRadius: 25,
-                                    alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
-                                    justifyContent: 'center', //
-                                }}
-                            >
-                                <Image
-                                    source={require(question)}
-                                    style={{
-                                        marginTop: 15,
-                                        width: 50,
-                                        height: 50,
-                                    }}
-                                />
-                                <Text
-                                    style={{
-                                        marginTop: 15,
-                                        fontWeight: 'bold',
-                                        fontSize: 18,
-                                    }}
-                                >
-                                    Bạn có muốn tham gia hoạt động?
-                                </Text>
-
-                                <View
-                                    style={{
-                                        flexDirection: 'row',
-                                        marginTop: 30,
-                                    }}
-                                >
-                                    <View
-                                        style={{
-                                            width: 80,
-                                            marginRight: 15,
-                                        }}
-                                    >
-                                        <CustomButtonV2
-                                            title="ĐÓNG"
-                                            onPress={() =>
-                                                setShowWarning(false)
-                                            }
-                                        />
-                                    </View>
-                                    <View
-                                        style={{
-                                            width: 80,
-                                        }}
-                                    >
-                                        <CustomButton
-                                            title="ĐỒNG Ý"
-                                            onPress={handleJoinCLick}
-                                        />
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-                    </Modal>
-                    {/* Tham gia hoạt động */}
-                    {type === 'Organization' || !type ? null : isJoin ? (
-                        <View
-                            style={{
-                                backgroundColor: '#ccc',
-                                borderRadius: 10,
-                                padding: 5,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    ...FONTS.body5,
-                                    color: 'black',
-                                }}
-                            >
-                                Đã tham gia
-                            </Text>
-                        </View>
-                    ) : (
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: COLORS.primary,
-                                borderRadius: 10,
-                                padding: 5,
-                            }}
-                            onPress={() => setShowWarning(true)}
-                        >
-                            <Text
-                                style={{
-                                    ...FONTS.body5,
-                                    color: 'white',
-                                }}
-                            >
-                                Tham Gia
-                            </Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
-            )
-        }
-    }
-    const [posts, setPosts] = useState([])
+    const [posts, setPosts] = useState()
     const [token, setToken] = useState('')
     const [avatar, setAvatar] = useState('')
 
@@ -413,7 +286,6 @@ const Feed = ({ navigation }) => {
     const getPosts = async () => {
         const config = {
             headers: {
-                'Content-Type': 'application/json',
                 Authorization: token,
             },
         }
@@ -453,29 +325,6 @@ const Feed = ({ navigation }) => {
         }
     }
     const [showWarning, setShowWarning] = useState(false)
-    const joinActivity = async (_activityId) => {
-        console.log(_activityId)
-        try {
-            const res = await axios({
-                method: 'put',
-                url: API_URL.API_URL + '/activity/' + _activityId,
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: token,
-                },
-            })
-            console.log(res.data.status)
-            if (res.data.status === 'SUCCESS') {
-                console.log(res.data)
-                setShowWarning(false)
-                onRefresh()
-            }
-        } catch (error) {
-            if (error) {
-                console.log(error)
-            }
-        }
-    }
     const unLikePost = async (_postId) => {
         try {
             const res = await axios({
@@ -504,7 +353,7 @@ const Feed = ({ navigation }) => {
         })
     }
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
-    const [currentPage, setCurrentPage] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1)
     console.log(currentPage)
     const fetchNextPage = async () => {
         if (!isFetchingNextPage) {
@@ -674,6 +523,7 @@ const Feed = ({ navigation }) => {
                                         marginHorizontal: 8,
                                     }}
                                     onPress={() => viewProfile(item.ownerId)}
+                                    // onPress={() => console.log(item.isJoin)}
                                 >
                                     <Image
                                         source={item.ownerAvatar}
@@ -871,12 +721,56 @@ const Feed = ({ navigation }) => {
                                         />
                                     </View>
                                 </View>
-                                <JoinButton _activityId={item.activityId} _isJoin={item.isJoin} joinActivity={joinActivity}/>
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    {(type === 'Organization' ||
+                                    !type) ? null : (item.isJoin ? (
+                                        <View
+                                            style={{
+                                                backgroundColor: '#ccc',
+                                                borderRadius: 10,
+                                                padding: 5,
+                                            }}
+                                        >
+                                            <Text
+                                                style={{
+                                                    ...FONTS.body5,
+                                                    color: 'black',
+                                                }}
+                                            >
+                                                Đã tham gia
+                                            </Text>
+                                        </View>
+                                    ) : (
+                                        <TouchableOpacity
+                                            style={{
+                                                backgroundColor: COLORS.primary,
+                                                borderRadius: 10,
+                                                padding: 5,
+                                            }}
+                                            onPress={() =>
+                                                viewDetailPost(item._id)
+                                            }
+                                        >
+                                            <Text
+                                                style={{
+                                                    ...FONTS.body5,
+                                                    color: 'white',
+                                                }}
+                                            >
+                                                Tham Gia
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
                             </View>
 
                             {/* comment section */}
 
-                            {!avatar ? null : (
+                            {avatar === null ? null : (
                                 <View
                                     style={{
                                         flexDirection: 'row',

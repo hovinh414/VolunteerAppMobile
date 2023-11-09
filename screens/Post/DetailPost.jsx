@@ -4,7 +4,7 @@ import {
     TouchableOpacity,
     ScrollView,
     Modal,
-    SafeAreaView,
+    Alert,
     KeyboardAvoidingView,
     Image,
     FlatList,
@@ -22,9 +22,41 @@ import {
 import CustomButton from '../../components/CustomButton'
 import { friends, posts } from '../../constants/data'
 import { SliderBox } from 'react-native-image-slider-box'
+import AsyncStoraged from '../../services/AsyncStoraged'
+import API_URL from '../../interfaces/config'
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const DetailPost = ({ navigation, route }) => {
-    const items = route.params
+    const [items, setItems] = useState(route.params)
+
+    const refreshDetail = async () => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        }
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/post/' + items._id,
+                config
+            )
+            if (response.data.status === 'SUCCESS') {
+                setItems(response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error:', error)
+        }
+    }
+    const [token, setToken] = useState('')
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
+    }
+
+    useEffect(() => {
+        getToken()
+    }, [])
     function DaysDifference({ exprirationDate }) {
         const [daysDifference, setDaysDifference] = useState(null)
 
@@ -104,14 +136,112 @@ const DetailPost = ({ navigation, route }) => {
         // console.log(item)
         navigation.navigate('ViewDetailImage', data)
     }
+    const joinActivity = async () => {
+        try {
+            const res = await axios({
+                method: 'put',
+                url: API_URL.API_URL + '/activity/' + items.activityId,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            })
+            console.log(res.data.status)
+            if (res.data.status === 'SUCCESS') {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Thành công',
+                    text2: 'Tham gia thành công!',
+                    visibilityTime: 2500,
+                    topOffset: 100,
+                })
+                refreshDetail()
+            }
+        } catch (error) {
+            if (error) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thất bại',
+                    text2: 'Tham gia thất bại!',
+                    visibilityTime: 2500,
+                    topOffset: 100,
+                })
+                console.log(error)
+            }
+        }
+    }
+    const joinActi = () => {
+        Alert.alert('Thông báo', 'Bạn có muốn tham gia hoạt động', [
+            {
+                text: 'Hủy',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+            },
+            {
+                text: 'Đồng ý',
+                onPress: () => {
+                    joinActivity()
+                },
+            },
+        ])
+    }
+    const toastConfig = {
+        success: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#6dcf81' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+
+        error: (props) => (
+            <ErrorToast
+                {...props}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#FFE600' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+    }
     return (
         <ScrollView
             style={{
                 backgroundColor: '#fff',
             }}
         >
-            <View style={{ flex: 1, marginBottom: 15 }}>
-                {/* <FlatList
+            <View
+                style={{
+                    zIndex: 2,
+                }}
+            >
+                <Toast config={toastConfig} />
+            </View>
+            <View style={{zIndex:1}}>
+                <View style={{ flex: 1, marginBottom: 15 }}>
+                    {/* <FlatList
                     data={items.media}
                     horizontal={true}
                     renderItem={({ item, index }) => (
@@ -134,362 +264,360 @@ const DetailPost = ({ navigation, route }) => {
                         </View>
                     )}
                 /> */}
-                <SliderBox
-                    images={items.media}
-                    paginationBoxVerticalPadding={5}
-                    activeOpacity={1}
-                    dotColor={COLORS.primary}
-                    inactiveDotColor={COLORS.white}
-                    sliderBoxHeight={300}
-                    dotStyle={{ width: 7, height: 7 }}
-                />
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={{
-                        position: 'absolute',
-                        top: 50,
-                        left: 20,
-                        borderRadius: 50,
-                        backgroundColor: '#cccc',
-                    }}
-                >
-                    <MaterialIcons
-                        name="keyboard-arrow-left"
-                        size={26}
-                        color={COLORS.black}
+                    <SliderBox
+                        images={items.media}
+                        paginationBoxVerticalPadding={5}
+                        activeOpacity={1}
+                        dotColor={COLORS.primary}
+                        inactiveDotColor={COLORS.white}
+                        sliderBoxHeight={300}
+                        dotStyle={{ width: 7, height: 7 }}
                     />
-                </TouchableOpacity>
-            </View>
-            <View
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 15,
-                }}
-            >
-                <View style={{ flexDirection: 'row', marginRight: 70 }}>
-                    <View
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
                         style={{
-                            width: 35,
-                            height: 35,
-                            borderRadius: 20,
-                            backgroundColor: '#DC143C',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginRight: 8,
+                            position: 'absolute',
+                            top: 50,
+                            left: 20,
+                            borderRadius: 50,
+                            backgroundColor: '#cccc',
                         }}
                     >
-                        <FontAwesome name="group" size={18} color="#fff" />
-                    </View>
-                    <View style={{ flexDirection: 'column' }}>
-                        <Text
-                            style={{
-                                fontSize: 14,
-                                color: '#696969',
-                                marginBottom: 4,
-                            }}
-                        >
-                            Số tình nguyện viên
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 15,
-                                fontWeight: '500',
-                            }}
-                        >
-                            {items.participants} người
-                        </Text>
-                    </View>
-                </View>
-                <View style={{ flexDirection: 'row' }}>
-                    <View
-                        style={{
-                            width: 35,
-                            height: 35,
-                            borderRadius: 20,
-                            backgroundColor: '#20B2AA',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginRight: 8,
-                        }}
-                    >
-                        <FontAwesome5
-                            name="calendar-alt"
-                            size={18}
-                            color="#fff"
+                        <MaterialIcons
+                            name="keyboard-arrow-left"
+                            size={26}
+                            color={COLORS.black}
                         />
-                    </View>
-                    <View style={{ flexDirection: 'column' }}>
-                        <Text
-                            style={{
-                                fontSize: 14,
-                                color: '#696969',
-                                marginBottom: 4,
-                            }}
-                        >
-                            Thời gian còn lại
-                        </Text>
-                        <DaysDifference
-                            exprirationDate={items.exprirationDate}
-                        />
-                    </View>
+                    </TouchableOpacity>
                 </View>
-            </View>
-            <View
-                style={{
-                    flexDirection: 'row',
-                }}
-            >
                 <View
                     style={{
-                        margin: 8,
                         flexDirection: 'row',
                         alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 15,
                     }}
                 >
-                    <Ionicons
-                        name="location-outline"
-                        size={22}
-                        color="#696969"
-                    />
-                    <Text
-                        style={{
-                            fontSize: 13,
-                            color: '#696969',
-                            marginLeft: 4,
-                            marginRight: 15,
-                        }}
-                    >
-                        {items.address}
-                    </Text>
-                </View>
-            </View>
-            <View
-                style={{
-                    flexDirection: 'row',
-                    paddingHorizontal: 15,
-                    paddingBottom: 15,
-                }}
-            >
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'flex-start',
-                        marginTop: 4,
-                    }}
-                >
-                    <Text
-                        style={{
-                            fontSize: 14,
-                            color: '#696969',
-                        }}
-                    >
-                        Đăng bởi:
-                    </Text>
-                    <Text
-                        style={{
-                            fontSize: 14,
-                            color: COLORS.primary,
-                            marginLeft: 4,
-                            marginRight: 15,
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        {items.ownerDisplayname}{' '}
-                        <FontAwesome
-                            name="check-circle"
-                            size={15}
-                            color={COLORS.primary}
-                        />
-                    </Text>
-                </View>
-            </View>
-            <View
-                style={{
-                    flexDirection: 'column',
-                    paddingHorizontal: 15,
-                }}
-            >
-                <Progress.Bar
-                    progress={items.totalUserJoin / items.participants}
-                    color="#FF493C"
-                    height={8}
-                    width={SIZES.width - 45}
-                    unfilledColor="#D3D3D3"
-                    borderColor="#F5F5F5"
-                    borderRadius={25}
-                />
-                <Text
-                    style={{
-                        paddingVertical: 10,
-                        color: '#696969',
-                    }}
-                >
-                    Đã tham gia:
-                    <Text
-                        style={{
-                            fontSize: 14,
-                            color: COLORS.primary,
-                            marginLeft: 8,
-                            marginRight: 15,
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        {' '}
-                        {items.totalUserJoin}/{items.participants} người
-                    </Text>
-                </Text>
-            </View>
-            <View
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingHorizontal: 15,
-                }}
-            >
-                <FlatList
-                    horizontal={true}
-                    data={friends}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item, index }) => (
+                    <View style={{ flexDirection: 'row', marginRight: 70 }}>
                         <View
-                            key={item.id}
                             style={{
-                                flexDirection: 'column',
-                                flex: 1,
+                                width: 35,
+                                height: 35,
+                                borderRadius: 20,
+                                backgroundColor: '#DC143C',
                                 alignItems: 'center',
                                 justifyContent: 'center',
+                                marginRight: 8,
                             }}
                         >
-                            <TouchableOpacity
-                                onPress={() => console.log('Pressed')}
-                                style={{
-                                    padding: 3,
-                                }}
-                            >
-                                <Image
-                                    source={item.image}
-                                    contentFit="contain"
-                                    style={{
-                                        width: 40,
-                                        height: 40,
-                                        borderRadius: 50,
-                                    }}
-                                />
-                            </TouchableOpacity>
+                            <FontAwesome name="group" size={18} color="#fff" />
                         </View>
-                    )}
-                />
-            </View>
-            <View
-                style={{
-                    flexDirection: 'column',
-                    paddingTop: 25,
-                    paddingHorizontal: 15,
-                }}
-            >
-                <Text
-                    style={{
-                        fontSize: 16,
-                        fontWeight: 'bold',
-                        marginBottom: 15,
-                    }}
-                >
-                    Câu chuyện
-                </Text>
-                <LongText maxLength={250} content={items.content} />
-            </View>
-            <View
-                style={{
-                    flexDirection: 'column',
-                    paddingTop: 25,
-                    paddingHorizontal: 15,
-                }}
-            >
-                <Text
-                    style={{
-                        fontSize: 16,
-                        fontWeight: 'bold',
-                        marginBottom: 15,
-                    }}
-                >
-                    Ảnh/Video
-                </Text>
-                <FlatList
-                    style={{
-                        marginBottom: 15,
-                    }}
-                    horizontal={true}
-                    data={items.media}
-                    renderItem={({ item, index }) => (
-                        <View
-                            key={index}
-                            style={{
-                                flexDirection: 'column',
-                                flex: 1,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        >
-                            <TouchableOpacity
-                                style={{
-                                    paddingVertical: 4,
-                                }}
-                                onPress={() => handleNavigate(item)}
-                            >
-                                <Image
-                                    source={{ uri: item }}
-                                    style={{
-                                        paddingVertical: 4,
-                                        width: 100,
-                                        height: 100,
-                                        borderRadius: 10,
-                                        marginRight: 8,
-                                    }}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                />
-                {items.isJoin ? (
-                    <View
-                        style={{
-                            marginBottom: 50,
-                        }}
-                    >
-                        <View
-                            style={{
-                                backgroundColor: '#ccc',
-                                height: 44,
-                                borderRadius: 16,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        >
+                        <View style={{ flexDirection: 'column' }}>
                             <Text
                                 style={{
-                                    fontFamily: 'monterrat',
-                                    color: '#000',
+                                    fontSize: 14,
+                                    color: '#696969',
+                                    marginBottom: 4,
                                 }}
                             >
-                                ĐÃ THAM GIA
+                                Số tình nguyện viên
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: 15,
+                                    fontWeight: '500',
+                                }}
+                            >
+                                {items.participants} người
                             </Text>
                         </View>
                     </View>
-                ) : (
+                    <View style={{ flexDirection: 'row' }}>
+                        <View
+                            style={{
+                                width: 35,
+                                height: 35,
+                                borderRadius: 20,
+                                backgroundColor: '#20B2AA',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginRight: 8,
+                            }}
+                        >
+                            <FontAwesome5
+                                name="calendar-alt"
+                                size={18}
+                                color="#fff"
+                            />
+                        </View>
+                        <View style={{ flexDirection: 'column' }}>
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    color: '#696969',
+                                    marginBottom: 4,
+                                }}
+                            >
+                                Thời gian còn lại
+                            </Text>
+                            <DaysDifference
+                                exprirationDate={items.exprirationDate}
+                            />
+                        </View>
+                    </View>
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                    }}
+                >
                     <View
                         style={{
-                            marginBottom: 50,
+                            margin: 8,
+                            flexDirection: 'row',
+                            alignItems: 'center',
                         }}
                     >
-                        <CustomButton
-                            onPress={() => console.log('OK')}
-                            title="THAM GIA"
+                        <Ionicons
+                            name="location-outline"
+                            size={22}
+                            color="#696969"
                         />
+                        <Text
+                            style={{
+                                fontSize: 13,
+                                color: '#696969',
+                                marginLeft: 4,
+                                marginRight: 15,
+                            }}
+                        >
+                            {items.address}
+                        </Text>
                     </View>
-                )}
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        paddingHorizontal: 15,
+                        paddingBottom: 15,
+                    }}
+                >
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'flex-start',
+                            marginTop: 4,
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 14,
+                                color: '#696969',
+                            }}
+                        >
+                            Đăng bởi:
+                        </Text>
+                        <Text
+                            style={{
+                                fontSize: 14,
+                                color: COLORS.primary,
+                                marginLeft: 4,
+                                marginRight: 15,
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            {items.ownerDisplayname}{' '}
+                            <FontAwesome
+                                name="check-circle"
+                                size={15}
+                                color={COLORS.primary}
+                            />
+                        </Text>
+                    </View>
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'column',
+                        paddingHorizontal: 15,
+                    }}
+                >
+                    <Progress.Bar
+                        progress={items.totalUserJoin / items.participants}
+                        color="#FF493C"
+                        height={8}
+                        width={SIZES.width - 45}
+                        unfilledColor="#D3D3D3"
+                        borderColor="#F5F5F5"
+                        borderRadius={25}
+                    />
+                    <Text
+                        style={{
+                            paddingVertical: 10,
+                            color: '#696969',
+                        }}
+                    >
+                        Đã tham gia:
+                        <Text
+                            style={{
+                                fontSize: 14,
+                                color: COLORS.primary,
+                                marginLeft: 8,
+                                marginRight: 15,
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            {' '}
+                            {items.totalUserJoin}/{items.participants} người
+                        </Text>
+                    </Text>
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        paddingHorizontal: 15,
+                    }}
+                >
+                    <FlatList
+                        horizontal={true}
+                        data={friends}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item, index }) => (
+                            <View
+                                key={item.id}
+                                style={{
+                                    flexDirection: 'column',
+                                    flex: 1,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => console.log('Pressed')}
+                                    style={{
+                                        padding: 3,
+                                    }}
+                                >
+                                    <Image
+                                        source={item.image}
+                                        contentFit="contain"
+                                        style={{
+                                            width: 40,
+                                            height: 40,
+                                            borderRadius: 50,
+                                        }}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    />
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'column',
+                        paddingTop: 25,
+                        paddingHorizontal: 15,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontSize: 16,
+                            fontWeight: 'bold',
+                            marginBottom: 15,
+                        }}
+                    >
+                        Câu chuyện
+                    </Text>
+                    <LongText maxLength={250} content={items.content} />
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'column',
+                        paddingTop: 25,
+                        paddingHorizontal: 15,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontSize: 16,
+                            fontWeight: 'bold',
+                            marginBottom: 15,
+                        }}
+                    >
+                        Ảnh/Video
+                    </Text>
+                    <FlatList
+                        style={{
+                            marginBottom: 15,
+                        }}
+                        horizontal={true}
+                        data={items.media}
+                        renderItem={({ item, index }) => (
+                            <View
+                                key={index}
+                                style={{
+                                    flexDirection: 'column',
+                                    flex: 1,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <TouchableOpacity
+                                    style={{
+                                        paddingVertical: 4,
+                                    }}
+                                    onPress={() => handleNavigate(item)}
+                                >
+                                    <Image
+                                        source={{ uri: item }}
+                                        style={{
+                                            paddingVertical: 4,
+                                            width: 100,
+                                            height: 100,
+                                            borderRadius: 10,
+                                            marginRight: 8,
+                                        }}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    />
+                    {items.isJoin ? (
+                        <View
+                            style={{
+                                marginBottom: 50,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    backgroundColor: '#ccc',
+                                    height: 44,
+                                    borderRadius: 16,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontFamily: 'monterrat',
+                                        color: '#000',
+                                    }}
+                                >
+                                    ĐÃ THAM GIA
+                                </Text>
+                            </View>
+                        </View>
+                    ) : (
+                        <View
+                            style={{
+                                marginBottom: 50,
+                            }}
+                        >
+                            <CustomButton onPress={joinActi} title="THAM GIA" />
+                        </View>
+                    )}
+                </View>
             </View>
         </ScrollView>
     )

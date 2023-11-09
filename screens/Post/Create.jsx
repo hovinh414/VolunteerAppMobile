@@ -21,15 +21,12 @@ import axios from 'axios'
 import { MaterialIcons } from '@expo/vector-icons'
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
 import { AntDesign } from '@expo/vector-icons'
-import CustomAlert from '../../components/CustomAlert'
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 
 const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
-const success = '../../assets/success.png'
-const fail = '../../assets/cross.png'
-const warning = '../../assets/warning.png'
 const fundraising = '../../assets/fundraising.png'
 const empathy = '../../assets/empathy.png'
 const Create = () => {
@@ -43,9 +40,6 @@ const Create = () => {
     const [content, setContent] = useState('')
     const [participants, setParticipants] = useState('')
     const [ButtonPress, setButtonPress] = useState('')
-    const [showWarning, setShowWarning] = useState(false)
-    const [mess, setMess] = useState()
-    const [icon, setIcon] = useState()
     const [showChoose, setShowChoose] = useState(false)
 
     const [openStartDatePicker, setOpenStartDatePicker] = useState(false)
@@ -75,6 +69,47 @@ const Create = () => {
     useEffect(() => {
         getToken()
     }, [])
+    const toastConfig = {
+        success: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#6dcf81' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+
+        error: (props) => (
+            <ErrorToast
+                {...props}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#FFE600' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+    }
     const handleImageSelection = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -132,9 +167,12 @@ const Create = () => {
             !scope ||
             !participants
         ) {
-            setMess('Vui lòng nhập đầy đủ thông tin và hình ảnh!')
-            setIcon()
-            setShowWarning(true)
+            Toast.show({
+                type: 'warning',
+                text1: 'Cảnh báo',
+                text2: 'Nhập đầy đủ thông tin bao gồm ảnh!',
+                visibilityTime: 2500,
+            })
             setButtonPress(false)
             return
         }
@@ -147,18 +185,24 @@ const Create = () => {
             })
             .then((response) => {
                 if (response.data.status === 'SUCCESS') {
-                    setMess('Đăng bài viết thành công!')
-                    setIcon('SUCCESS')
-                    setShowWarning(true)
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Đăng bài thành công',
+                        visibilityTime: 2500,
+                    })
                     resetForm()
                     setButtonPress(false)
                 }
             })
             .catch((error) => {
                 console.log('API Error:', error)
-                setMess('Đăng bài viết thất bại!')
-                setIcon('FAIL')
-                setShowWarning(true)
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thất bại',
+                    text2: 'Đăng ký thất bại!',
+                    visibilityTime: 2500,
+                })
                 setButtonPress(false)
             })
     }
@@ -293,7 +337,15 @@ const Create = () => {
                     </View>
                 </View>
             </Modal>
+            <View
+                style={{
+                    zIndex: 2,
+                }}
+            >
+                <Toast config={toastConfig} />
+            </View>
             <ScrollView
+                style={{ zIndex: 1 }}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -301,14 +353,6 @@ const Create = () => {
                     />
                 }
             >
-                <CustomAlert
-                    visible={showWarning}
-                    mess={mess}
-                    onRequestClose={() => setShowWarning(false)}
-                    onPress={() => setShowWarning(false)}
-                    title={'ĐÓNG'}
-                    icon={icon}
-                />
                 <View style={{ backgroundColor: '#fff', height: '100%' }}>
                     <View style={styles.post}>
                         <View style={styles.header}>
