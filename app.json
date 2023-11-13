@@ -20,13 +20,14 @@
         {
           "iCloudContainerEnvironment": "Production"
         }
+        
       ]
     ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Ứng dụng cần truy cập máy ảnh để chụp hình.",
-        "NSPhotoLibraryUsageDescription": "Ứng dụng cần truy cập thư viện ảnh để chọn hình ảnh."
+        "NSPhotoLibraryUsageDescription": "Ứng dụng cần truy cập thư viện ảnh để truy cập hình ảnh."
       }
     },
     "android": {

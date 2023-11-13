@@ -44,7 +44,7 @@ export const styles = StyleSheet.create({
     },
     checkinText: {
         fontWeight: '400',
-        fontSize: 16,
+        fontSize: 14,
         fontStyle: 'italic',
         marginRight:150,
     }

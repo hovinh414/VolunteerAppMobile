@@ -5,114 +5,741 @@ import {
     FlatList,
     ScrollView,
     TouchableOpacity,
+    RefreshControl,
     Modal,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
-import { Feather, AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import {
+    Feather,
+    AntDesign,
+    Ionicons,
+    MaterialIcons,
+    MaterialCommunityIcons,
+    FontAwesome,
+} from '@expo/vector-icons'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
-import { posts } from '../../constants/data'
+import { SliderBox } from 'react-native-image-slider-box'
+import * as Progress from 'react-native-progress'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import * as ImagePicker from 'expo-image-picker'
-import ImageAvata from '../../assets/hero2.jpg'
 import ImageUpload from '../../assets/add-image.png'
 import axios from 'axios'
 import CustomButton from '../../components/CustomButton'
-import CustomAlert from '../../components/CustomAlert'
+import CustomButtonV2 from '../../components/CustomButtonV2'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
+import { useNavigation } from '@react-navigation/native'
+import CustomViewInfo from '../../components/CustomViewInfo'
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
-const PostsRoute = () => (
-    <View
-        style={{
-            flex: 1,
-            paddingTop: 12,
-        }}
-    >
-        <FlatList
-            data={posts}
-            numColumns={3}
-            renderItem={({ item, index }) => (
-                <View
-                    style={{
-                        flex: 1,
-                        aspectRatio: 1,
-                        margin: 3,
-                    }}
-                >
-                    <Image
-                        key={index}
-                        source={item.image}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: 12,
-                        }}
-                    />
-
-                    <View
-                        style={{
-                            position: 'absolute',
-                            bottom: 4,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                marginHorizontal: 6,
-                            }}
-                        >
-                            <Ionicons
-                                name="eye"
-                                size={14}
-                                color={COLORS.white}
-                            />
-                            <Text style={{ color: COLORS.white }}>
-                                {item.numOfViews}
-                            </Text>
-                        </View>
-
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Ionicons
-                                name="heart-outline"
-                                size={14}
-                                color={COLORS.white}
-                            />
-                            <Text style={{ color: COLORS.white }}>
-                                {item.numOfViews}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-            )}
-        />
-    </View>
-)
-const success = '../../assets/success.png'
-const fail = '../../assets/cross.png'
-const warning = '../../assets/warning.png'
-const VerifyRoute = ({ navigation }) => {
-    const [selectedImages, setSelectedImage] = useState([])
-    const [avatar, setAvatar] = useState()
+const share = '../../assets/share.png'
+const cover = '../../assets/cover.jpg'
+const question = '../../assets/question.png'
+const PostsRoute = () => {
     const [orgId, setOrgId] = useState()
-    const [token, setToken] = useState()
-    const [ButtonPress, setButtonPress] = useState('')
+    const [posts, setPosts] = useState([])
+    const [token, setToken] = useState('')
+    const [type, setType] = useState('')
     const [showWarning, setShowWarning] = useState(false)
-    const [mess, setMess] = useState()
-    const [icon, setIcon] = useState()
-
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
+    }
+    useEffect(() => {
+        getToken()
+    }, [])
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setOrgId(userStored._id)
+        setType(userStored.type)
+    }
+    useEffect(() => {
+        getUserStored()
+    }, [])
+    function LikeButton({ postId, likePost, unLikePost, onLikeUnlike }) {
+        const [isLiked, setIsLiked] = useState(false)
+        const [totalLike, setTotalLike] = useState(0)
+        const checkLikes = async () => {
+            try {
+                const res = await axios({
+                    method: 'get',
+                    url: API_URL.API_URL + '/post/like/' + postId,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: token,
+                    },
+                })
+
+                if (res.data.message === 'User not like this post before') {
+                    setIsLiked(false)
+                } else {
+                    setIsLiked(true)
+                }
+            } catch (error) {
+                console.log(error)
+                setIsLiked(false)
+            }
+        }
+
+        useEffect(() => {
+            checkLikes()
+        }, [])
+        const fetchLikes = async () => {
+            try {
+                const response = await axios.get(
+                    API_URL.API_URL + '/post/likes/' + postId
+                )
+
+                if (response.data.status === 'SUCCESS') {
+                    setTotalLike(response.data.data.totalLikes)
+                }
+            } catch (error) {
+                console.log('API Error:', error)
+            }
+        }
+
+        useEffect(() => {
+            fetchLikes()
+        }, [])
+        const handleLikeClick = async () => {
+            try {
+                if (isLiked) {
+                    await unLikePost(postId)
+                    setIsLiked(false)
+                } else {
+                    await likePost(postId)
+                    setIsLiked(true)
+                }
+
+                fetchLikes() // Gọi hàm này sau khi thực hiện like/unlike thành công
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        if (token !== null) {
+            return (
+                <View
+                    style={{
+                        flexDirection: 'row',
+
+                        alignItems: 'center',
+                        marginRight: SIZES.padding2,
+                    }}
+                >
+                    <TouchableOpacity onPress={handleLikeClick}>
+                        {isLiked ? (
+                            <FontAwesome
+                                name="heart"
+                                size={20}
+                                color={COLORS.primary}
+                            />
+                        ) : (
+                            <Feather
+                                name="heart"
+                                size={20}
+                                color={COLORS.black}
+                            />
+                        )}
+                    </TouchableOpacity>
+                    <Text style={{ ...FONTS.body4, marginLeft: 5 }}>
+                        {totalLike}
+                    </Text>
+                </View>
+            )
+        } else {
+            return (
+                <View
+                    style={{
+                        flexDirection: 'row',
+
+                        alignItems: 'center',
+                        marginRight: SIZES.padding2,
+                    }}
+                >
+                    <TouchableOpacity>
+                        <Feather name="heart" size={20} color={COLORS.black} />
+                    </TouchableOpacity>
+                    <Text style={{ ...FONTS.body4, marginLeft: 5 }}>
+                        {totalLike}
+                    </Text>
+                </View>
+            )
+        }
+    }
+    function DaysDifference({ exprirationDate }) {
+        const [daysDifference, setDaysDifference] = useState(null)
+
+        useEffect(() => {
+            const currentDate = new Date()
+            const targetDate = new Date(exprirationDate)
+            const timeDifference = targetDate - currentDate
+            const daysDifference = Math.floor(
+                timeDifference / (1000 * 60 * 60 * 24)
+            )
+            setDaysDifference(daysDifference)
+        }, [exprirationDate])
+
+        if (daysDifference === null) {
+            return null // Hoặc thay thế bằng UI mặc định khác nếu cần
+        }
+        if (daysDifference <= 0) {
+            return (
+                <Text
+                    style={{
+                        fontSize: 14,
+                        fontFamily: 'regular',
+                        color: COLORS.blue,
+                        marginLeft: 4,
+                    }}
+                >
+                    Đã hết hạn đăng ký
+                </Text>
+            )
+        } else {
+            return (
+                <Text
+                    style={{
+                        fontSize: 14,
+                        fontFamily: 'regular',
+                        color: COLORS.blue,
+                        marginLeft: 4,
+                    }}
+                >
+                    Còn lại: {daysDifference} ngày
+                </Text>
+            )
+        }
+    }
+    const likePost = async (_postId) => {
+        try {
+            const res = await axios({
+                method: 'post',
+                url: API_URL.API_URL + '/post/like',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+                data: {
+                    postId: _postId,
+                },
+            })
+        } catch (error) {
+            if (error) {
+                console.log(error)
+            }
+        }
+    }
+    const unLikePost = async (_postId) => {
+        try {
+            const res = await axios({
+                method: 'put',
+                url: API_URL.API_URL + '/post/unlike',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+                data: {
+                    postId: _postId,
+                },
+            })
+        } catch (error) {
+            if (error) {
+                console.log(error)
+            }
+        }
+    }
+    const joinActivity = async (_activityId) => {
+        try {
+            const res = await axios({
+                method: 'put',
+                url: API_URL.API_URL + '/activity/' + _activityId,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            })
+            console.log(res.data.status)
+            if (res.data.status === 'SUCCESS') {
+                setShowWarning(false)
+                onRefresh()
+            }
+        } catch (error) {
+            if (error) {
+                console.log(error)
+            }
+        }
+    }
+    const getPosts = async () => {
+        axios
+            .get(API_URL.API_URL + '/posts/' + orgId + '?page=1&limit=4')
+            .then((response) => {
+                if (response.data.status === 'SUCCESS') {
+                    setPosts(response.data.data)
+                }
+            })
+            .catch((error) => {
+                console.log('API Error:', error)
+            })
+    }
+    useEffect(() => {
+        getPosts()
+    }, [orgId]) // Ensure that orgId is updated as expected
+
+    const [refreshing, setRefreshing] = useState(false)
+    const onRefresh = () => {
+        setRefreshing(true)
+        getPosts().then(() => {
+            setRefreshing(false)
+        })
+    }
+    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const fetchNextPage = async () => {
+        if (!isFetchingNextPage && currentPage < 10) {
+            setIsFetchingNextPage(true)
+
+            try {
+                const response = await axios.get(
+                    `${API_URL.API_URL}/posts/` +
+                        orgId +
+                        `?page=${currentPage + 1}&limit=4`
+                )
+                if (response.data.status === 'SUCCESS') {
+                    setPosts([...posts, ...response.data.data])
+                    setCurrentPage(currentPage + 1)
+                } else {
+                    setPosts([...posts, ...response.data.data])
+                }
+            } catch (error) {
+                console.log('API Error:', error)
+            } finally {
+                setIsFetchingNextPage(false)
+            }
+        }
+    }
+    const navigation = useNavigation()
+    const viewDetailPost = async (_postId) => {
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/post/' + _postId
+            )
+            if (response.data.status === 'SUCCESS') {
+                navigation.navigate('DetailPost', response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error:', error)
+        }
+    }
+    function LongText({ content, maxLength }) {
+        const [isFullTextVisible, setIsFullTextVisible] = useState(false)
+
+        // Hàm này được gọi khi người dùng bấm vào nút "Xem thêm" hoặc "Thu gọn"
+        const toggleTextVisibility = () => {
+            setIsFullTextVisible(!isFullTextVisible)
+        }
+
+        // Hiển thị nội dung đầy đủ hoặc ngắn gọn tùy thuộc vào trạng thái
+        const displayText = isFullTextVisible
+            ? content
+            : content.slice(0, maxLength)
+
+        return (
+            <View>
+                <Text style={{ fontSize: 16, textAlign: 'justify' }}>
+                    {displayText}
+                </Text>
+
+                {content.length > maxLength && (
+                    <TouchableOpacity onPress={toggleTextVisibility}>
+                        <Text
+                            style={{ fontWeight: '500', color: COLORS.primary }}
+                        >
+                            {isFullTextVisible ? '...Thu gọn' : '...Xem thêm'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        )
+    }
+    return (
+        <View
+            style={{
+                flex: 1,
+                paddingTop: 12,
+            }}
+        >
+            <Modal
+                visible={showWarning}
+                animationType="fade"
+                transparent
+                onRequestClose={() => setShowWarning(false)}
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        shadowColor: '#000',
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.75,
+                        shadowRadius: 4,
+                        elevation: 5,
+                    }}
+                >
+                    <View
+                        style={{
+                            width: 300,
+                            height: 200,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 25,
+                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
+                            justifyContent: 'center', //
+                        }}
+                    >
+                        <Image
+                            source={require(question)}
+                            style={{
+                                marginTop: 15,
+                                width: 50,
+                                height: 50,
+                            }}
+                        />
+                        <Text
+                            style={{
+                                marginTop: 15,
+                                fontWeight: 'bold',
+                                fontSize: 18,
+                            }}
+                        >
+                            Bạn có muốn tham gia hoạt động?
+                        </Text>
+
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                marginTop: 30,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    width: 80,
+                                    marginRight: 15,
+                                }}
+                            >
+                                <CustomButtonV2
+                                    title="ĐÓNG"
+                                    onPress={() => setShowWarning(false)}
+                                />
+                            </View>
+                            <View
+                                style={{
+                                    width: 80,
+                                }}
+                            >
+                                <CustomButton
+                                    title="ĐỒNG Ý"
+                                    onPress={() =>
+                                        joinActivity(item.activityId)
+                                    }
+                                />
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+            <FlatList
+                data={posts}
+                onEndReached={fetchNextPage}
+                onEndReachedThreshold={0.1}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
+                renderItem={({ item, index }) => (
+                    <View
+                        key={index}
+                        style={{
+                            backgroundColor: '#fff',
+                            flexDirection: 'column',
+                            width: '100%',
+                            borderWidth: 1,
+                            borderTopColor: '#FDF6ED',
+                            borderColor: '#fff',
+                        }}
+                    >
+                        {/* Post header */}
+                        <TouchableOpacity
+                            style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginTop: 12,
+                                paddingBottom: 10,
+                            }}
+                            onPress={() => viewDetailPost(item._id)}
+                        >
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    marginHorizontal: 8,
+                                }}
+                            >
+                                <Image
+                                    source={item.ownerAvatar}
+                                    style={{
+                                        height: 52,
+                                        width: 52,
+                                        borderRadius: 20,
+                                    }}
+                                />
+
+                                <View style={{ marginLeft: 12 }}>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            fontWeight: 'bold',
+                                        }}
+                                    >
+                                        {item.ownerDisplayname}
+                                    </Text>
+                                </View>
+                            </View>
+
+                            <MaterialCommunityIcons
+                                name="dots-vertical"
+                                size={24}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                        <View>
+                            <SliderBox
+                                images={item.media}
+                                paginationBoxVerticalPadding={5}
+                                activeOpacity={1}
+                                dotColor={COLORS.primary}
+                                inactiveDotColor={COLORS.white}
+                                sliderBoxHeight={500}
+                                dotStyle={{ width: 7, height: 7 }}
+                            />
+                            {/* <FlatList
+                                    data={item}
+                                    horizontal
+                                    renderItem={({ item, index }) => (
+                                        <View
+                                            style={{
+                                                alignItems: 'center',
+                                                marginVertical: 8,
+                                            }}
+                                            key={index}
+                                        >
+                                            <Image
+                                                source={item.media}
+                                                style={{
+                                                    height: 450,
+                                                    width: 450,
+                                                    marginRight: 10,
+                                                }}
+                                            />
+                                        </View>
+                                    )}
+                                /> */}
+                        </View>
+
+                        <View
+                            style={{
+                                marginHorizontal: 8,
+                                marginVertical: 8,
+                            }}
+                        >
+                            <LongText maxLength={150} content={item.content} />
+                        </View>
+                        <TouchableOpacity
+                            onPress={() => viewDetailPost(item._id)}
+                        >
+                            <View
+                                style={{
+                                    paddingLeft: 10,
+                                    paddingBottom: 5,
+                                }}
+                            >
+                                <Progress.Bar
+                                    progress={36 / 100}
+                                    color="#FF493C"
+                                    height={8}
+                                    width={SIZES.width - 20}
+                                    unfilledColor="#F5F5F5"
+                                    borderColor="#F5F5F5"
+                                    borderRadius={25}
+                                />
+                            </View>
+                            <View
+                                style={{
+                                    margin: 8,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Ionicons
+                                    name="location-outline"
+                                    size={22}
+                                    color={COLORS.primary}
+                                />
+                                <Text
+                                    style={{
+                                        fontSize: 13,
+                                        fontFamily: 'regular',
+                                        color: COLORS.primary,
+                                        marginLeft: 4,
+                                        marginRight: 10,
+                                    }}
+                                >
+                                    {item.address}
+                                </Text>
+                            </View>
+                            <View
+                                style={{
+                                    marginHorizontal: 8,
+                                    marginBottom: 8,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Ionicons
+                                    name="calendar-outline"
+                                    size={21}
+                                    color={COLORS.blue}
+                                />
+                                <DaysDifference
+                                    exprirationDate={item.exprirationDate}
+                                />
+                            </View>
+                        </TouchableOpacity>
+
+                        {/* Posts likes and comments */}
+
+                        <View
+                            style={{
+                                marginHorizontal: 8,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                paddingBottom: 6,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                }}
+                            >
+                                <LikeButton
+                                    postId={item._id}
+                                    unLikePost={unLikePost}
+                                    likePost={likePost}
+                                />
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        marginRight: SIZES.padding2,
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <MaterialCommunityIcons
+                                        name="message-text-outline"
+                                        size={20}
+                                        color={COLORS.black}
+                                    />
+                                    <Text
+                                        style={{
+                                            ...FONTS.body4,
+                                            marginLeft: 2,
+                                        }}
+                                    >
+                                        03
+                                    </Text>
+                                </View>
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Image
+                                        source={require(share)}
+                                        style={{
+                                            width: 20,
+                                            height: 20,
+                                        }}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={{ flexDirection: 'row' }}>
+                                {type ===
+                                'Organization' ? null : !item.isJoin ? (
+                                    <TouchableOpacity
+                                        style={{
+                                            backgroundColor: COLORS.primary,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                        }}
+                                        onPress={() => setShowWarning(true)}
+                                    >
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                color: 'white',
+                                            }}
+                                        >
+                                            Tham Gia
+                                        </Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <View
+                                        style={{
+                                            backgroundColor: '#ccc',
+                                            borderRadius: 10,
+                                            padding: 5,
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                color: 'black',
+                                            }}
+                                        >
+                                            Đã tham gia
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    </View>
+                )}
+            />
+        </View>
+    )
+}
+const VerifyRoute = ({ navigation }) => {
+    const [selectedImages, setSelectedImage] = useState([])
+
+    const [token, setToken] = useState()
+    const [ButtonPress, setButtonPress] = useState('')
+    const [orgId, setOrgId] = useState()
+    const [isActive, setIsActive] = useState(false)
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setOrgId(userStored._id)
+        setIsActive(userStored.isActiveOrganization)
     }
     useEffect(() => {
         getUserStored()
@@ -136,9 +763,12 @@ const VerifyRoute = ({ navigation }) => {
         delete result.cancelled
         if (!result.canceled) {
             if (selectedImages.length + result.assets.length > 5) {
-                setIcon()
-                setMess('Số lượng ảnh phải ít hơn 5 ảnh')
-                setShowWarning(true)
+                Toast.show({
+                    type: 'warning',
+                    text1: 'Cảnh báo',
+                    text2: 'Số lượng ảnh phải ít hơn 5!',
+                    visibilityTime: 2500,
+                })
 
                 return
             } else if (selectedImages.length === 0) {
@@ -164,9 +794,12 @@ const VerifyRoute = ({ navigation }) => {
         console.log(formData)
         setButtonPress(true)
         if (selectedImages.length === 0) {
-            setMess('Vui lòng chọn ảnh!')
-            setIcon()
-            setShowWarning(true)
+            Toast.show({
+                type: 'warning',
+                text1: 'Cảnh báo',
+                text2: 'Vui lòng chọn ảnh!',
+                visibilityTime: 2500,
+            })
             setButtonPress(false)
             return
         }
@@ -180,153 +813,180 @@ const VerifyRoute = ({ navigation }) => {
             })
             .then((response) => {
                 if (response.data.status === 'SUCCESS') {
-                    setMess('Đăng minh chứng thành công!')
-                    setIcon(response.data.status)
-                    setShowWarning(true)
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Đăng minh chứng thành công!',
+                        visibilityTime: 2500,
+                    })
                     setSelectedImage([])
                     setButtonPress(false)
-                    setAvatar(null)
                 }
             })
             .catch((error) => {
-                console.error('API Error:', error)
-                setMess('Đăng minh chứng thất bại!')
-                setIcon('FAIL')
-                setShowWarning(true)
+                console.log('API Error:', error)
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thất bại',
+                    text2: 'Thay đổi minh chứng thất bại!',
+                    visibilityTime: 2500,
+                })
                 setButtonPress(false)
             })
     }
 
     return (
-        <ScrollView style={{ flex: 1, paddingTop: 25 }}>
-            <CustomAlert
-                visible={showWarning}
-                mess={mess}
-                onRequestClose={() => setShowWarning(false)}
-                onPress={() => setShowWarning(false)}
-                title={'ĐÓNG'}
-                icon={icon}
-            />
-            <FlatList
-                data={selectedImages}
-                horizontal={true}
-                renderItem={({ item, index }) => (
-                    <View
-                        key={index}
-                        style={{
-                            position: 'relative',
-                            flexDirection: 'column',
-                            flex: 1,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <Image
-                            source={{ uri: item.uri }}
+        <ScrollView style={{ flex: 1, marginHorizontal: 22 }}>
+            <View style={{ zIndex: 0, paddingBottom: 50 }}>
+                <FlatList
+                    data={selectedImages}
+                    horizontal={true}
+                    renderItem={({ item, index }) => (
+                        <View
+                            key={index}
                             style={{
-                                paddingVertical: 4,
-                                marginLeft: 12,
-                                width: 140,
-                                height: 140,
-                                borderRadius: 12,
-                            }}
-                        />
-                        <TouchableOpacity
-                            onPress={() => removeImage(item)}
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                right: 0,
-                                backgroundColor: '#C5C7C7',
-                                borderRadius: 12, // Bo tròn góc
-                                padding: 5,
+                                position: 'relative',
+                                flexDirection: 'column',
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}
                         >
-                            <MaterialIcons
-                                name="delete"
-                                size={20}
-                                color={COLORS.black}
+                            <Image
+                                source={{ uri: item.uri }}
+                                style={{
+                                    paddingVertical: 4,
+                                    marginLeft: 12,
+                                    width: 140,
+                                    height: 140,
+                                    borderRadius: 12,
+                                }}
                             />
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
-            <TouchableOpacity
-                style={{
-                    paddingTop: 25,
-                    paddingBottom: 15,
-                    flex: 1,
-                    flexDirection: 'row',
-                }}
-                onPress={() => handleImageSelection()}
-            >
-                <Image
-                    source={avatar ? { uri: avatar } : ImageUpload}
-                    style={{
-                        height: 110,
-                        width: 110,
-                        marginRight: 15,
-                    }}
+                            <TouchableOpacity
+                                onPress={() => removeImage(item)}
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 0,
+                                    backgroundColor: '#C5C7C7',
+                                    borderRadius: 12, // Bo tròn góc
+                                    padding: 5,
+                                }}
+                            >
+                                <MaterialIcons
+                                    name="delete"
+                                    size={20}
+                                    color={COLORS.black}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 />
-                <View
+                <TouchableOpacity
                     style={{
-                        backgroundColor: '#C5C7C7',
+                        paddingTop: 25,
+                        paddingBottom: 15,
                         flex: 1,
-                        padding: 10,
-                        borderRadius: 5,
+                        flexDirection: 'row',
                     }}
+                    onPress={() => handleImageSelection()}
                 >
-                    <Text
+                    <Image
+                        source={ImageUpload}
                         style={{
-                            fontStyle: 'italic',
-                            fontSize: 17,
-                            backgroundColor: 'transparent',
+                            height: 100,
+                            width: 100,
+                            marginRight: 15,
+                        }}
+                    />
+                    <View
+                        style={{
+                            backgroundColor: '#C5C7C7',
+                            flex: 1,
+                            padding: 10,
+                            borderRadius: 5,
                         }}
                     >
-                        Minh chứng bao gồm{' '}
+                        <Text
+                            style={{
+                                fontStyle: 'italic',
+                                fontSize: 17,
+                                backgroundColor: 'transparent',
+                            }}
+                        >
+                            Minh chứng bao gồm{' '}
+                            <Text
+                                style={{
+                                    fontStyle: 'italic',
+                                    color: '#8B0000',
+                                }}
+                            >
+                                5 hình
+                            </Text>
+                            :{' '}
+                        </Text>
+                        <Text
+                            style={{
+                                fontStyle: 'italic',
+                                backgroundColor: 'transparent',
+                            }}
+                        >
+                            - 2 ảnh CCCD hoặc CMND.
+                        </Text>
+                        <Text
+                            style={{
+                                fontStyle: 'italic',
+                                backgroundColor: 'transparent',
+                            }}
+                        >
+                            - 3 ảnh chụp địa điểm tổ chức.
+                        </Text>
                         <Text
                             style={{
                                 fontStyle: 'italic',
                                 color: '#8B0000',
+                                backgroundColor: 'transparent',
                             }}
                         >
-                            5 hình
+                            * (Ảnh chụp phải rõ nét, ảnh CCCD là hình gốc không
+                            scan hay photocopy, không bị mất góc)
                         </Text>
-                        :{' '}
-                    </Text>
-                    <Text
-                        style={{
-                            fontStyle: 'italic',
-                            backgroundColor: 'transparent',
-                        }}
-                    >
-                        - 2 ảnh CCCD hoặc CMND.
-                    </Text>
-                    <Text
-                        style={{
-                            fontStyle: 'italic',
-                            backgroundColor: 'transparent',
-                        }}
-                    >
-                        - 3 ảnh chụp địa điểm tổ chức.
-                    </Text>
-                    <Text
-                        style={{
-                            fontStyle: 'italic',
-                            color: '#8B0000',
-                            backgroundColor: 'transparent',
-                        }}
-                    >
-                        * (Ảnh chụp phải rõ nét, ảnh CCCD là hình gốc không scan
-                        hay photocopy, không bị mất góc)
-                    </Text>
-                </View>
-            </TouchableOpacity>
-            <CustomButton
-                onPress={() => handleUpload()}
-                title="ĐĂNG MINH CHỨNG"
-                isLoading={ButtonPress}
-            />
+                    </View>
+                </TouchableOpacity>
+                <CustomButton
+                    onPress={() => handleUpload()}
+                    title="ĐĂNG MINH CHỨNG"
+                    isLoading={ButtonPress}
+                />
+            </View>
+        </ScrollView>
+    )
+}
+
+const InfoRoute = ({ navigation }) => {
+    const [address, setAddress] = useState('')
+    const [email, setEmail] = useState('')
+    const [phone, setPhone] = useState('')
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setAddress(userStored.address)
+        setEmail(userStored.email)
+        setPhone(userStored.phone)
+    }
+    useEffect(() => {
+        getUserStored()
+    }, [])
+    return (
+        <ScrollView style={{ flex: 1, marginHorizontal: 22 }}>
+            <View style={{paddingTop: 20 }}>
+                <CustomViewInfo value={address} icon={'location-outline'} height={70}/>
+            </View>
+            <View style={{paddingTop: 20 }}>
+                <CustomViewInfo value={email} icon={'mail-outline'} height={48}/>
+            </View>
+            <View style={{paddingTop: 20 }}>
+                <CustomViewInfo value={phone} icon={'call-outline'} height={48}/>
+            </View>
         </ScrollView>
     )
 }
@@ -334,169 +994,121 @@ const VerifyRoute = ({ navigation }) => {
 const renderScene = SceneMap({
     first: PostsRoute,
     second: VerifyRoute,
+    third: InfoRoute,
 })
-const ProfileOrganisation = ({ navigation }) => {
+const ProfileOrganisation = ({ navigation, route }) => {
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
-    const [address, setAddress] = useState('')
-    const [email, setEmail] = useState('')
+    const [isActive, setIsActive] = useState(false)
+    const [routes, setRoute] = useState([])
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
         setFullname(userStored.fullname)
-        setAddress(userStored.address)
-        setEmail(userStored.email)
+        setIsActive(userStored.isActiveOrganization)
+    }
+    const getUserStoredEdit = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setAvatar(userStored.avatar)
+        setFullname(userStored.fullname)
     }
     useEffect(() => {
         getUserStored()
     }, [])
-    function renderProfileCard() {
-        return (
-            <View
-                style={{
-                    width: SIZES.width - 44,
-                    height: 200,
-                    marginHorizontal: 22,
-                    paddingHorizontal: 6,
-                    paddingVertical: 18,
-                    backgroundColor: '#FFFFFF',
-                }}
-            >
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                    }}
-                >
-                    {/* Profile image container */}
-                    <View>
-                        <Image
-                            source={avatar ? { uri: avatar } : ImageAvata}
-                            contentFit="contain"
-                            style={{
-                                height: 90,
-                                width: 90,
-                                borderRadius: 80,
-                                borderWidth: 4,
-                                borderColor: '#ffffff',
-                            }}
-                        />
-                    </View>
-
-                    <View
-                        style={{
-                            justifyContent: 'center',
-                            alignContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Text
-                            style={{
-                                ...FONTS.body3,
-                                fontSize: 16,
-                            }}
-                        >
-                            {fullname}
-                        </Text>
-
-                        <View
-                            style={{
-                                flex: 1,
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <View
-                                style={{
-                                    backgroundColor: '#FFF9E8',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    borderRadius: 20,
-                                    padding: 15,
-                                }}
-                            >
-                                <Text style={{ ...FONTS.body4 }}>
-                                    Đã tổ chức 24 hoạt động
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
-
-                    <Feather
-                        style={{
-                            paddingLeft: 10,
-                        }}
-                        name="menu"
-                        size={24}
-                        color={COLORS.black}
-                        onPress={() => navigation.navigate('Settings')}
-                    />
-                </View>
-
-                <View
-                    style={{
-                        flexDirection: 'column',
-                        marginVertical: 12,
-                    }}
-                >
-                    <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ ...FONTS.body4 }}>Email: </Text>
-                        <Text style={{ ...FONTS.body4, color: COLORS.blue }}>
-                            @{email}
-                        </Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ ...FONTS.body4 }}>Địa chỉ: </Text>
-                        <Text
-                            style={{
-                                ...FONTS.body4,
-                                color: COLORS.blue,
-                                paddingRight: 100,
-                            }}
-                        >
-                            {address}
-                        </Text>
-                    </View>
-                </View>
-            </View>
-        )
-    }
-
     const layout = useWindowDimensions()
     const [index, setIndex] = useState(0)
-    const [routes] = useState([
-        { key: 'first', title: 'Hoạt động', icon: 'team' },
-        { key: 'second', title: 'Đăng minh chứng', icon: 'upload' },
-    ])
+    useEffect(() => {
+        if (!isActive) {
+            setRoute([
+                { key: 'first', title: 'Hoạt động', icon: 'home' },
+                { key: 'second', title: 'Đăng minh chứng', icon: 'upload' },
+            ])
+        } else {
+            setRoute([
+                { key: 'first', title: 'Hoạt động', icon: 'home' },
+                { key: 'third', title: 'Thông tin', icon: 'user' },
+            ])
+        }
+    }, [isActive])
 
-    const renderTabBar = (props) => (
-        <TabBar
-            {...props}
-            indicatorStyle={{
-                backgroundColor: COLORS.primary,
-            }}
-            renderIcon={({ route, focused, color }) => (
-                <AntDesign
-                    name={route.icon}
-                    size={20}
-                    color={focused ? COLORS.black : 'gray'}
-                />
-            )}
-            style={{
-                backgroundColor: '#fff',
-                height: 64,
-            }}
-            renderLabel={({ focused, route }) => (
-                <Text style={[{ color: focused ? COLORS.black : 'gray' }]}>
-                    {route.title}
-                </Text>
-            )}
-        />
-    )
+    const renderTabBar = (props) => {
+        return routes.length === 1 ? null : (
+            <TabBar
+                {...props}
+                indicatorStyle={{
+                    backgroundColor: COLORS.primary,
+                }}
+                renderIcon={({ route, focused, color }) => (
+                    <AntDesign
+                        name={route.icon}
+                        size={20}
+                        color={focused ? COLORS.black : 'gray'}
+                    />
+                )}
+                style={{
+                    backgroundColor: '#fff',
+                    height: 64,
+                }}
+                renderLabel={({ focused, route }) => (
+                    <Text style={[{ color: focused ? COLORS.black : 'gray' }]}>
+                        {route.title}
+                    </Text>
+                )}
+            />
+        )
+    }
+    const onRefresh = () => {
+        getUserStoredEdit()
+    }
+    React.useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            onRefresh()
+        })
 
+        return unsubscribe
+    }, [navigation])
+    const toastConfig = {
+        success: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#6dcf81' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+
+        error: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#FF0035' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#FFE600' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+    }
     return (
         <SafeAreaView
             style={{
@@ -504,22 +1116,288 @@ const ProfileOrganisation = ({ navigation }) => {
                 backgroundColor: '#fff',
             }}
         >
-            <View style={{ flex: 1 }}>
-                {renderProfileCard()}
+            <View>
                 <View
                     style={{
-                        flex: 1,
-                        marginHorizontal: 22,
+                        zIndex: 2,
                     }}
                 >
-                    <TabView
-                        navigationState={{ index, routes }}
-                        renderScene={renderScene}
-                        onIndexChange={setIndex}
-                        initialLayout={{ width: layout.width }}
-                        renderTabBar={renderTabBar}
-                    />
+                    <Toast config={toastConfig} />
                 </View>
+                <View>
+                    <View
+                        style={{
+                            width: '100%',
+                            height: '55%',
+                            position: 'relative',
+                        }}
+                    >
+                        <Image
+                            source={require(cover)}
+                            contentFit="cover"
+                            style={{
+                                height: 228,
+                                width: '100%',
+                            }}
+                        />
+                        <TouchableOpacity
+                            style={{
+                                position: 'absolute',
+                                top: 15,
+                                right: 12,
+                                zIndex: 1,
+                            }}
+                            onPress={() => navigation.navigate('Settings')}
+                        >
+                            <Feather
+                                name="menu"
+                                size={28}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                        <View style={{ alignItems: 'center', top: -67 }}>
+                            <Image
+                                source={avatar}
+                                contentFit="contain"
+                                style={{
+                                    height: 135,
+                                    width: 135,
+                                    borderRadius: 999,
+                                }}
+                            />
+
+                            <Text
+                                style={{
+                                    ...FONTS.h3,
+                                    color: COLORS.black,
+                                    marginVertical: 8,
+                                }}
+                            >
+                                {fullname}
+                            </Text>
+                            {isActive ? (
+                                <Text
+                                    style={{
+                                        color: '#4EB09B',
+                                        ...FONTS.body5,
+                                    }}
+                                >
+                                    Đã xác thực{' '}
+                                    <FontAwesome
+                                        name="check-circle"
+                                        size={15}
+                                        color={'#4EB09B'}
+                                    />
+                                </Text>
+                            ) : (
+                                <Text
+                                    style={{
+                                        color: COLORS.black,
+                                        ...FONTS.body5,
+                                    }}
+                                >
+                                    Chưa xác thực{' '}
+                                    <FontAwesome
+                                        name="times-circle"
+                                        size={15}
+                                        color={COLORS.black}
+                                    />
+                                </Text>
+                            )}
+
+                            <View
+                                style={{ flexDirection: 'row', paddingTop: 15 }}
+                            >
+                                <TouchableOpacity
+                                    style={{
+                                        width: 160,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: COLORS.primary,
+                                        borderRadius: 15,
+                                        marginHorizontal: 10,
+                                    }}
+                                    onPress={() =>
+                                        navigation.navigate('EditProfile')
+                                    }
+                                >
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: '#fff',
+                                        }}
+                                    >
+                                        Chỉnh sửa thông tin
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        width: 36,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: '#DCDCDC',
+                                        borderRadius: 15,
+                                        marginRight: 5,
+                                    }}
+                                >
+                                    <Feather
+                                        name="heart"
+                                        size={20}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        width: 36,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: '#DCDCDC',
+                                        borderRadius: 15,
+                                        marginRight: 5,
+                                    }}
+                                >
+                                    <Feather
+                                        name="message-square"
+                                        size={20}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        width: 36,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: '#DCDCDC',
+                                        borderRadius: 15,
+                                        marginRight: 5,
+                                    }}
+                                >
+                                    <AntDesign
+                                        name="sharealt"
+                                        size={20}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        width: 36,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: '#DCDCDC',
+                                        borderRadius: 15,
+                                        marginRight: 5,
+                                    }}
+                                >
+                                    <Feather
+                                        name="more-horizontal"
+                                        size={20}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                            <View
+                                style={{
+                                    paddingVertical: 8,
+                                    flexDirection: 'row',
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginHorizontal: 10,
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            fontSize: 16,
+                                            lineHeight: 30,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        200
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        Người theo dõi
+                                    </Text>
+                                </View>
+
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginHorizontal: 10,
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            fontSize: 16,
+                                            lineHeight: 30,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        67
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        Đang theo dõi
+                                    </Text>
+                                </View>
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginHorizontal: 10,
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            fontSize: 16,
+                                            lineHeight: 30,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        75
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        Lượt ủng hộ
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </View>
+            <View style={{ flex: 1 }}>
+                <TabView
+                    navigationState={{ index, routes }}
+                    renderScene={renderScene}
+                    onIndexChange={setIndex}
+                    initialLayout={{ width: layout.width }}
+                    renderTabBar={renderTabBar}
+                />
             </View>
         </SafeAreaView>
     )

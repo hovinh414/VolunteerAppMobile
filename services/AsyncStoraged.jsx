@@ -22,7 +22,6 @@ class AsyncStoraged {
     removeData = async () => {
         try {
             await AsyncStorage.removeItem('Authorized');
-            await AsyncStorage.removeItem('Token');
         } catch (e) {
             console.error(e);
         }
@@ -36,6 +35,14 @@ class AsyncStoraged {
             console.error('Store' + error);
         }
     }
+    removeToken = async () => {
+        try {
+            await AsyncStorage.removeItem('Token');
+        } catch (e) {
+            console.error(e);
+        }
+        console.log('Done.')
+    }
     getToken = async () => {
         try {
             const value = await AsyncStorage.getItem('Token')
@@ -44,6 +51,7 @@ class AsyncStoraged {
             console.error('get store', error);
         }
     }
+    
     storeDataBykey = async (key, value) => {
         try {
             const jsonValue = JSON.stringify(value)

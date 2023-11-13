@@ -15,10 +15,10 @@ import { COLORS, FONTS } from '../../constants/theme'
 import { MaterialIcons, Feather } from '@expo/vector-icons'
 import { Dropdown } from 'react-native-element-dropdown'
 import CustomInput from '../../components/CustomInput'
-import CustomAlert from '../../components/CustomAlert'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import API_URL from '../../interfaces/config'
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const ChangeAddress = () => {
     const screenWidth = Dimensions.get('window').width
@@ -37,9 +37,6 @@ const ChangeAddress = () => {
     const [ButtonPress, setButtonPress] = useState('')
     const [userId, setUserId] = useState()
     const [token, setToken] = useState()
-    const [showWarning, setShowWarning] = useState(false)
-    const [mess, setMess] = useState()
-    const [icon, setIcon] = useState()
     const navigation = useNavigation()
 
     const getToken = async () => {
@@ -56,7 +53,10 @@ const ChangeAddress = () => {
     useEffect(() => {
         getToken()
     }, [])
-
+    const onRefresh = () => {
+        getToken()
+        getUserStored()
+    }
     useEffect(() => {
         var config = {
             method: 'get',
@@ -100,8 +100,8 @@ const ChangeAddress = () => {
                 }
                 setStateData(stateArray)
             })
-            .catch(function (error) {
-                console.log(error)
+            .catch((error) => {
+                console.log('API Error:', error)
             })
     }
 
@@ -133,9 +133,12 @@ const ChangeAddress = () => {
     const formData = new FormData()
     const handleUpdateAddress = async () => {
         if (!countryName || !cityName || !stateName || !address) {
-            setMess('Vui lòng chọn đầy đủ địa chỉ!')
-            setIcon()
-            setShowWarning(true)
+            Toast.show({
+                type: 'warning',
+                text1: 'Cảnh báo',
+                text2: 'Vui lòng nhập đầy đủ địa chỉ!',
+                visibilityTime: 2500,
+            })
             return
         }
         formData.append('address', fullAddress)
@@ -153,24 +156,69 @@ const ChangeAddress = () => {
                     AsyncStoraged.storeData(
                         response.data.data.userResultForUpdate
                     )
-                    setMess('Thay đổi địa chỉ thành công!')
-                    setIcon('SUCCESS')
-                    setShowWarning(true)
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Thay đổi địa chỉ thành công',
+                        visibilityTime: 2500,
+                        
+                    })
+                    onRefresh()
                     setButtonPress(false)
-                    navigation.goBack();
-                    navigation.reset({
-                        index: 0,
-                        routes: [{ name: 'BottomTabNavigation' }],
-                      });
                 }
             })
             .catch((error) => {
                 console.log(error)
-                setMess('Thay đổi địa chỉ thất bại!')
-                setIcon('FAIL')
-                setShowWarning(true)
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thất bại',
+                    text2: 'Thay đổi địa chỉ thất bại!',
+                    visibilityTime: 2500,
+                })
                 setButtonPress(false)
             })
+    }
+    const toastConfig = {
+        success: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#6dcf81' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+
+        error: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#FF0035' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{ borderLeftColor: '#FFE600' }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+            />
+        ),
     }
     return (
         <KeyboardAvoidingView
@@ -180,15 +228,14 @@ const ChangeAddress = () => {
             }}
             behavior="padding"
         >
-            <CustomAlert
-                visible={showWarning}
-                mess={mess}
-                onRequestClose={() => setShowWarning(false)}
-                onPress={() => setShowWarning(false)}
-                title={'ĐÓNG'}
-                icon={icon}
-            />
-            <ScrollView>
+             <View
+                style={{
+                    zIndex: 2,
+                }}
+            >
+                <Toast config={toastConfig} />
+            </View>
+            <ScrollView style={{zIndex:1}}>
                 <View
                     style={{
                         flex: 1,
