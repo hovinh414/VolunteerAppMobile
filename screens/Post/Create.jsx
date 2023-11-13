@@ -29,7 +29,7 @@ const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
 const fundraising = '../../assets/fundraising.png'
 const empathy = '../../assets/empathy.png'
-const Create = () => {
+const Create = ({navigation}) => {
     const [selectedImages, setSelectedImage] = useState([])
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
@@ -191,9 +191,14 @@ const Create = () => {
                         text1: 'Thành công',
                         text2: 'Đăng bài thành công',
                         visibilityTime: 2500,
+                        autoHide: true,
+                        onHide: () => {
+                            navigation.navigate('BottomTabNavigation', { name: 'Feed' })
+                        },
                     })
                     resetForm()
                     setButtonPress(false)
+                    
                 }
             })
             .catch((error) => {

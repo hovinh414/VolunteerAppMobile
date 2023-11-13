@@ -249,29 +249,7 @@ const DetailPost = ({ navigation, route }) => {
             </View>
             <View style={{ zIndex: 1 }}>
                 <View style={{ flex: 1, marginBottom: 15 }}>
-                    {/* <FlatList
-                    data={items.media}
-                    horizontal={true}
-                    renderItem={({ item, index }) => (
-                        <View
-                            key={index}
-                            style={{
-                                flexDirection: 'column',
-                                flex: 1,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        >
-                            <Image
-                                source={item.image}
-                                style={{
-                                    width: 430,
-                                    height: 300,
-                                }}
-                            />
-                        </View>
-                    )}
-                /> */}
+                    
                     <SliderBox
                         images={items.media}
                         paginationBoxVerticalPadding={5}

@@ -161,7 +161,10 @@ const ChangeAddress = () => {
                         text1: 'Thành công',
                         text2: 'Thay đổi địa chỉ thành công',
                         visibilityTime: 2500,
-                        
+                        autoHide: true,
+                        onHide: () => {
+                            navigation.navigate('BottomTabNavigation')
+                        },
                     })
                     onRefresh()
                     setButtonPress(false)
