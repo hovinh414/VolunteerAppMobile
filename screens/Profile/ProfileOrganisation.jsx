@@ -31,7 +31,7 @@ import CustomButtonV2 from '../../components/CustomButtonV2'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 import { useNavigation } from '@react-navigation/native'
-import { useFocusEffect } from '@react-navigation/native'
+import CustomViewInfo from '../../components/CustomViewInfo'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const share = '../../assets/share.png'
@@ -837,7 +837,7 @@ const VerifyRoute = ({ navigation }) => {
 
     return (
         <ScrollView style={{ flex: 1, marginHorizontal: 22 }}>
-            <View style={{ zIndex: 0, paddingBottom:50, }}>
+            <View style={{ zIndex: 0, paddingBottom: 50 }}>
                 <FlatList
                     data={selectedImages}
                     horizontal={true}
@@ -963,41 +963,71 @@ const VerifyRoute = ({ navigation }) => {
     )
 }
 
-const renderScene = SceneMap({
-    first: PostsRoute,
-    second: VerifyRoute,
-})
-const ProfileOrganisation = ({ navigation, route }) => {
-    const [avatar, setAvatar] = useState('')
-    const [fullname, setFullname] = useState('')
+const InfoRoute = ({ navigation }) => {
     const [address, setAddress] = useState('')
     const [email, setEmail] = useState('')
-    const [isActive, setIsActive] = useState(false)
-    const [routes, setRoute] = useState([])
     const [phone, setPhone] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
-        setAvatar(userStored.avatar)
-        setFullname(userStored.fullname)
         setAddress(userStored.address)
         setEmail(userStored.email)
-        setIsActive(userStored.isActiveOrganization)
         setPhone(userStored.phone)
     }
     useEffect(() => {
         getUserStored()
     }, [])
+    return (
+        <ScrollView style={{ flex: 1, marginHorizontal: 22 }}>
+            <View style={{paddingTop: 20 }}>
+                <CustomViewInfo value={address} icon={'location-outline'} height={70}/>
+            </View>
+            <View style={{paddingTop: 20 }}>
+                <CustomViewInfo value={email} icon={'mail-outline'} height={48}/>
+            </View>
+            <View style={{paddingTop: 20 }}>
+                <CustomViewInfo value={phone} icon={'call-outline'} height={48}/>
+            </View>
+        </ScrollView>
+    )
+}
 
+const renderScene = SceneMap({
+    first: PostsRoute,
+    second: VerifyRoute,
+    third: InfoRoute,
+})
+const ProfileOrganisation = ({ navigation, route }) => {
+    const [avatar, setAvatar] = useState('')
+    const [fullname, setFullname] = useState('')
+    const [isActive, setIsActive] = useState(false)
+    const [routes, setRoute] = useState([])
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setAvatar(userStored.avatar)
+        setFullname(userStored.fullname)
+        setIsActive(userStored.isActiveOrganization)
+    }
+    const getUserStoredEdit = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setAvatar(userStored.avatar)
+        setFullname(userStored.fullname)
+    }
+    useEffect(() => {
+        getUserStored()
+    }, [])
     const layout = useWindowDimensions()
     const [index, setIndex] = useState(0)
     useEffect(() => {
         if (!isActive) {
             setRoute([
-                { key: 'first', title: 'Hoạt động', icon: 'team' },
+                { key: 'first', title: 'Hoạt động', icon: 'home' },
                 { key: 'second', title: 'Đăng minh chứng', icon: 'upload' },
             ])
         } else {
-            setRoute([{ key: 'first', title: 'Hoạt động', icon: 'team' }])
+            setRoute([
+                { key: 'first', title: 'Hoạt động', icon: 'home' },
+                { key: 'third', title: 'Thông tin', icon: 'user' },
+            ])
         }
     }, [isActive])
 
@@ -1028,14 +1058,15 @@ const ProfileOrganisation = ({ navigation, route }) => {
         )
     }
     const onRefresh = () => {
-        getUserStored()
+        getUserStoredEdit()
     }
-    useFocusEffect(
-        React.useCallback(() => {
-            // Thực hiện các công việc cần thiết để làm mới màn hình ở đây (ví dụ, gọi hàm onRefresh).
+    React.useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
             onRefresh()
-        }, [route])
-    )
+        })
+
+        return unsubscribe
+    }, [navigation])
     const toastConfig = {
         success: (props) => (
             <BaseToast
@@ -1052,8 +1083,9 @@ const ProfileOrganisation = ({ navigation, route }) => {
         ),
 
         error: (props) => (
-            <ErrorToast
+            <BaseToast
                 {...props}
+                style={{ borderLeftColor: '#FF0035' }}
                 text1Style={{
                     fontSize: 18,
                 }}
@@ -1084,349 +1116,288 @@ const ProfileOrganisation = ({ navigation, route }) => {
                 backgroundColor: '#fff',
             }}
         >
-            <View
-                style={{
-                    zIndex: 2,
-                }}
-            >
-                <Toast config={toastConfig} />
-            </View>
             <View>
                 <View
                     style={{
-                        width: '100%',
-                        position: 'relative',
-                        height: '68%',
+                        zIndex: 2,
                     }}
                 >
-                    <Image
-                        source={require(cover)}
-                        contentFit="cover"
+                    <Toast config={toastConfig} />
+                </View>
+                <View>
+                    <View
                         style={{
-                            height: 228,
                             width: '100%',
+                            height: '55%',
+                            position: 'relative',
                         }}
-                    />
-                    <TouchableOpacity
-                        style={{
-                            position: 'absolute',
-                            top: 15,
-                            right: 12,
-                            zIndex: 1,
-                        }}
-                        onPress={() => navigation.navigate('Settings')}
                     >
-                        <Feather name="menu" size={28} color={COLORS.black} />
-                    </TouchableOpacity>
-                    <View style={{ alignItems: 'center', top: -67 }}>
                         <Image
-                            source={avatar}
-                            contentFit="contain"
+                            source={require(cover)}
+                            contentFit="cover"
                             style={{
-                                height: 135,
-                                width: 135,
-                                borderRadius: 999,
+                                height: 228,
+                                width: '100%',
                             }}
                         />
-
-                        <Text
+                        <TouchableOpacity
                             style={{
-                                ...FONTS.h3,
-                                color: COLORS.black,
-                                marginVertical: 8,
+                                position: 'absolute',
+                                top: 15,
+                                right: 12,
+                                zIndex: 1,
                             }}
+                            onPress={() => navigation.navigate('Settings')}
                         >
-                            {fullname}
-                        </Text>
-                        {isActive ? (
-                            <Text
+                            <Feather
+                                name="menu"
+                                size={28}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                        <View style={{ alignItems: 'center', top: -67 }}>
+                            <Image
+                                source={avatar}
+                                contentFit="contain"
                                 style={{
-                                    color: '#4EB09B',
-                                    ...FONTS.body5,
+                                    height: 135,
+                                    width: 135,
+                                    borderRadius: 999,
                                 }}
-                            >
-                                Đã xác thực{' '}
-                                <FontAwesome
-                                    name="check-circle"
-                                    size={15}
-                                    color={'#4EB09B'}
-                                />
-                            </Text>
-                        ) : (
+                            />
+
                             <Text
                                 style={{
+                                    ...FONTS.h3,
                                     color: COLORS.black,
-                                    ...FONTS.body5,
+                                    marginVertical: 8,
                                 }}
                             >
-                                Chưa xác thực{' '}
-                                <FontAwesome
-                                    name="times-circle"
-                                    size={15}
-                                    color={COLORS.black}
-                                />
+                                {fullname}
                             </Text>
-                        )}
-
-                        <View style={{ flexDirection: 'column' }}>
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    marginVertical: 6,
-                                    marginHorizontal: 100,
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Ionicons
-                                    name="location-outline"
-                                    size={22}
-                                    color="black"
-                                />
+                            {isActive ? (
                                 <Text
                                     style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 4,
-                                        textAlign: 'justify',
-                                    }}
-                                >
-                                    {address}
-                                </Text>
-                            </View>
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    marginBottom: 6,
-                                    marginHorizontal: 100,
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <MaterialCommunityIcons
-                                    name="email-outline"
-                                    size={20}
-                                    color="black"
-                                />
-                                <Text
-                                    style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 4,
-                                        textAlign: 'justify',
-                                    }}
-                                >
-                                    {email}
-                                </Text>
-                            </View>
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    marginHorizontal: 100,
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Feather name="phone" size={20} color="black" />
-                                <Text
-                                    style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 4,
-                                        textAlign: 'justify',
-                                    }}
-                                >
-                                    {phone}
-                                </Text>
-                            </View>
-                        </View>
-                        <View style={{ flexDirection: 'row', paddingTop: 15 }}>
-                            <TouchableOpacity
-                                style={{
-                                    width: 124,
-                                    height: 36,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: COLORS.primary,
-                                    borderRadius: 15,
-                                    marginHorizontal: 10,
-                                }}
-                            >
-                                <Text
-                                    style={{
+                                        color: '#4EB09B',
                                         ...FONTS.body5,
-                                        color: '#fff',
                                     }}
                                 >
-                                    Theo dõi
+                                    Đã xác thực{' '}
+                                    <FontAwesome
+                                        name="check-circle"
+                                        size={15}
+                                        color={'#4EB09B'}
+                                    />
                                 </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{
-                                    width: 36,
-                                    height: 36,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: '#DCDCDC',
-                                    borderRadius: 15,
-                                    marginRight: 5,
-                                }}
-                            >
-                                <Feather
-                                    name="heart"
-                                    size={20}
-                                    color={COLORS.primary}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{
-                                    width: 36,
-                                    height: 36,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: '#DCDCDC',
-                                    borderRadius: 15,
-                                    marginRight: 5,
-                                }}
-                            >
-                                <Feather
-                                    name="message-square"
-                                    size={20}
-                                    color={COLORS.primary}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{
-                                    width: 36,
-                                    height: 36,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: '#DCDCDC',
-                                    borderRadius: 15,
-                                    marginRight: 5,
-                                }}
-                            >
-                                <AntDesign
-                                    name="sharealt"
-                                    size={20}
-                                    color={COLORS.primary}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{
-                                    width: 36,
-                                    height: 36,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: '#DCDCDC',
-                                    borderRadius: 15,
-                                    marginRight: 5,
-                                }}
-                            >
-                                <Feather
-                                    name="more-horizontal"
-                                    size={20}
-                                    color={COLORS.primary}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                        <View
-                            style={{
-                                paddingVertical: 8,
-                                flexDirection: 'row',
-                            }}
-                        >
-                            <View
-                                style={{
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    marginHorizontal: 10,
-                                }}
-                            >
+                            ) : (
                                 <Text
                                     style={{
-                                        fontFamily: 'monterrat',
-                                        fontSize: 16,
-                                        lineHeight: 30,
                                         color: COLORS.black,
-                                    }}
-                                >
-                                    200
-                                </Text>
-                                <Text
-                                    style={{
                                         ...FONTS.body5,
-                                        color: COLORS.black,
                                     }}
                                 >
-                                    Người theo dõi
+                                    Chưa xác thực{' '}
+                                    <FontAwesome
+                                        name="times-circle"
+                                        size={15}
+                                        color={COLORS.black}
+                                    />
                                 </Text>
-                            </View>
+                            )}
 
                             <View
-                                style={{
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    marginHorizontal: 10,
-                                }}
+                                style={{ flexDirection: 'row', paddingTop: 15 }}
                             >
-                                <Text
+                                <TouchableOpacity
                                     style={{
-                                        fontFamily: 'monterrat',
-                                        fontSize: 16,
-                                        lineHeight: 30,
-                                        color: COLORS.black,
+                                        width: 160,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: COLORS.primary,
+                                        borderRadius: 15,
+                                        marginHorizontal: 10,
+                                    }}
+                                    onPress={() =>
+                                        navigation.navigate('EditProfile')
+                                    }
+                                >
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: '#fff',
+                                        }}
+                                    >
+                                        Chỉnh sửa thông tin
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        width: 36,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: '#DCDCDC',
+                                        borderRadius: 15,
+                                        marginRight: 5,
                                     }}
                                 >
-                                    67
-                                </Text>
-                                <Text
+                                    <Feather
+                                        name="heart"
+                                        size={20}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
                                     style={{
-                                        ...FONTS.body5,
-                                        color: COLORS.black,
+                                        width: 36,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: '#DCDCDC',
+                                        borderRadius: 15,
+                                        marginRight: 5,
                                     }}
                                 >
-                                    Đang theo dõi
-                                </Text>
+                                    <Feather
+                                        name="message-square"
+                                        size={20}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        width: 36,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: '#DCDCDC',
+                                        borderRadius: 15,
+                                        marginRight: 5,
+                                    }}
+                                >
+                                    <AntDesign
+                                        name="sharealt"
+                                        size={20}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        width: 36,
+                                        height: 36,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: '#DCDCDC',
+                                        borderRadius: 15,
+                                        marginRight: 5,
+                                    }}
+                                >
+                                    <Feather
+                                        name="more-horizontal"
+                                        size={20}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
                             </View>
                             <View
                                 style={{
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    marginHorizontal: 10,
+                                    paddingVertical: 8,
+                                    flexDirection: 'row',
                                 }}
                             >
-                                <Text
+                                <View
                                     style={{
-                                        fontFamily: 'monterrat',
-                                        fontSize: 16,
-                                        lineHeight: 30,
-                                        color: COLORS.black,
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginHorizontal: 10,
                                     }}
                                 >
-                                    75
-                                </Text>
-                                <Text
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            fontSize: 16,
+                                            lineHeight: 30,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        200
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        Người theo dõi
+                                    </Text>
+                                </View>
+
+                                <View
                                     style={{
-                                        ...FONTS.body5,
-                                        color: COLORS.black,
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginHorizontal: 10,
                                     }}
                                 >
-                                    Lượt ủng hộ
-                                </Text>
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            fontSize: 16,
+                                            lineHeight: 30,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        67
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        Đang theo dõi
+                                    </Text>
+                                </View>
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginHorizontal: 10,
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            fontSize: 16,
+                                            lineHeight: 30,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        75
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        Lượt ủng hộ
+                                    </Text>
+                                </View>
                             </View>
                         </View>
                     </View>
                 </View>
             </View>
             <View style={{ flex: 1 }}>
-                <View
-                    style={{
-                        flex: 1,
-                    }}
-                >
-                    <TabView
-                        navigationState={{ index, routes }}
-                        renderScene={renderScene}
-                        onIndexChange={setIndex}
-                        initialLayout={{ width: layout.width }}
-                        renderTabBar={renderTabBar}
-                    />
-                </View>
+                <TabView
+                    navigationState={{ index, routes }}
+                    renderScene={renderScene}
+                    onIndexChange={setIndex}
+                    initialLayout={{ width: layout.width }}
+                    renderTabBar={renderTabBar}
+                />
             </View>
         </SafeAreaView>
     )

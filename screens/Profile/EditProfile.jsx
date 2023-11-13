@@ -19,8 +19,7 @@ import ImageAvata from '../../assets/hero2.jpg'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import CustomButton from '../../components/CustomButton'
 import CustomInputEdit from '../../components/CustomInputEdit'
-import CustomEditAddress from '../../components/CustomEditAddress'
-import CustomAlert from '../../components/CustomAlert'
+import { useFocusEffect } from '@react-navigation/native'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
@@ -28,7 +27,7 @@ import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 const success = '../../assets/success.png'
 const fail = '../../assets/cross.png'
 const warning = '../../assets/warning.png'
-const EditProfile = ({ navigation }) => {
+const EditProfile = ({ navigation,route }) => {
     const [selectedImage, setSelectedImage] = useState('')
     const [avatar, setAvatar] = useState()
     const [fullname, setFullname] = useState('')
@@ -43,9 +42,6 @@ const EditProfile = ({ navigation }) => {
     const [userId, setUserId] = useState()
     const [token, setToken] = useState()
     const [ButtonPress, setButtonPress] = useState('')
-    const [showWarning, setShowWarning] = useState(false)
-    const [mess, setMess] = useState()
-    const [icon, setIcon] = useState()
 
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
@@ -115,6 +111,12 @@ const EditProfile = ({ navigation }) => {
     useEffect(() => {
         getToken()
     }, [])
+    useFocusEffect(
+        React.useCallback(() => {
+            // Thực hiện các công việc cần thiết để làm mới màn hình ở đây (ví dụ, gọi hàm onRefresh).
+            onRefreshInfo()
+        }, [route])
+    )
     const formData = new FormData()
     const randomNum = Math.floor(Math.random() * (10000 - 10 + 1)) + 10
     const handleUpdateUser = async () => {
@@ -161,6 +163,10 @@ const EditProfile = ({ navigation }) => {
                         text1: 'Thành công',
                         text2: 'Thay đổi thông tin thành công',
                         visibilityTime: 2500,
+                        autoHide: true,
+                        onHide: () => {
+                            navigation.navigate('BottomTabNavigation')
+                        },
                     })
                     onRefreshInfo()
                     setButtonPress(false)
@@ -222,8 +228,9 @@ const EditProfile = ({ navigation }) => {
         ),
 
         error: (props) => (
-            <ErrorToast
+            <BaseToast
                 {...props}
+                style={{ borderLeftColor: '#FF0035' }}
                 text1Style={{
                     fontSize: 18,
                 }}

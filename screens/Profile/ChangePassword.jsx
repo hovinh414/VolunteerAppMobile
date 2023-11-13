@@ -18,7 +18,6 @@ import CustomButton from '../../components/CustomButton'
 import API_URL from '../../interfaces/config'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
-
 const ChangePassword = ({ navigation }) => {
     const [password, setPassword] = useState()
     const [newPassword, setNewPassword] = useState()
@@ -103,6 +102,10 @@ const ChangePassword = ({ navigation }) => {
                 text1: 'Thất bại',
                 text2: 'Thay đổi mật khẩu thất bại!',
                 visibilityTime: 2500,
+                autoHide: true,
+                onHide: () => {
+                    navigation.navigate('BottomTabNavigation')
+                },
             })
             setButtonPress(false)
         }
@@ -152,8 +155,9 @@ const ChangePassword = ({ navigation }) => {
         ),
 
         error: (props) => (
-            <ErrorToast
+            <BaseToast
                 {...props}
+                style={{ borderLeftColor: '#FF0035' }}
                 text1Style={{
                     fontSize: 18,
                 }}

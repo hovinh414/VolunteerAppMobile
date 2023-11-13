@@ -17,11 +17,10 @@ import {
     MaterialCommunityIcons,
 } from '@expo/vector-icons'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
-import { posts } from '../../constants/data'
+import CustomViewInfo from '../../components/CustomViewInfo'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import ImageAvata from '../../assets/hero2.jpg'
 import { Image } from 'expo-image'
-import { useFocusEffect } from '@react-navigation/native'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const cover = '../../assets/cover.jpg'
@@ -34,8 +33,33 @@ const PostsRoute = () => (
     ></View>
 )
 
-const InfoRoute = () => {
-    return <ScrollView style={{ flex: 1, paddingTop: 25 }}></ScrollView>
+const InfoRoute = ({ navigation }) => {
+
+    const [address, setAddress] = useState('')
+    const [email, setEmail] = useState('')
+    const [phone, setPhone] = useState('')
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setAddress(userStored.address)
+        setEmail(userStored.email)
+        setPhone(userStored.phone)
+    }
+    useEffect(() => {
+        getUserStored()
+    }, [])
+    return (
+        <ScrollView style={{ flex: 1, marginHorizontal: 22 }}>
+            <View style={{paddingTop: 20 }}>
+                <CustomViewInfo value={address} icon={'location-outline'} height={70}/>
+            </View>
+            <View style={{paddingTop: 20 }}>
+                <CustomViewInfo value={email} icon={'mail-outline'} height={48}/>
+            </View>
+            <View style={{paddingTop: 20 }}>
+                <CustomViewInfo value={phone} icon={'call-outline'} height={48}/>
+            </View>
+        </ScrollView>
+    )
 }
 
 const renderScene = SceneMap({
@@ -45,16 +69,10 @@ const renderScene = SceneMap({
 const Profile = ({ navigation, route }) => {
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
-    const [address, setAddress] = useState('')
-    const [email, setEmail] = useState('')
-    const [phone, setPhone] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
         setFullname(userStored.fullname)
-        setAddress(userStored.address)
-        setEmail(userStored.email)
-        setPhone(userStored.phone)
     }
     useEffect(() => {
         getUserStored()
@@ -94,12 +112,13 @@ const Profile = ({ navigation, route }) => {
     const onRefresh = () => {
         getUserStored()
     }
-    useFocusEffect(
-        React.useCallback(() => {
-            // Thực hiện các công việc cần thiết để làm mới màn hình ở đây (ví dụ, gọi hàm onRefresh).
+    React.useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
             onRefresh()
-        }, [route])
-    )
+        })
+
+        return unsubscribe
+    }, [navigation])
     const toastConfig = {
         success: (props) => (
             <BaseToast
@@ -116,8 +135,9 @@ const Profile = ({ navigation, route }) => {
         ),
 
         error: (props) => (
-            <ErrorToast
+            <BaseToast
                 {...props}
+                style={{ borderLeftColor: '#FF0035' }}
                 text1Style={{
                     fontSize: 18,
                 }}
@@ -153,7 +173,7 @@ const Profile = ({ navigation, route }) => {
                     style={{
                         width: '100%',
                         position: 'relative',
-                        height: '68%',
+                        height: '55%',
                     }}
                 >
                     <Image
@@ -195,77 +215,10 @@ const Profile = ({ navigation, route }) => {
                         >
                             {fullname}
                         </Text>
-
-                        <View style={{ flexDirection: 'column' }}>
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    marginVertical: 6,
-                                    marginHorizontal: 100,
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Ionicons
-                                    name="location-outline"
-                                    size={22}
-                                    color="black"
-                                />
-                                <Text
-                                    style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 4,
-                                        textAlign: 'justify',
-                                    }}
-                                >
-                                    {address}
-                                </Text>
-                            </View>
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    marginBottom: 6,
-                                    marginHorizontal: 100,
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <MaterialCommunityIcons
-                                    name="email-outline"
-                                    size={20}
-                                    color="black"
-                                />
-                                <Text
-                                    style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 4,
-                                        textAlign: 'justify',
-                                    }}
-                                >
-                                    {email}
-                                </Text>
-                            </View>
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    marginHorizontal: 100,
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Feather name="phone" size={20} color="black" />
-                                <Text
-                                    style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 4,
-                                        textAlign: 'justify',
-                                    }}
-                                >
-                                    {phone}
-                                </Text>
-                            </View>
-                        </View>
                         <View style={{ flexDirection: 'row', paddingTop: 15 }}>
                             <TouchableOpacity
                                 style={{
-                                    width: 124,
+                                    width: 160,
                                     height: 36,
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -273,6 +226,7 @@ const Profile = ({ navigation, route }) => {
                                     borderRadius: 15,
                                     marginHorizontal: 10,
                                 }}
+                                onPress={() => navigation.navigate('EditProfile')}
                             >
                                 <Text
                                     style={{
@@ -280,7 +234,7 @@ const Profile = ({ navigation, route }) => {
                                         color: '#fff',
                                     }}
                                 >
-                                    Theo dõi
+                                    Chỉnh sửa thông tin
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity

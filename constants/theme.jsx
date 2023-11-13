@@ -73,7 +73,7 @@ export const FONTS = {
         color: COLORS.black,
     },
     body2: {
-        fontFamily: 'regular',
+        fontFamily: 'regularBold',
         fontSize: SIZES.body2,
         lineHeight: 30,
         color: COLORS.black,

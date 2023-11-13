@@ -167,8 +167,9 @@ const Signup = ({ navigation }) => {
         ),
 
         error: (props) => (
-            <ErrorToast
+            <BaseToast
                 {...props}
+                style={{ borderLeftColor: '#FF0035' }}
                 text1Style={{
                     fontSize: 18,
                 }}

@@ -22,7 +22,7 @@ const Settings = ({ navigation }) => {
     }
 
     const navigateToEditProfile = () => {
-        navigation.push('EditProfile')
+        navigation.navigate('EditProfile')
     }
 
     const navigateToSecurity = () => {

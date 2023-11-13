@@ -28,7 +28,14 @@ import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const DetailPost = ({ navigation, route }) => {
     const [items, setItems] = useState(route.params)
-
+    const [type, setType] = useState('')
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setType(userStored.type)
+    }
+    useEffect(() => {
+        getUserStored()
+    }, [])
     const refreshDetail = async () => {
         const config = {
             headers: {
@@ -143,7 +150,7 @@ const DetailPost = ({ navigation, route }) => {
                 url: API_URL.API_URL + '/activity/' + items.activityId,
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: token,
+                    Authorization: token
                 },
             })
             console.log(res.data.status)
@@ -201,8 +208,9 @@ const DetailPost = ({ navigation, route }) => {
         ),
 
         error: (props) => (
-            <ErrorToast
+            <BaseToast
                 {...props}
+                style={{ borderLeftColor: '#FF0035' }}
                 text1Style={{
                     fontSize: 18,
                 }}
@@ -239,7 +247,7 @@ const DetailPost = ({ navigation, route }) => {
             >
                 <Toast config={toastConfig} />
             </View>
-            <View style={{zIndex:1}}>
+            <View style={{ zIndex: 1 }}>
                 <View style={{ flex: 1, marginBottom: 15 }}>
                     {/* <FlatList
                     data={items.media}
@@ -583,7 +591,7 @@ const DetailPost = ({ navigation, route }) => {
                             </View>
                         )}
                     />
-                    {items.isJoin ? (
+                    {(type === 'Organization' || !type) ? null : items.isJoin ? (
                         <View
                             style={{
                                 marginBottom: 50,

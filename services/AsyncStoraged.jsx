@@ -51,6 +51,7 @@ class AsyncStoraged {
             console.error('get store', error);
         }
     }
+    
     storeDataBykey = async (key, value) => {
         try {
             const jsonValue = JSON.stringify(value)

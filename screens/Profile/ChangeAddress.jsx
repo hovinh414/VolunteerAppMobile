@@ -161,6 +161,7 @@ const ChangeAddress = () => {
                         text1: 'Thành công',
                         text2: 'Thay đổi địa chỉ thành công',
                         visibilityTime: 2500,
+                        
                     })
                     onRefresh()
                     setButtonPress(false)
@@ -193,8 +194,9 @@ const ChangeAddress = () => {
         ),
 
         error: (props) => (
-            <ErrorToast
+            <BaseToast
                 {...props}
+                style={{ borderLeftColor: '#FF0035' }}
                 text1Style={{
                     fontSize: 18,
                 }}

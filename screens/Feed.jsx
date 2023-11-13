@@ -7,6 +7,7 @@ import {
     TextInput,
     RefreshControl,
     Modal,
+    StyleSheet,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
 import React, { useState, useEffect } from 'react'
@@ -18,6 +19,7 @@ import {
     Feather,
     FontAwesome,
     MaterialCommunityIcons,
+    Entypo,
 } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { friends, posts } from '../constants/data'
@@ -33,6 +35,21 @@ import CustomButtonV2 from '../components/CustomButtonV2'
 import LongText from './Feed/LongText'
 import DaysDifference from './Feed/DaysDifference'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
+import {
+    Menu,
+    MenuProvider,
+    MenuOptions,
+    MenuOption,
+    MenuTrigger,
+} from 'react-native-popup-menu'
+import {
+    Block,
+    Mute,
+    Follow,
+    Why,
+    Question,
+    NotInterested,
+} from '../components/CustomContent'
 
 const share = '../assets/share.png'
 const question = '../assets/question.png'
@@ -49,102 +66,19 @@ const Feed = ({ navigation, route }) => {
         setPosts([])
         getPosts()
     }
-    function renderHeader() {
-        return (
-            <View
-                style={{
-                    padding: 12,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                }}
-            >
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <Text
-                        style={{
-                            ...FONTS.body2,
-                            marginRight: 4,
-                        }}
-                    >
-                        Việc Tử Tế
-                    </Text>
-                    <MaterialIcons
-                        name="keyboard-arrow-down"
-                        size={24}
-                        color={COLORS.black}
-                    />
-                </View>
+    const Divider = () => (
+        <View
+            style={{
+                height: StyleSheet.hairlineWidth,
+                backgroundColor: '#7F8487',
+            }}
+        />
+    )
+    // function renderHeader() {
+    //     return (
 
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <TouchableOpacity
-                        style={{
-                            height: 50,
-                            width: 50,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: '#fff',
-                            shadowColor: '#18274B',
-                            shadowOffset: {
-                                width: 0,
-                                height: 4.5,
-                            },
-                            shadowOpacity: 0.12,
-                            shadowRadius: 6.5,
-                            elevation: 2,
-                            borderRadius: 22,
-                        }}
-                        onPress={() => console.log('Filter')}
-                    >
-                        <Ionicons
-                            name="filter"
-                            size={24}
-                            color={COLORS.black}
-                        />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Chat')}
-                    >
-                        <LinearGradient
-                            colors={['#D4145A', '#FBB03B']}
-                            style={{
-                                height: 50,
-                                width: 50,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                shadowColor: '#18274B',
-                                shadowOffset: {
-                                    width: 0,
-                                    height: 4.5,
-                                },
-                                shadowOpacity: 0.12,
-                                shadowRadius: 6.5,
-                                elevation: 2,
-                                borderRadius: 22,
-                                marginLeft: 12,
-                            }}
-                        >
-                            <Feather
-                                name="message-circle"
-                                size={30}
-                                color={COLORS.white}
-                            />
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        )
-    }
+    //     )
+    // }
     function LikeButton({ postId, likePost, unLikePost }) {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
@@ -250,7 +184,9 @@ const Feed = ({ navigation, route }) => {
                         marginRight: SIZES.padding2,
                     }}
                 >
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('LoginScreen')}
+                    >
                         <Feather name="heart" size={20} color={COLORS.black} />
                     </TouchableOpacity>
                     <Text style={{ ...FONTS.body4, marginLeft: 5 }}>
@@ -262,7 +198,7 @@ const Feed = ({ navigation, route }) => {
     }
     const [posts, setPosts] = useState()
     const [token, setToken] = useState('')
-    const [avatar, setAvatar] = useState('')
+    const [avatar, setAvatar] = useState()
 
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -273,11 +209,16 @@ const Feed = ({ navigation, route }) => {
         getToken()
     }, [])
 
-    const [type, setType] = useState('')
+    const [type, setType] = useState()
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
-        setAvatar(userStored.avatar)
-        setType(userStored.type)
+        if (userStored) {
+            setAvatar(userStored.avatar)
+            setType(userStored.type)
+        } else {
+            setAvatar(null)
+            setType(null)
+        }
     }
     useEffect(() => {
         getUserStored()
@@ -323,7 +264,6 @@ const Feed = ({ navigation, route }) => {
             }
         }
     }
-    const [showWarning, setShowWarning] = useState(false)
     const unLikePost = async (_postId) => {
         try {
             const res = await axios({
@@ -353,7 +293,6 @@ const Feed = ({ navigation, route }) => {
     }
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
-    console.log(currentPage)
     const fetchNextPage = async () => {
         if (!isFetchingNextPage) {
             setIsFetchingNextPage(true)
@@ -401,7 +340,6 @@ const Feed = ({ navigation, route }) => {
             console.log('API Error:', error)
         }
     }
-
     const RenderSuggestionsContainer = () => {
         return (
             <View
@@ -477,9 +415,110 @@ const Feed = ({ navigation, route }) => {
     }
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <View style={{ flex: 1 }}>
-                {renderHeader()}
+            <View style={{ zIndex: 2 }}>
+                <View
+                    style={{
+                        padding: 12,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                    }}
+                >
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                ...FONTS.body2,
+                                marginRight: 4,
+                            }}
+                        >
+                            Việc Tử Tế
+                        </Text>
+                    </View>
+                    <MenuProvider>
+                        <Menu
+                            style={{
+                                zIndex: 999,
+                            }}
+                        >
+                            <MenuTrigger>
+                                <Feather
+                                    name="chevron-down"
+                                    size={30}
+                                    color={COLORS.black}
+                                />
+                            </MenuTrigger>
+                            <MenuOptions
+                                customStyles={{
+                                    optionsContainer: {
+                                        borderRadius: 10,
+                                    },
+                                }}
+                            >
+                                <NotInterested
+                                    text="Đang theo dõi"
+                                    value="Not Interested"
+                                    iconName="emoji-sad"
+                                />
+                                <Divider />
+                                <Block
+                                    text="Block"
+                                    value="Block"
+                                    iconName="block"
+                                />
+                                <Divider />
+                                <Mute
+                                    text="Mute"
+                                    value="Mute"
+                                    iconName="sound-mute"
+                                />
+                            </MenuOptions>
+                        </Menu>
+                    </MenuProvider>
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('Chat')}
+                        >
+                            <LinearGradient
+                                colors={['#D4145A', '#FBB03B']}
+                                style={{
+                                    height: 50,
+                                    width: 50,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    shadowColor: '#18274B',
+                                    shadowOffset: {
+                                        width: 0,
+                                        height: 4.5,
+                                    },
+                                    shadowOpacity: 0.12,
+                                    shadowRadius: 6.5,
+                                    elevation: 2,
+                                    borderRadius: 22,
+                                    marginLeft: 12,
+                                }}
+                            >
+                                <Feather
+                                    name="message-circle"
+                                    size={30}
+                                    color={COLORS.white}
+                                />
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
 
+            <View style={{ flex: 1, zIndex: 1 }}>
                 <FlatList
                     data={posts}
                     ListHeaderComponent={<RenderSuggestionsContainer />}
@@ -522,7 +561,7 @@ const Feed = ({ navigation, route }) => {
                                         marginHorizontal: 8,
                                     }}
                                     onPress={() => viewProfile(item.ownerId)}
-                                    // onPress={() => console.log(item.isJoin)}
+                                    // onPress={() => console.log(avatar)}
                                 >
                                     <Image
                                         source={item.ownerAvatar}
@@ -725,8 +764,8 @@ const Feed = ({ navigation, route }) => {
                                         flexDirection: 'row',
                                     }}
                                 >
-                                    {(type === 'Organization' ||
-                                    !type) ? null : (item.isJoin ? (
+                                    {type === 'Organization' ||
+                                    !type ? null : item.isJoin ? (
                                         <View
                                             style={{
                                                 backgroundColor: '#ccc',
@@ -763,13 +802,13 @@ const Feed = ({ navigation, route }) => {
                                                 Tham Gia
                                             </Text>
                                         </TouchableOpacity>
-                                    ))}
+                                    )}
                                 </View>
                             </View>
 
                             {/* comment section */}
 
-                            {avatar === null ? null : (
+                            {!avatar ? null : (
                                 <View
                                     style={{
                                         flexDirection: 'row',
