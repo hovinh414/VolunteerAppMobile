@@ -42,14 +42,7 @@ import {
     MenuOption,
     MenuTrigger,
 } from 'react-native-popup-menu'
-import {
-    Block,
-    Mute,
-    Follow,
-    Why,
-    Question,
-    NotInterested,
-} from '../components/CustomContent'
+import { Block, Mute, Follow, Why, Question } from '../components/CustomContent'
 
 const share = '../assets/share.png'
 const question = '../assets/question.png'
@@ -74,6 +67,13 @@ const Feed = ({ navigation, route }) => {
             }}
         />
     )
+    const [posts, setPosts] = useState()
+    const [token, setToken] = useState('')
+    const [avatar, setAvatar] = useState()
+    const [typePost, setTypePost] = useState('normal')
+    const [type, setType] = useState()
+    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
     // function renderHeader() {
     //     return (
 
@@ -196,9 +196,6 @@ const Feed = ({ navigation, route }) => {
             )
         }
     }
-    const [posts, setPosts] = useState()
-    const [token, setToken] = useState('')
-    const [avatar, setAvatar] = useState()
 
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -208,8 +205,6 @@ const Feed = ({ navigation, route }) => {
     useEffect(() => {
         getToken()
     }, [])
-
-    const [type, setType] = useState()
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
@@ -291,8 +286,6 @@ const Feed = ({ navigation, route }) => {
             setRefreshing(false)
         })
     }
-    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
-    const [currentPage, setCurrentPage] = useState(1)
     const fetchNextPage = async () => {
         if (!isFetchingNextPage) {
             setIsFetchingNextPage(true)
@@ -304,15 +297,37 @@ const Feed = ({ navigation, route }) => {
             }
 
             try {
-                const response = await axios.get(
-                    `${API_URL.API_URL}/posts?page=${currentPage + 1}&limit=6`,
-                    config
-                )
-                if (response.data.status === 'SUCCESS') {
-                    setPosts([...posts, ...response.data.data])
-                    setCurrentPage(currentPage + 1)
+                if (typePost === 'normal') {
+                    const response = await axios.get(
+                        `${API_URL.API_URL}/posts?page=${
+                            currentPage + 1
+                        }&limit=6`,
+                        config
+                    )
+                    if (response.data.status === 'SUCCESS') {
+                        setPosts([...posts, ...response.data.data])
+                        setCurrentPage(currentPage + 1)
+                    } else {
+                        setPosts([...posts, ...response.data.data])
+                    }
                 } else {
-                    setPosts([...posts, ...response.data.data])
+                    const res = await axios({
+                        method: 'post',
+                        url: `${API_URL.API_URL}/posts/follows?page=${
+                            currentPage + 1
+                        }&limit=6`,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: token,
+                        },
+                    })
+
+                    if (res.data.status === 'SUCCESS') {
+                        setPosts([...posts, ...res.data.data.postsInformation])
+                        setCurrentPage(currentPage + 1)
+                    } else {
+                        setPosts([...posts, ...res.data.data.postsInformation])
+                    }
                 }
             } catch (error) {
                 console.log('API Error:', error)
@@ -413,15 +428,35 @@ const Feed = ({ navigation, route }) => {
             console.log('API Error:', error)
         }
     }
+    const getPostsFollow = async () => {
+        try {
+            const res = await axios({
+                method: 'post',
+                url: API_URL.API_URL + '/posts/follows?page=1&limit=6',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            })
+
+            if (res.data.status === 'SUCCESS') {
+                setPosts(res.data.data.postsInformation)
+                setTypePost('follow')
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <View style={{ zIndex: 2 }}>
+            <View>
                 <View
                     style={{
                         padding: 12,
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'space-between',
+                        zIndex: 999,
                     }}
                 >
                     <View
@@ -439,46 +474,7 @@ const Feed = ({ navigation, route }) => {
                             Việc Tử Tế
                         </Text>
                     </View>
-                    <MenuProvider>
-                        <Menu
-                            style={{
-                                zIndex: 999,
-                            }}
-                        >
-                            <MenuTrigger>
-                                <Feather
-                                    name="chevron-down"
-                                    size={30}
-                                    color={COLORS.black}
-                                />
-                            </MenuTrigger>
-                            <MenuOptions
-                                customStyles={{
-                                    optionsContainer: {
-                                        borderRadius: 10,
-                                    },
-                                }}
-                            >
-                                <NotInterested
-                                    text="Đang theo dõi"
-                                    value="Not Interested"
-                                    iconName="emoji-sad"
-                                />
-                                <Divider />
-                                <Block
-                                    text="Block"
-                                    value="Block"
-                                    iconName="block"
-                                />
-                                <Divider />
-                                <Mute
-                                    text="Mute"
-                                    value="Mute"
-                                    iconName="sound-mute"
-                                />
-                            </MenuOptions>
-                        </Menu>
-                    </MenuProvider>
+                    
                     <View
                         style={{
                             flexDirection: 'row',
@@ -519,6 +515,7 @@ const Feed = ({ navigation, route }) => {
             </View>
 
             <View style={{ flex: 1, zIndex: 1 }}>
+            
                 <FlatList
                     data={posts}
                     ListHeaderComponent={<RenderSuggestionsContainer />}
