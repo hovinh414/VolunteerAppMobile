@@ -474,7 +474,46 @@ const Feed = ({ navigation, route }) => {
                             Việc Tử Tế
                         </Text>
                     </View>
-                    
+                    <MenuProvider>
+                        <Menu>
+                            <MenuTrigger>
+                                <Feather
+                                    name="chevron-down"
+                                    size={30}
+                                    color={COLORS.black}
+                                    style={{
+                                        marginTop: 10,
+                                    }}
+                                />
+                            </MenuTrigger>
+                            <MenuOptions
+                                customStyles={{
+                                    optionsContainer: {
+                                        borderRadius: 10,
+                                        marginTop: 30,
+                                    },
+                                }}
+                            >
+                                <Follow
+                                    text="Đang theo dõi"
+                                    onSelect={getPostsFollow}
+                                    iconName="users"
+                                />
+                                <Divider />
+                                <Block
+                                    text="Block"
+                                    value="Block"
+                                    iconName="block"
+                                />
+                                <Divider />
+                                <Mute
+                                    text="Mute"
+                                    value="Mute"
+                                    iconName="sound-mute"
+                                />
+                            </MenuOptions>
+                        </Menu>
+                    </MenuProvider>
                     <View
                         style={{
                             flexDirection: 'row',
@@ -515,7 +554,6 @@ const Feed = ({ navigation, route }) => {
             </View>
 
             <View style={{ flex: 1, zIndex: 1 }}>
-            
                 <FlatList
                     data={posts}
                     ListHeaderComponent={<RenderSuggestionsContainer />}
