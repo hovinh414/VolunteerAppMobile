@@ -20,6 +20,7 @@ import ChatDetail from './screens/Chat/ChatDetail'
 import DetailPost from './screens/Post/DetailPost'
 import ViewDetailImage from './screens/Post/ViewDetailImage'
 import ProfileUser from './screens/Profile/ProfileUser'
+import FeaturedArticle from './screens/Feed/FeaturedArticle'
 
 const Stack = createNativeStackNavigator()
 
@@ -144,6 +145,13 @@ export default function App() {
                     <Stack.Screen
                         name="ProfileUser"
                         component={ProfileUser}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="FeaturedArticle"
+                        component={FeaturedArticle}
                         options={{
                             headerShown: false,
                         }}

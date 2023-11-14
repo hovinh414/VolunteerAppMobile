@@ -295,6 +295,7 @@ const Feed = ({ navigation, route }) => {
                     <TouchableOpacity
                         activeOpacity={0.8}
                         style={{ flexDirection: 'row', marginRight: 10 }}
+                        onPress={() => navigation.navigate('FeaturedArticle')}
                     >
                         <Text
                             style={{
@@ -417,7 +418,7 @@ const Feed = ({ navigation, route }) => {
                                             ...FONTS.body5,
                                         }}
                                     >
-                                        {item.ownerDisplayname}
+                                        {item.content.length > 23 ? `${item.content.slice(0, 23)}...` : item.content}
                                     </Text>
                                     <View
                                         style={{
