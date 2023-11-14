@@ -18,7 +18,6 @@ import { signUpApi } from '../../services/UserService'
 import Auth from '../Login/Auth'
 import CustomInput from '../../components/CustomInput'
 import CustomButton from '../../components/CustomButton'
-import CustomAlert from '../../components/CustomAlert'
 import API_URL from '../../interfaces/config'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 

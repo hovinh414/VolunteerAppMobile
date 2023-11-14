@@ -36,7 +36,6 @@ import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const share = '../../assets/share.png'
 const cover = '../../assets/cover.jpg'
-const question = '../../assets/question.png'
 const PostsRoute = () => {
     const [orgId, setOrgId] = useState()
     const [posts, setPosts] = useState([])
@@ -371,88 +370,6 @@ const PostsRoute = () => {
                 paddingTop: 12,
             }}
         >
-            <Modal
-                visible={showWarning}
-                animationType="fade"
-                transparent
-                onRequestClose={() => setShowWarning(false)}
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        shadowColor: '#000',
-                        shadowOffset: {
-                            width: 0,
-                            height: 2,
-                        },
-                        shadowOpacity: 0.75,
-                        shadowRadius: 4,
-                        elevation: 5,
-                    }}
-                >
-                    <View
-                        style={{
-                            width: 300,
-                            height: 200,
-                            backgroundColor: '#ffffff',
-                            borderRadius: 25,
-                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
-                            justifyContent: 'center', //
-                        }}
-                    >
-                        <Image
-                            source={require(question)}
-                            style={{
-                                marginTop: 15,
-                                width: 50,
-                                height: 50,
-                            }}
-                        />
-                        <Text
-                            style={{
-                                marginTop: 15,
-                                fontWeight: 'bold',
-                                fontSize: 18,
-                            }}
-                        >
-                            Bạn có muốn tham gia hoạt động?
-                        </Text>
-
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginTop: 30,
-                            }}
-                        >
-                            <View
-                                style={{
-                                    width: 80,
-                                    marginRight: 15,
-                                }}
-                            >
-                                <CustomButtonV2
-                                    title="ĐÓNG"
-                                    onPress={() => setShowWarning(false)}
-                                />
-                            </View>
-                            <View
-                                style={{
-                                    width: 80,
-                                }}
-                            >
-                                <CustomButton
-                                    title="ĐỒNG Ý"
-                                    onPress={() =>
-                                        joinActivity(item.activityId)
-                                    }
-                                />
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
             <FlatList
                 data={posts}
                 onEndReached={fetchNextPage}
@@ -683,7 +600,7 @@ const PostsRoute = () => {
                                 </View>
                             </View>
 
-                            <View style={{ flexDirection: 'row' }}>
+                            {/* <View style={{ flexDirection: 'row' }}>
                                 {type ===
                                 'Organization' ? null : !item.isJoin ? (
                                     <TouchableOpacity
@@ -721,7 +638,7 @@ const PostsRoute = () => {
                                         </Text>
                                     </View>
                                 )}
-                            </View>
+                            </View> */}
                         </View>
                     </View>
                 )}
