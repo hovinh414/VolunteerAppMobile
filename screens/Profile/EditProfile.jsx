@@ -12,7 +12,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import * as ImagePicker from 'expo-image-picker'
 import { COLORS, FONTS } from '../../constants/theme'
-import { MaterialIcons, AntDesign } from '@expo/vector-icons'
+import { MaterialIcons, Ionicons } from '@expo/vector-icons'
 import CustomInput from '../../components/CustomInput'
 import Auth from '../Login/Auth'
 import ImageAvata from '../../assets/hero2.jpg'
@@ -24,9 +24,7 @@ import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
-const success = '../../assets/success.png'
-const fail = '../../assets/cross.png'
-const warning = '../../assets/warning.png'
+
 const EditProfile = ({ navigation,route }) => {
     const [selectedImage, setSelectedImage] = useState('')
     const [avatar, setAvatar] = useState()
@@ -216,34 +214,50 @@ const EditProfile = ({ navigation,route }) => {
         success: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#6dcf81' }}
+                style={{
+                    borderLeftColor: '#379A4F',
+                    backgroundColor: '#379A4F',
+                    borderRadius: 12,
+                }}
                 text1Style={{
+                    color: '#fff',
                     fontSize: 18,
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={SuccessToast}
             />
         ),
 
         error: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FF0035' }}
+                style={{
+                    borderLeftColor: '#FF0035',
+                    backgroundColor: '#FF0035',
+                    borderRadius: 12,
+                }}
                 text1Style={{
                     fontSize: 18,
+                    color: '#fff',
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={ErrorToast}
             />
         ),
         warning: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FFE600' }}
+                style={{
+                    borderLeftColor: '#FFE600',
+                    backgroundColor: '#FFE600',
+                    borderRadius: 12,
+                }}
                 text1Style={{
                     fontSize: 18,
                 }}
@@ -251,8 +265,66 @@ const EditProfile = ({ navigation,route }) => {
                     fontSize: 16,
                     color: '#696969',
                 }}
+                renderLeadingIcon={WarningToast}
             />
         ),
+    }
+    const WarningToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="alert-circle-outline"
+                    size={35}
+                    color={COLORS.black}
+                />
+            </View>
+        )
+    }
+    const SuccessToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="checkmark-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
+    }
+    const ErrorToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="close-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
     }
     return (
         <KeyboardAvoidingView

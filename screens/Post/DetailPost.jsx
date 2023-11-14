@@ -31,7 +31,11 @@ const DetailPost = ({ navigation, route }) => {
     const [type, setType] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
-        setType(userStored.type)
+        if (userStored) {
+            setType(userStored.type)
+        } else {
+            setType(null)
+        }
     }
     useEffect(() => {
         getUserStored()
@@ -150,7 +154,7 @@ const DetailPost = ({ navigation, route }) => {
                 url: API_URL.API_URL + '/activity/' + items.activityId,
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: token
+                    Authorization: token,
                 },
             })
             console.log(res.data.status)
@@ -196,34 +200,50 @@ const DetailPost = ({ navigation, route }) => {
         success: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#6dcf81' }}
+                style={{
+                    borderLeftColor: '#379A4F',
+                    backgroundColor: '#379A4F',
+                    borderRadius: 12,
+                }}
                 text1Style={{
+                    color: '#fff',
                     fontSize: 18,
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={SuccessToast}
             />
         ),
 
         error: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FF0035' }}
+                style={{
+                    borderLeftColor: '#FF0035',
+                    backgroundColor: '#FF0035',
+                    borderRadius: 12,
+                }}
                 text1Style={{
                     fontSize: 18,
+                    color: '#fff',
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={ErrorToast}
             />
         ),
         warning: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FFE600' }}
+                style={{
+                    borderLeftColor: '#FFE600',
+                    backgroundColor: '#FFE600',
+                    borderRadius: 12,
+                }}
                 text1Style={{
                     fontSize: 18,
                 }}
@@ -231,8 +251,66 @@ const DetailPost = ({ navigation, route }) => {
                     fontSize: 16,
                     color: '#696969',
                 }}
+                renderLeadingIcon={WarningToast}
             />
         ),
+    }
+    const WarningToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="alert-circle-outline"
+                    size={35}
+                    color={COLORS.black}
+                />
+            </View>
+        )
+    }
+    const SuccessToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="checkmark-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
+    }
+    const ErrorToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="close-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
     }
     return (
         <ScrollView
@@ -249,7 +327,6 @@ const DetailPost = ({ navigation, route }) => {
             </View>
             <View style={{ zIndex: 1 }}>
                 <View style={{ flex: 1, marginBottom: 15 }}>
-                    
                     <SliderBox
                         images={items.media}
                         paginationBoxVerticalPadding={5}
@@ -569,7 +646,7 @@ const DetailPost = ({ navigation, route }) => {
                             </View>
                         )}
                     />
-                    {(type === 'Organization' || !type) ? null : items.isJoin ? (
+                    {type === 'Organization' || !type ? null : items.isJoin ? (
                         <View
                             style={{
                                 marginBottom: 50,

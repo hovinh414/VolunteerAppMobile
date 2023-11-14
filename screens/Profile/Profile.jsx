@@ -119,48 +119,6 @@ const Profile = ({ navigation, route }) => {
 
         return unsubscribe
     }, [navigation])
-    const toastConfig = {
-        success: (props) => (
-            <BaseToast
-                {...props}
-                style={{ borderLeftColor: '#6dcf81' }}
-                text1Style={{
-                    fontSize: 18,
-                }}
-                text2Style={{
-                    fontSize: 16,
-                    color: '#696969',
-                }}
-            />
-        ),
-
-        error: (props) => (
-            <BaseToast
-                {...props}
-                style={{ borderLeftColor: '#FF0035' }}
-                text1Style={{
-                    fontSize: 18,
-                }}
-                text2Style={{
-                    fontSize: 16,
-                    color: '#696969',
-                }}
-            />
-        ),
-        warning: (props) => (
-            <BaseToast
-                {...props}
-                style={{ borderLeftColor: '#FFE600' }}
-                text1Style={{
-                    fontSize: 18,
-                }}
-                text2Style={{
-                    fontSize: 16,
-                    color: '#696969',
-                }}
-            />
-        ),
-    }
     return (
         <SafeAreaView
             style={{

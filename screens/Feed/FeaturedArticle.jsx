@@ -192,7 +192,7 @@ function FeaturedArticle({ navigation }) {
                         flexDirection: 'row',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        paddingVertical:7,
+                        paddingVertical: 7,
                     }}
                     onPress={() => {
                         showSearchInput
@@ -255,13 +255,17 @@ function FeaturedArticle({ navigation }) {
                         />
                     </View>
                 ) : (
-                    <MaterialIcons
-                        name="search"
-                        size={30}
-                        color={COLORS.black}
-                        style={{ marginRight: 8, borderRadius: 30 }}
+                    <TouchableOpacity
+                        activeOpacity={0.8}
                         onPress={toggleSearchInput}
-                    />
+                    >
+                        <MaterialIcons
+                            name="search"
+                            size={30}
+                            color={COLORS.black}
+                            style={{ marginRight: 8 }}
+                        />
+                    </TouchableOpacity>
                 )}
             </View>
             <FlatList
@@ -282,6 +286,7 @@ function FeaturedArticle({ navigation }) {
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
+                        activeOpacity={0.8}
                         onPress={() => viewDetailPost(item._id)}
                     >
                         <View
@@ -302,11 +307,11 @@ function FeaturedArticle({ navigation }) {
                                     position: 'absolute',
                                     zIndex: 3,
                                     top: 30,
-                                    backgroundColor: COLORS.primary,
+                                    backgroundColor: '#EE6457',
                                     borderBottomRightRadius: 5,
                                     borderTopRightRadius: 5,
                                     width: 55,
-                                    height: 20,
+                                    height: 24,
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                 }}

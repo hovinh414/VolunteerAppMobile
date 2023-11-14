@@ -316,6 +316,7 @@ const Feed = ({ navigation, route }) => {
                     renderItem={({ item, index }) => (
                         <TouchableOpacity
                             key={index}
+                            activeOpacity={0.8}
                             style={{
                                 flexDirection: 'column',
                                 flex: 1,

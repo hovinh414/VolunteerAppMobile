@@ -18,7 +18,7 @@ import ImageAvata from '../../assets/hero2.jpg'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
 import { addYears, format, addDays, parse } from 'date-fns'
 import axios from 'axios'
-import { MaterialIcons } from '@expo/vector-icons'
+import { MaterialIcons,Ionicons } from '@expo/vector-icons'
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
 import { AntDesign } from '@expo/vector-icons'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
@@ -29,7 +29,7 @@ const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
 const fundraising = '../../assets/fundraising.png'
 const empathy = '../../assets/empathy.png'
-const Create = ({navigation}) => {
+const Create = ({ navigation }) => {
     const [selectedImages, setSelectedImage] = useState([])
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
@@ -73,34 +73,50 @@ const Create = ({navigation}) => {
         success: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#6dcf81' }}
+                style={{
+                    borderLeftColor: '#379A4F',
+                    backgroundColor: '#379A4F',
+                    borderRadius: 12,
+                }}
                 text1Style={{
+                    color: '#fff',
                     fontSize: 18,
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={SuccessToast}
             />
         ),
 
         error: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FF0035' }}
+                style={{
+                    borderLeftColor: '#FF0035',
+                    backgroundColor: '#FF0035',
+                    borderRadius: 12,
+                }}
                 text1Style={{
                     fontSize: 18,
+                    color: '#fff',
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={ErrorToast}
             />
         ),
         warning: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FFE600' }}
+                style={{
+                    borderLeftColor: '#FFE600',
+                    backgroundColor: '#FFE600',
+                    borderRadius: 12,
+                }}
                 text1Style={{
                     fontSize: 18,
                 }}
@@ -108,8 +124,66 @@ const Create = ({navigation}) => {
                     fontSize: 16,
                     color: '#696969',
                 }}
+                renderLeadingIcon={WarningToast}
             />
         ),
+    }
+    const WarningToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="alert-circle-outline"
+                    size={35}
+                    color={COLORS.black}
+                />
+            </View>
+        )
+    }
+    const SuccessToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="checkmark-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
+    }
+    const ErrorToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="close-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
     }
     const handleImageSelection = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -193,12 +267,13 @@ const Create = ({navigation}) => {
                         visibilityTime: 2500,
                         autoHide: true,
                         onHide: () => {
-                            navigation.navigate('BottomTabNavigation', { name: 'Feed' })
+                            navigation.navigate('BottomTabNavigation', {
+                                name: 'Feed',
+                            })
                         },
                     })
                     resetForm()
                     setButtonPress(false)
-                    
                 }
             })
             .catch((error) => {
