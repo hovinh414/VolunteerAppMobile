@@ -12,6 +12,7 @@ export const Block = ({ text, iconName, value }) => (
             optionWrapper: {
                 flexDirection: 'row',
                 alignItems: 'center',
+                height:45,
                 justifyContent: 'space-between',
             },
         }}
@@ -28,6 +29,7 @@ export const Mute = ({ text, iconName, value }) => (
             optionWrapper: {
                 flexDirection: 'row',
                 alignItems: 'center',
+                height:45,
                 justifyContent: 'space-between',
             },
         }}
@@ -45,6 +47,7 @@ export const Why = ({ text, iconName, value }) => (
             optionWrapper: {
                 flexDirection: 'row',
                 alignItems: 'center',
+                height:45,
                 justifyContent: 'space-between',
             },
         }}
@@ -60,6 +63,7 @@ export const Question = ({ text, iconName, value }) => (
             optionWrapper: {
                 flexDirection: 'row',
                 alignItems: 'center',
+                height:45,
                 justifyContent: 'space-between',
             },
         }}
@@ -74,6 +78,7 @@ export const Follow = ({ text, iconName, onSelect }) => (
         customStyles={{
             optionWrapper: {
                 flexDirection: 'row',
+                height:45,
                 alignItems: 'center',
                 justifyContent: 'space-between',
             },

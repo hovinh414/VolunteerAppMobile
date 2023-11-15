@@ -18,7 +18,7 @@ import ImageAvata from '../../assets/hero2.jpg'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
 import { addYears, format, addDays, parse } from 'date-fns'
 import axios from 'axios'
-import { MaterialIcons,Ionicons } from '@expo/vector-icons'
+import { MaterialIcons, Ionicons } from '@expo/vector-icons'
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
 import { AntDesign } from '@expo/vector-icons'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
@@ -36,13 +36,14 @@ const Create = ({ navigation }) => {
     const [address, setAddress] = useState('')
     const [token, setToken] = useState()
     const [exprirationDate, setExprirationDate] = useState('Chọn ngày')
+    const [dateActivity, setDateActivity] = useState('Chọn ngày')
     const [scope, setScope] = useState('public')
     const [content, setContent] = useState('')
     const [participants, setParticipants] = useState('')
     const [ButtonPress, setButtonPress] = useState('')
     const [showChoose, setShowChoose] = useState(false)
-
     const [openStartDatePicker, setOpenStartDatePicker] = useState(false)
+    const [openActiDatePicker, setOpenActiDatePicker] = useState(false)
     const currentDate = new Date()
     function handleChangeStartDate(propDate) {
         setStartedDate(propDate)
@@ -52,6 +53,9 @@ const Create = ({ navigation }) => {
         setOpenStartDatePicker(!openStartDatePicker)
     }
 
+    const handleOnPressActiDate = () => {
+        setOpenActiDatePicker(!openActiDatePicker)
+    }
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
@@ -77,6 +81,7 @@ const Create = ({ navigation }) => {
                     borderLeftColor: '#379A4F',
                     backgroundColor: '#379A4F',
                     borderRadius: 12,
+                    width:'90%'
                 }}
                 text1Style={{
                     color: '#fff',
@@ -97,6 +102,7 @@ const Create = ({ navigation }) => {
                     borderLeftColor: '#FF0035',
                     backgroundColor: '#FF0035',
                     borderRadius: 12,
+                    width:'90%'
                 }}
                 text1Style={{
                     fontSize: 18,
@@ -116,6 +122,7 @@ const Create = ({ navigation }) => {
                     borderLeftColor: '#FFE600',
                     backgroundColor: '#FFE600',
                     borderRadius: 12,
+                    width:'90%'
                 }}
                 text1Style={{
                     fontSize: 18,
@@ -230,12 +237,13 @@ const Create = ({ navigation }) => {
             })
         })
         formData.append('exprirationDate', exprirationDate)
+        formData.append('dateActivity', dateActivity)
         formData.append('scope', scope)
         formData.append('content', content)
         formData.append('participants', participants)
         formData.append('type', _type)
         setButtonPress(true)
-
+        console.log(formData)
         if (
             selectedImages.length === 0 ||
             !content ||
@@ -246,6 +254,18 @@ const Create = ({ navigation }) => {
                 type: 'warning',
                 text1: 'Cảnh báo',
                 text2: 'Nhập đầy đủ thông tin bao gồm ảnh!',
+                visibilityTime: 2500,
+            })
+            setButtonPress(false)
+            return
+        }
+        const date1 = new Date(exprirationDate); 
+        const date2 = new Date(dateActivity);
+        if (date1 > date2) {
+            Toast.show({
+                type: 'warning',
+                text1: 'Cảnh báo',
+                text2: 'Ngày diễn ra phải sau ngày hết hạn!',
                 visibilityTime: 2500,
             })
             setButtonPress(false)
@@ -463,7 +483,7 @@ const Create = ({ navigation }) => {
                     </View>
 
                     <View style={{ paddingHorizontal: 10 }}>
-                        <View style={styles.content}>
+                        <View>
                             <Text style={styles.headerInput}>
                                 Nhập nội dung bài viết:
                             </Text>
@@ -481,16 +501,6 @@ const Create = ({ navigation }) => {
                                 <Text style={styles.headerInput}>
                                     Số tình nguyện viên:
                                 </Text>
-                                <Text
-                                    style={{
-                                        paddingVertical: 10,
-                                        marginHorizontal: 10,
-                                        fontSize: 18,
-                                        marginLeft: 50,
-                                    }}
-                                >
-                                    Ngày hết hạn:
-                                </Text>
                             </View>
                             <View style={{ flex: 1, flexDirection: 'row' }}>
                                 <TextInput
@@ -503,13 +513,18 @@ const Create = ({ navigation }) => {
                                     placeholder="100"
                                     keyboardType="numeric"
                                 />
+                            </View>
+                        </View>
+                        <View style={styles.content}>
+                            <View style={{ flex: 1, flexDirection: 'column' }}>
+                                <Text style={styles.headerInput}>
+                                    Ngày hết hạn:
+                                </Text>
                                 <KeyboardAvoidingView
                                     behavior={
                                         Platform.OS == 'ios' ? 'padding' : ''
                                     }
                                     style={{
-                                        width: '100%',
-                                        height: '100%',
                                         backgroundColor: '#fff',
                                     }}
                                 >
@@ -627,6 +642,144 @@ const Create = ({ navigation }) => {
                                     </View>
                                 </KeyboardAvoidingView>
                             </View>
+                            <View style={{ flex: 1, flexDirection: 'column' }}>
+                                <Text style={styles.headerInput}>
+                                    Ngày diễn ra:
+                                </Text>
+                                <KeyboardAvoidingView
+                                    behavior={
+                                        Platform.OS == 'ios' ? 'padding' : ''
+                                    }
+                                    style={{
+                                        backgroundColor: '#fff',
+                                    }}
+                                >
+                                    <View>
+                                        <View>
+                                            <TouchableOpacity
+                                                style={styles.inputBtn}
+                                                onPress={handleOnPressActiDate}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        flex: 1,
+                                                        fontSize: 16,
+                                                        marginLeft: 10,
+                                                        paddingVertical: 13,
+                                                        width: 29,
+                                                        color: '#696969',
+                                                    }}
+                                                >
+                                                    {dateActivity}
+                                                </Text>
+                                                <View style={styles.iconStyle}>
+                                                    <Image
+                                                        style={styles.icon}
+                                                        source={require('../../assets/calendar.png')}
+                                                    />
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+
+                                        {/* Create modal for date picker */}
+                                        <Modal
+                                            animationType="slide"
+                                            transparent={true}
+                                            visible={openActiDatePicker}
+                                        >
+                                            <View style={styles.centeredView}>
+                                                <View style={styles.modalView}>
+                                                    <DatePicker
+                                                        mode="calendar"
+                                                        minimumDate={format(
+                                                            addDays(
+                                                                currentDate,
+                                                                1
+                                                            ),
+                                                            'yyyy-MM-dd'
+                                                        )}
+                                                        maximumDate={format(
+                                                            addYears(
+                                                                currentDate,
+                                                                1
+                                                            ),
+                                                            'yyyy-MM-dd'
+                                                        )}
+                                                        onDateChanged={
+                                                            handleChangeStartDate
+                                                        }
+                                                        onSelectedChange={(
+                                                            date
+                                                        ) =>
+                                                            setDateActivity(
+                                                                format(
+                                                                    parse(
+                                                                        date,
+                                                                        'yyyy/MM/dd',
+                                                                        new Date()
+                                                                    ),
+                                                                    'dd-MM-yyyy'
+                                                                )
+                                                            )
+                                                        }
+                                                        options={{
+                                                            backgroundColor:
+                                                                '#FFF',
+                                                            textHeaderColor:
+                                                                COLORS.primary,
+                                                            textDefaultColor:
+                                                                COLORS.black,
+                                                            selectedTextColor:
+                                                                '#fff',
+                                                            mainColor:
+                                                                COLORS.primary,
+                                                            textSecondaryColor:
+                                                                '#FFFFFF',
+                                                            borderColor:
+                                                                'rgba(122, 146, 165, 0.1)',
+                                                        }}
+                                                    />
+
+                                                    <TouchableOpacity
+                                                        style={{
+                                                            padding: 10,
+                                                            borderRadius: 16,
+                                                            backgroundColor:
+                                                                COLORS.primary,
+                                                        }}
+                                                        onPress={
+                                                            handleOnPressActiDate
+                                                        }
+                                                    >
+                                                        <Text
+                                                            style={{
+                                                                color: '#fff',
+                                                                fontSize: 16,
+                                                                fontFamily:
+                                                                    'regular',
+                                                            }}
+                                                        >
+                                                            Đóng
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        </Modal>
+                                    </View>
+                                </KeyboardAvoidingView>
+                            </View>
+                        </View>
+                        <View style={{  marginTop: 5, justifyContent:'center', alignItems:'center' }}>
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    fontStyle: 'italic',
+                                    color: COLORS.primary,
+                                }}
+                            >
+                                (* Lưu ý: ngày diễn ra phải sau ngày hết hạn
+                                đăng ký)
+                            </Text>
                         </View>
                         <Text style={styles.headerInput}>
                             Hình ảnh bài viết:

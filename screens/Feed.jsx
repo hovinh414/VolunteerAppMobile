@@ -27,7 +27,6 @@ import axios from 'axios'
 import API_URL from '../interfaces/config'
 import { Image } from 'expo-image'
 import AsyncStoraged from '../services/AsyncStoraged'
-import { SliderBox } from 'react-native-image-slider-box'
 
 import Post from './Feed/Post'
 import {
@@ -117,6 +116,7 @@ const Feed = ({ navigation, route }) => {
     const onRefresh = () => {
         setRefreshing(true)
         setCurrentPage(1)
+        setTypePost('normal')
         getPosts().then(() => {
             setRefreshing(false)
         })
@@ -165,7 +165,7 @@ const Feed = ({ navigation, route }) => {
                     }
                 }
             } catch (error) {
-                console.log('API Error:', error)
+                console.log('API Error get more post:', error)
             } finally {
                 setIsFetchingNextPage(false)
             }
@@ -310,7 +310,7 @@ const Feed = ({ navigation, route }) => {
                 </View>
                 <FlatList
                     horizontal={true}
-                    onEndReached={fetchNextPage}
+                    // onEndReached={fetchNextPage}
                     onEndReachedThreshold={0.4}
                     data={posts}
                     renderItem={({ item, index }) => (
@@ -419,7 +419,9 @@ const Feed = ({ navigation, route }) => {
                                             ...FONTS.body5,
                                         }}
                                     >
-                                        {item.content.length > 23 ? `${item.content.slice(0, 23)}...` : item.content}
+                                        {item.content.length > 23
+                                            ? `${item.content.slice(0, 23)}...`
+                                            : item.content}
                                     </Text>
                                     <View
                                         style={{
@@ -526,6 +528,26 @@ const Feed = ({ navigation, route }) => {
                                                     Đã tham gia
                                                 </Text>
                                             </View>
+                                        ) : item.isExprired ? (
+                                            <View
+                                                style={{
+                                                    backgroundColor:'#cccc',
+                                                    borderRadius: 10,
+                                                    padding: 5,
+
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        ...FONTS.body5,
+                                                        color: 'black',
+                                                    }}
+                                                >
+                                                    Đã hết hạn
+                                                </Text>
+                                            </View>
                                         ) : (
                                             <TouchableOpacity
                                                 style={{
@@ -560,36 +582,30 @@ const Feed = ({ navigation, route }) => {
             </View>
         )
     }
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <View>
-                <View
-                    style={{
-                        padding: 12,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        zIndex: 999,
-                    }}
-                >
+    function renderHeader() {
+        return (
+            <View style={{ ...headerStyle, flexDirection: 'row' }}>
+                <View>
                     <View
                         style={{
+                            paddingVertical: 12,
+                            paddingLeft: 12,
                             flexDirection: 'row',
-                            justifyContent: 'center',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            zIndex: 1,
                         }}
-                    >
-                        <Text
-                            style={{
-                                ...FONTS.body2,
-                                marginRight: 4,
-                            }}
-                        >
-                            Việc Tử Tế
-                        </Text>
-                    </View>
-                    <MenuProvider>
-                        <Menu>
-                            <MenuTrigger>
+                    ></View>
+                </View>
+                <MenuProvider>
+                    <Menu>
+                        <MenuTrigger>
+                            <Text
+                                style={{
+                                    ...FONTS.body2,
+                                }}
+                            >
+                                Việc Tử Tế{' '}
                                 <Feather
                                     name="chevron-down"
                                     size={30}
@@ -598,75 +614,79 @@ const Feed = ({ navigation, route }) => {
                                         marginTop: 10,
                                     }}
                                 />
-                            </MenuTrigger>
-                            <MenuOptions
-                                customStyles={{
-                                    optionsContainer: {
-                                        borderRadius: 10,
-                                        marginTop: 30,
-                                    },
-                                }}
-                            >
-                                <Follow
-                                    text="Đang theo dõi"
-                                    onSelect={getPostsFollow}
-                                    iconName="users"
-                                />
-                                <Divider />
-                                <Block
-                                    text="Block"
-                                    value="Block"
-                                    iconName="block"
-                                />
-                                <Divider />
-                                <Mute
-                                    text="Mute"
-                                    value="Mute"
-                                    iconName="sound-mute"
-                                />
-                            </MenuOptions>
-                        </Menu>
-                    </MenuProvider>
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate('Chat')}
+                            </Text>
+                        </MenuTrigger>
+
+                        <MenuOptions
+                            customStyles={{
+                                optionsContainer: {
+                                    borderRadius: 10,
+                                    marginTop: 20,
+                                },
+                            }}
                         >
-                            <LinearGradient
-                                colors={['#D4145A', '#FBB03B']}
-                                style={{
-                                    height: 50,
-                                    width: 50,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    shadowColor: '#18274B',
-                                    shadowOffset: {
-                                        width: 0,
-                                        height: 4.5,
-                                    },
-                                    shadowOpacity: 0.12,
-                                    shadowRadius: 6.5,
-                                    elevation: 2,
-                                    borderRadius: 22,
-                                    marginLeft: 12,
-                                }}
-                            >
-                                <Feather
-                                    name="message-circle"
-                                    size={30}
-                                    color={COLORS.white}
-                                />
-                            </LinearGradient>
-                        </TouchableOpacity>
-                    </View>
+                            <Follow
+                                text="Đang theo dõi"
+                                onSelect={getPostsFollow}
+                                iconName="users"
+                            />
+                            <Divider />
+                            <Block
+                                text="Block"
+                                value="Block"
+                                iconName="block"
+                            />
+                            <Divider />
+                            <Mute
+                                text="Mute"
+                                value="Mute"
+                                iconName="sound-mute"
+                            />
+                        </MenuOptions>
+                    </Menu>
+                </MenuProvider>
+                <View
+                    style={{
+                        marginRight: 12,
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Chat')}
+                    >
+                        <LinearGradient
+                            colors={['#D4145A', '#FBB03B']}
+                            style={{
+                                height: 50,
+                                width: 50,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                shadowColor: '#18274B',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 4.5,
+                                },
+                                shadowOpacity: 0.12,
+                                shadowRadius: 6.5,
+                                elevation: 2,
+                                borderRadius: 22,
+                                marginLeft: 12,
+                            }}
+                        >
+                            <Feather
+                                name="message-circle"
+                                size={30}
+                                color={COLORS.white}
+                            />
+                        </LinearGradient>
+                    </TouchableOpacity>
                 </View>
             </View>
-
-            <View style={{ flex: 1, zIndex: 1 }}>
+        )
+    }
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+            {renderHeader()}
+            <View style={{ flex: 1, zIndex: 1, marginTop: 50 }}>
                 <Post
                     posts={posts}
                     fetchNextPage={fetchNextPage}
@@ -678,5 +698,11 @@ const Feed = ({ navigation, route }) => {
         </SafeAreaView>
     )
 }
-
+const headerStyle = {
+    position: 'absolute',
+    top: 50,
+    left: 12,
+    right: 0,
+    zIndex: 2,
+}
 export default Feed

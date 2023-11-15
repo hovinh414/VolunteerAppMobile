@@ -21,7 +21,6 @@ import CustomViewInfo from '../../components/CustomViewInfo'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import ImageAvata from '../../assets/hero2.jpg'
 import { Image } from 'expo-image'
-import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const cover = '../../assets/cover.jpg'
 const PostsRoute = () => (

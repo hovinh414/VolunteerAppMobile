@@ -401,12 +401,12 @@ const Post = ({ posts, fetchNextPage, refreshing, onRefresh, headers }) => {
                                             marginLeft: 5,
                                         }}
                                     >
-                                        Đã tham gia: {' '}
+                                        Đã tham gia:{' '}
                                         <Text
                                             style={{
                                                 color: COLORS.primary,
                                                 fontSize: 15,
-                                                fontWeight:'bold'
+                                                fontWeight: 'bold',
                                             }}
                                         >
                                             {item.totalUserJoin} /{' '}
@@ -571,6 +571,23 @@ const Post = ({ posts, fetchNextPage, refreshing, onRefresh, headers }) => {
                                         }}
                                     >
                                         Đã tham gia
+                                    </Text>
+                                </View>
+                            ) : item.isExprired ? (
+                                <View
+                                    style={{
+                                        backgroundColor: '#cccc',
+                                        borderRadius: 10,
+                                        padding: 5,
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: 'black',
+                                        }}
+                                    >
+                                        Đã hết hạn
                                     </Text>
                                 </View>
                             ) : (
