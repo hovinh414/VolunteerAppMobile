@@ -41,6 +41,7 @@ const PostsRoute = () => {
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
     const [type, setType] = useState('')
+    
     const [showWarning, setShowWarning] = useState(false)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -917,12 +918,14 @@ const ProfileOrganisation = ({ navigation, route }) => {
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
     const [isActive, setIsActive] = useState(false)
+    const [follower, setFollower] = useState('')
     const [routes, setRoute] = useState([])
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
         setFullname(userStored.fullname)
         setIsActive(userStored.isActiveOrganization)
+        setFollower(userStored.follower)
     }
     const getUserStoredEdit = async () => {
         const userStored = await AsyncStoraged.getData()
@@ -1312,7 +1315,7 @@ const ProfileOrganisation = ({ navigation, route }) => {
                                             color: COLORS.black,
                                         }}
                                     >
-                                        200
+                                        {follower}
                                     </Text>
                                     <Text
                                         style={{

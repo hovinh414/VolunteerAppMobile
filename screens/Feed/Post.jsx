@@ -33,12 +33,20 @@ import ImageAvata from '../../assets/hero2.jpg'
 import AsyncStoraged from '../../services/AsyncStoraged'
 
 const share = '../../assets/share.png'
-const Post = ({ posts, fetchNextPage, refreshing, onRefresh, headers }) => {
+const Post = ({
+    posts,
+    fetchNextPage,
+    refreshing,
+    onRefresh,
+    headers,
+    footer,
+}) => {
     const [token, setToken] = useState('')
     const [avatar, setAvatar] = useState()
     const [typePost, setTypePost] = useState('normal')
     const [type, setType] = useState()
     const navigation = useNavigation()
+    const [loading, setLoading] = useState(false)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
@@ -266,6 +274,7 @@ const Post = ({ posts, fetchNextPage, refreshing, onRefresh, headers }) => {
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
+            ListFooterComponent={footer}
             renderItem={({ item, index }) => (
                 <View
                     key={index}

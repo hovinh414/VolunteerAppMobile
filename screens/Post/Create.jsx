@@ -24,6 +24,7 @@ import { AntDesign } from '@expo/vector-icons'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
+import da from 'date-fns/esm/locale/da/index.js'
 
 const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
@@ -81,7 +82,7 @@ const Create = ({ navigation }) => {
                     borderLeftColor: '#379A4F',
                     backgroundColor: '#379A4F',
                     borderRadius: 12,
-                    width:'90%'
+                    width: '90%',
                 }}
                 text1Style={{
                     color: '#fff',
@@ -102,7 +103,7 @@ const Create = ({ navigation }) => {
                     borderLeftColor: '#FF0035',
                     backgroundColor: '#FF0035',
                     borderRadius: 12,
-                    width:'90%'
+                    width: '90%',
                 }}
                 text1Style={{
                     fontSize: 18,
@@ -122,7 +123,7 @@ const Create = ({ navigation }) => {
                     borderLeftColor: '#FFE600',
                     backgroundColor: '#FFE600',
                     borderRadius: 12,
-                    width:'90%'
+                    width: '90%',
                 }}
                 text1Style={{
                     fontSize: 18,
@@ -259,18 +260,18 @@ const Create = ({ navigation }) => {
             setButtonPress(false)
             return
         }
-        const date1 = new Date(exprirationDate); 
-        const date2 = new Date(dateActivity);
-        if (date1 > date2) {
-            Toast.show({
-                type: 'warning',
-                text1: 'Cảnh báo',
-                text2: 'Ngày diễn ra phải sau ngày hết hạn!',
-                visibilityTime: 2500,
-            })
-            setButtonPress(false)
-            return
-        }
+        // const date1 = new Date(exprirationDate)
+        // const date2 = new Date(dateActivity)
+        // if (date1 > date2) {
+        //     Toast.show({
+        //         type: 'warning',
+        //         text1: 'Cảnh báo',
+        //         text2: 'Ngày diễn ra phải sau ngày hết hạn!',
+        //         visibilityTime: 2500,
+        //     })
+        //     setButtonPress(false)
+        //     return
+        // }
         axios
             .post(API_URL.API_URL + '/post', formData, {
                 headers: {
@@ -660,18 +661,42 @@ const Create = ({ navigation }) => {
                                                 style={styles.inputBtn}
                                                 onPress={handleOnPressActiDate}
                                             >
-                                                <Text
-                                                    style={{
-                                                        flex: 1,
-                                                        fontSize: 16,
-                                                        marginLeft: 10,
-                                                        paddingVertical: 13,
-                                                        width: 29,
-                                                        color: '#696969',
-                                                    }}
-                                                >
-                                                    {dateActivity}
-                                                </Text>
+                                                {dateActivity !==
+                                                'Chọn ngày' ? (
+                                                    <Text
+                                                        style={{
+                                                            flex: 1,
+                                                            fontSize: 16,
+                                                            marginLeft: 10,
+                                                            paddingVertical: 13,
+                                                            width: 29,
+                                                            color: '#696969',
+                                                        }}
+                                                    >
+                                                        {format(
+                                                            parse(
+                                                                dateActivity,
+                                                                'MM-dd-yyyy',
+                                                                new Date()
+                                                            ),
+                                                            'dd-MM-yyyy'
+                                                        )}
+                                                    </Text>
+                                                ) : (
+                                                    <Text
+                                                        style={{
+                                                            flex: 1,
+                                                            fontSize: 16,
+                                                            marginLeft: 10,
+                                                            paddingVertical: 13,
+                                                            width: 29,
+                                                            color: '#696969',
+                                                        }}
+                                                    >
+                                                        {dateActivity}
+                                                    </Text>
+                                                )}
+
                                                 <View style={styles.iconStyle}>
                                                     <Image
                                                         style={styles.icon}
@@ -718,7 +743,7 @@ const Create = ({ navigation }) => {
                                                                         'yyyy/MM/dd',
                                                                         new Date()
                                                                     ),
-                                                                    'dd-MM-yyyy'
+                                                                    'MM-dd-yyyy'
                                                                 )
                                                             )
                                                         }
@@ -769,7 +794,13 @@ const Create = ({ navigation }) => {
                                 </KeyboardAvoidingView>
                             </View>
                         </View>
-                        <View style={{  marginTop: 5, justifyContent:'center', alignItems:'center' }}>
+                        <View
+                            style={{
+                                marginTop: 5,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
                             <Text
                                 style={{
                                     fontSize: 14,

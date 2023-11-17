@@ -1,7 +1,7 @@
 import {
     View,
     Text,
-    useWindowDimensions,
+    ActivityIndicator,
     FlatList,
     ScrollView,
     TouchableOpacity,
@@ -18,24 +18,22 @@ import {
     MaterialCommunityIcons,
     FontAwesome,
 } from '@expo/vector-icons'
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
-import { SliderBox } from 'react-native-image-slider-box'
-import * as Progress from 'react-native-progress'
+import ModalAlert from '../../components/ModalAlert'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import axios from 'axios'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 import { useNavigation } from '@react-navigation/native'
-import LongText from '../Feed/LongText'
-import DaysDifference from '../Feed/DaysDifference'
 import Cover from '../../assets/cover.jpg'
 import Post from '../Feed/Post'
-
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
+const loading = '../../assets/loading.gif'
 const ProfileUser = ({ route }) => {
     const items = route.params
-
+    const [isLoading, setIsLoading] = useState(false)
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
+    const [showFilter, setShowFilter] = useState(false)
     const [totalFollows, setTotalFollow] = useState(items.followers)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -93,7 +91,7 @@ const ProfileUser = ({ route }) => {
                                         color: '#000',
                                     }}
                                 >
-                                    Đã theo dõi
+                                    Đang theo dõi
                                 </Text>
                             </View>
                         ) : (
@@ -227,6 +225,7 @@ const ProfileUser = ({ route }) => {
     const [currentPage, setCurrentPage] = useState(0)
     const fetchNextPage = async () => {
         if (!isFetchingNextPage && currentPage < 10) {
+            setIsLoading(true)
             setIsFetchingNextPage(true)
             const config = {
                 headers: {
@@ -248,6 +247,12 @@ const ProfileUser = ({ route }) => {
                     setPosts([...posts, ...response.data.data])
                 }
             } catch (error) {
+                setIsLoading(false)
+                Toast.show({
+                    type: 'warning',
+                    text1: 'Chưa có bài viết mới!',
+                    visibilityTime: 2500,
+                })
                 console.log('API Error:', error)
             } finally {
                 setIsFetchingNextPage(false)
@@ -318,23 +323,7 @@ const ProfileUser = ({ route }) => {
                         width: '100%',
                     }}
                 />
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={{
-                        position: 'absolute',
-                        top: 15,
-                        left: 12,
-                        zIndex: 1,
-                        borderRadius: 20,
-                        backgroundColor: '#cccc',
-                    }}
-                >
-                    <MaterialIcons
-                        name="keyboard-arrow-left"
-                        size={26}
-                        color={COLORS.black}
-                    />
-                </TouchableOpacity>
+
                 <View style={{ alignItems: 'center', top: -67 }}>
                     <Image
                         source={items.avatar}
@@ -542,6 +531,37 @@ const ProfileUser = ({ route }) => {
                         </View>
                     </View>
                 </View>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems:'center',
+                        justifyContent: 'space-between',
+                        marginHorizontal: 12,
+                    }}
+                >
+                    <Text
+                        style={{
+                            color: COLORS.black,
+                            fontSize: 19,
+                            fontWeight:'800'
+                        }}
+                    >
+                        Bài viết
+                    </Text>
+                    <TouchableOpacity
+                    onPress={() => setShowFilter(true)}
+                    >
+                        <Text
+                            style={{
+                                color: COLORS.primary,
+
+                                fontSize: 16,
+                            }}
+                        >
+                            Bộ lọc
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         )
     }
@@ -553,6 +573,65 @@ const ProfileUser = ({ route }) => {
     useEffect(() => {
         getUserStored()
     }, [])
+    const RenderLoader = () => {
+        return (
+            <View>
+                {isLoading ? (
+                    <View
+                        style={{
+                            marginBottom: 50,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Image
+                            source={require(loading)}
+                            style={{ width: 50, height: 50 }}
+                        />
+                    </View>
+                ) : null}
+            </View>
+        )
+    }
+    const toastConfig = {
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{
+                    borderLeftColor: '#FFE600',
+                    backgroundColor: '#FFE600',
+                    borderRadius: 12,
+                }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+                renderLeadingIcon={WarningToast}
+            />
+        ),
+    }
+    const WarningToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="alert-circle-outline"
+                    size={35}
+                    color={COLORS.black}
+                />
+            </View>
+        )
+    }
     return (
         <SafeAreaView
             style={{
@@ -560,12 +639,39 @@ const ProfileUser = ({ route }) => {
                 backgroundColor: '#fff',
             }}
         >
+            <View
+                style={{
+                    zIndex: 4,
+                }}
+            >
+                <Toast config={toastConfig} />
+            </View>
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{
+                    position: 'absolute',
+                    top: 60,
+                    left: 12,
+                    zIndex: 1,
+                    borderRadius: 20,
+                    backgroundColor: '#cccc',
+                    zIndex: 3,
+                }}
+            >
+                <MaterialIcons
+                    name="keyboard-arrow-left"
+                    size={26}
+                    color={COLORS.black}
+                />
+            </TouchableOpacity>
+            <ModalAlert visible={showFilter} onRequestClose={() => setShowFilter(false)}/>
             <Post
                 posts={posts}
                 fetchNextPage={fetchNextPage}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                headers={<RenderProfileCard/>}
+                headers={<RenderProfileCard />}
+                footer={RenderLoader}
             />
         </SafeAreaView>
     )

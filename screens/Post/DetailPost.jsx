@@ -164,14 +164,8 @@ const DetailPost = ({ navigation, route }) => {
                 Toast.show({
                     type: 'joinToast',
                     text1: 'Thành công',
-                    text2:
-                        'Tham gia thành công! \n- Ngày diễn ra là ngày: ' +
-                        formatDate(items.dateActivity) +
-                        '.' +
-                        '\n- Bạn sẽ nhận được về chi tiết hoạt động \ntrước 2 ngày vào email: ' +
-                        '\n- ' +
-                        email,
-                    visibilityTime: 7000,
+                    text2: 'Tham gia thành công',
+                    visibilityTime: 2500,
                 })
                 refreshDetail()
             }
@@ -182,7 +176,6 @@ const DetailPost = ({ navigation, route }) => {
                     text1: 'Thất bại',
                     text2: 'Tham gia thất bại!',
                     visibilityTime: 2500,
-                    topOffset: 100,
                 })
                 console.log(error)
             }
@@ -271,7 +264,6 @@ const DetailPost = ({ navigation, route }) => {
                     backgroundColor: '#379A4F',
                     borderRadius: 12,
                     padding: 10,
-                    width: '90%',
                 }}
             >
                 <View
@@ -381,11 +373,28 @@ const DetailPost = ({ navigation, route }) => {
         <View>
             <View
                 style={{
-                    zIndex: 2,
+                    zIndex: 4,
                 }}
             >
                 <Toast config={toastConfig} />
             </View>
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{
+                    position: 'absolute',
+                    top: 50,
+                    left: 20,
+                    borderRadius: 50,
+                    backgroundColor: '#cccc',
+                    zIndex: 3,
+                }}
+            >
+                <MaterialIcons
+                    name="keyboard-arrow-left"
+                    size={26}
+                    color={COLORS.black}
+                />
+            </TouchableOpacity>
             <ScrollView
                 style={{
                     backgroundColor: '#fff',
@@ -402,22 +411,6 @@ const DetailPost = ({ navigation, route }) => {
                             sliderBoxHeight={300}
                             dotStyle={{ width: 7, height: 7 }}
                         />
-                        <TouchableOpacity
-                            onPress={() => navigation.goBack()}
-                            style={{
-                                position: 'absolute',
-                                top: 50,
-                                left: 20,
-                                borderRadius: 50,
-                                backgroundColor: '#cccc',
-                            }}
-                        >
-                            <MaterialIcons
-                                name="keyboard-arrow-left"
-                                size={26}
-                                color={COLORS.black}
-                            />
-                        </TouchableOpacity>
                     </View>
                     <View
                         style={{

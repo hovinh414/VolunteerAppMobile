@@ -8,6 +8,7 @@ import {
     RefreshControl,
     Modal,
     StyleSheet,
+    ActivityIndicator,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
 import React, { useState, useEffect } from 'react'
@@ -15,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../constants'
 import { friends, posts } from '../constants/data'
 import {
-    MaterialIcons,
+    AntDesign,
     Ionicons,
     Feather,
     FontAwesome,
@@ -36,9 +37,15 @@ import {
     MenuOption,
     MenuTrigger,
 } from 'react-native-popup-menu'
-import { Block, Mute, Follow, Why, Question } from '../components/CustomContent'
-
-const question = '../assets/question.png'
+import {
+    MyActivity,
+    PostOngoing,
+    Follow,
+    JoinActivity,
+    Question,
+} from '../components/CustomContent'
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
+const loading = '../assets/loading.gif'
 const Feed = ({ navigation, route }) => {
     React.useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
@@ -67,7 +74,7 @@ const Feed = ({ navigation, route }) => {
     const [type, setType] = useState()
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
-
+    const [isLoading, setIsLoading] = useState(false)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
@@ -124,6 +131,7 @@ const Feed = ({ navigation, route }) => {
     const fetchNextPage = async () => {
         if (!isFetchingNextPage) {
             setIsFetchingNextPage(true)
+            setIsLoading(true)
             const config = {
                 headers: {
                     'Content-Type': 'application/json',
@@ -165,6 +173,12 @@ const Feed = ({ navigation, route }) => {
                     }
                 }
             } catch (error) {
+                setIsLoading(false)
+                Toast.show({
+                    type: 'warning',
+                    text1: 'Chưa có bài viết mới!',
+                    visibilityTime: 2500,
+                })
                 console.log('API Error get more post:', error)
             } finally {
                 setIsFetchingNextPage(false)
@@ -223,6 +237,7 @@ const Feed = ({ navigation, route }) => {
 
                 <FlatList
                     horizontal={true}
+                    showsHorizontalScrollIndicator={false}
                     data={friends}
                     renderItem={({ item, index }) => (
                         <View
@@ -311,6 +326,7 @@ const Feed = ({ navigation, route }) => {
                 <FlatList
                     horizontal={true}
                     // onEndReached={fetchNextPage}
+                    showsHorizontalScrollIndicator={false}
                     onEndReachedThreshold={0.4}
                     data={posts}
                     renderItem={({ item, index }) => (
@@ -531,7 +547,7 @@ const Feed = ({ navigation, route }) => {
                                         ) : item.isExprired ? (
                                             <View
                                                 style={{
-                                                    backgroundColor:'#cccc',
+                                                    backgroundColor: '#cccc',
                                                     borderRadius: 10,
                                                     padding: 5,
 
@@ -582,22 +598,91 @@ const Feed = ({ navigation, route }) => {
             </View>
         )
     }
-    function renderHeader() {
+    const RenderLoader = () => {
         return (
-            <View style={{ ...headerStyle, flexDirection: 'row' }}>
-                <View>
+            <View>
+                {isLoading ? (
                     <View
                         style={{
-                            paddingVertical: 12,
-                            paddingLeft: 12,
-                            flexDirection: 'row',
+                            marginBottom: 50,
+                            justifyContent: 'center',
                             alignItems: 'center',
-                            justifyContent: 'space-between',
-                            zIndex: 1,
                         }}
-                    ></View>
-                </View>
-                <MenuProvider>
+                    >
+                        <Image
+                            source={require(loading)}
+                            style={{ width: 50, height: 50 }}
+                        />
+                    </View>
+                ) : null}
+            </View>
+        )
+    }
+    const toastConfig = {
+        warning: (props) => (
+            <BaseToast
+                {...props}
+                style={{
+                    borderLeftColor: '#FFE600',
+                    backgroundColor: '#FFE600',
+                    borderRadius: 12,
+                }}
+                text1Style={{
+                    fontSize: 18,
+                }}
+                text2Style={{
+                    fontSize: 16,
+                    color: '#696969',
+                }}
+                renderLeadingIcon={WarningToast}
+            />
+        ),
+    }
+    const WarningToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="alert-circle-outline"
+                    size={35}
+                    color={COLORS.black}
+                />
+            </View>
+        )
+    }
+
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+            <TouchableOpacity
+                style={{ position: 'absolute', right: 12, top: 55 }}
+                onPress={() => navigation.navigate('Chat')}
+            >
+                <AntDesign name="message1" size={23} color={COLORS.black} />
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={{ position: 'absolute', right: 48, top: 55 }}
+                onPress={() => navigation.navigate('Chat')}
+            >
+                <Ionicons name="notifications-outline" size={26} color={COLORS.black} />
+            </TouchableOpacity>
+            <View
+                style={{
+                    position: 'absolute',
+                    top: 50,
+                    left: 12,
+                    width: '55%',
+                    height: '23%',
+                    zIndex: 333,
+                }}
+            >
+                <MenuProvider skipInstanceCheck>
                     <Menu>
                         <MenuTrigger>
                             <Text
@@ -621,78 +706,45 @@ const Feed = ({ navigation, route }) => {
                             customStyles={{
                                 optionsContainer: {
                                     borderRadius: 10,
-                                    marginTop: 20,
                                 },
                             }}
                         >
-                            <Follow
-                                text="Đang theo dõi"
-                                onSelect={getPostsFollow}
-                                iconName="users"
-                            />
-                            <Divider />
-                            <Block
-                                text="Block"
-                                value="Block"
-                                iconName="block"
-                            />
-                            <Divider />
-                            <Mute
-                                text="Mute"
-                                value="Mute"
-                                iconName="sound-mute"
-                            />
+                            {!type ? null : (
+                                <View>
+                                    <Follow
+                                        text="Đang theo dõi"
+                                        onSelect={getPostsFollow}
+                                        iconName="users"
+                                    />
+                                    {/* <Divider />
+                                    <Question
+                                        text="Bài viết hết hạn"
+                                        value="Mute"
+                                        iconName="alert-circle"
+                                    /> */}
+                                </View>
+                            )}
                         </MenuOptions>
                     </Menu>
                 </MenuProvider>
-                <View
-                    style={{
-                        marginRight: 12,
-                    }}
-                >
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Chat')}
-                    >
-                        <LinearGradient
-                            colors={['#D4145A', '#FBB03B']}
-                            style={{
-                                height: 50,
-                                width: 50,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                shadowColor: '#18274B',
-                                shadowOffset: {
-                                    width: 0,
-                                    height: 4.5,
-                                },
-                                shadowOpacity: 0.12,
-                                shadowRadius: 6.5,
-                                elevation: 2,
-                                borderRadius: 22,
-                                marginLeft: 12,
-                            }}
-                        >
-                            <Feather
-                                name="message-circle"
-                                size={30}
-                                color={COLORS.white}
-                            />
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </View>
             </View>
-        )
-    }
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            {renderHeader()}
-            <View style={{ flex: 1, zIndex: 1, marginTop: 50 }}>
+            <View
+                style={{
+                    zIndex: 2,
+                }}
+            >
+                <Toast config={toastConfig} />
+            </View>
+            <View
+                style={{ flex: 1, zIndex: 1, marginTop: 50, marginBottom: 20 }}
+            >
                 <Post
                     posts={posts}
                     fetchNextPage={fetchNextPage}
                     refreshing={refreshing}
                     onRefresh={onRefresh}
                     headers={<RenderSuggestionsContainer />}
+                    footer={RenderLoader}
                 />
             </View>
         </SafeAreaView>
