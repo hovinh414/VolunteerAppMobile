@@ -24,10 +24,10 @@ import axios from 'axios'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 import { useNavigation } from '@react-navigation/native'
-import Cover from '../../assets/cover.jpg'
 import Post from '../Feed/Post'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 const loading = '../../assets/loading.gif'
+const cover = '../../assets/cover.jpg'
 const ProfileUser = ({ route }) => {
     const items = route.params
     const [isLoading, setIsLoading] = useState(false)
@@ -316,8 +316,7 @@ const ProfileUser = ({ route }) => {
                 }}
             >
                 <Image
-                    source={Cover}
-                    contentFit="cover"
+                    source={require(cover)}
                     style={{
                         height: 228,
                         width: '100%',

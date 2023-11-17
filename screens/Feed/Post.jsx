@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import * as Progress from 'react-native-progress'
 import React, { useState, useEffect } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import CommentModal from '../../components/CommentModal'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
 import API_URL from '../../interfaces/config'
 import {
@@ -31,6 +31,7 @@ import { Image } from 'expo-image'
 import axios from 'axios'
 import ImageAvata from '../../assets/hero2.jpg'
 import AsyncStoraged from '../../services/AsyncStoraged'
+import { tr } from 'date-fns/locale'
 
 const share = '../../assets/share.png'
 const Post = ({
@@ -47,6 +48,7 @@ const Post = ({
     const [type, setType] = useState()
     const navigation = useNavigation()
     const [loading, setLoading] = useState(false)
+    const [showComment, setShowComment] = useState(false)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
@@ -106,11 +108,13 @@ const Post = ({
             }
         }
     }
+    const [postIdComment, setPostIdComment] = useState('')
     function LikeButton({ postId, likePost, unLikePost }) {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
+
         if (!token) {
-            console.log('Not login')
+            return
         } else {
             const checkLikes = async () => {
                 try {
@@ -170,54 +174,131 @@ const Post = ({
                 console.log(error)
             }
         }
-
         if (token !== null) {
             return (
-                <View
-                    style={{
-                        flexDirection: 'row',
+                <View style={{ flexDirection: 'column' }}>
+                    <View
+                        style={{
+                            flexDirection: 'row',
 
-                        alignItems: 'center',
-                        marginRight: SIZES.padding2,
-                    }}
-                >
-                    <TouchableOpacity onPress={handleLikeClick}>
-                        {isLiked ? (
-                            <FontAwesome
-                                name="heart"
-                                size={25}
-                                color={COLORS.primary}
-                            />
-                        ) : (
-                            <Feather
-                                name="heart"
+                            alignItems: 'center',
+                            marginRight: SIZES.padding2,
+                        }}
+                    >
+                        <TouchableOpacity onPress={handleLikeClick}>
+                            {isLiked ? (
+                                <FontAwesome
+                                    name="heart"
+                                    size={25}
+                                    color={COLORS.primary}
+                                />
+                            ) : (
+                                <Feather
+                                    name="heart"
+                                    size={25}
+                                    color={COLORS.black}
+                                />
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => {
+                                setShowComment(true)
+                                setPostIdComment(postId)
+                            }}
+                            style={{
+                                flexDirection: 'row',
+                                marginHorizontal: 8,
+                                alignItems: 'center',
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name="message-processing-outline"
                                 size={25}
                                 color={COLORS.black}
                             />
-                        )}
-                    </TouchableOpacity>
-                    <Text style={{ ...FONTS.body4, marginLeft: 5 }}>
-                        {totalLike}
+                        </TouchableOpacity>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Image
+                                source={require(share)}
+                                style={{
+                                    width: 25,
+                                    height: 25,
+                                }}
+                            />
+                        </View>
+                    </View>
+                    <Text
+                        style={{ ...FONTS.body5, marginLeft: 5, marginTop: 8 }}
+                    >
+                        {totalLike} lượt thích
                     </Text>
                 </View>
             )
         } else {
             return (
-                <View
-                    style={{
-                        flexDirection: 'row',
+                <View style={{ flexDirection: 'column' }}>
+                    <View
+                        style={{
+                            flexDirection: 'row',
 
-                        alignItems: 'center',
-                        marginRight: SIZES.padding2,
-                    }}
-                >
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('LoginScreen')}
+                            alignItems: 'center',
+                            marginRight: SIZES.padding2,
+                        }}
                     >
-                        <Feather name="heart" size={20} color={COLORS.black} />
-                    </TouchableOpacity>
-                    <Text style={{ ...FONTS.body4, marginLeft: 5 }}>
-                        {totalLike}
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('LoginScreen')}
+                        >
+                            <Feather
+                                name="heart"
+                                size={25}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => {
+                                setShowComment(true)
+                                setPostIdComment(item._id)
+                            }}
+                            style={{
+                                flexDirection: 'row',
+                                marginHorizontal: 8,
+                                alignItems: 'center',
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name="message-processing-outline"
+                                size={25}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Image
+                                source={require(share)}
+                                style={{
+                                    width: 25,
+                                    height: 25,
+                                }}
+                            />
+                        </View>
+                    </View>
+                    <Text
+                        style={{ ...FONTS.body5, marginLeft: 5, marginTop: 8 }}
+                    >
+                        {totalLike} lượt thích
                     </Text>
                 </View>
             )
@@ -266,89 +347,99 @@ const Post = ({
         }
     }
     return (
-        <FlatList
-            data={posts}
-            ListHeaderComponent={headers}
-            onEndReached={fetchNextPage}
-            onEndReachedThreshold={0.4}
-            refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            ListFooterComponent={footer}
-            renderItem={({ item, index }) => (
-                <View
-                    key={index}
-                    style={{
-                        backgroundColor: '#fff',
-                        flexDirection: 'column',
-                        width: '100%',
-                        borderWidth: 1,
-                        borderTopColor: '#cccc',
-                        borderColor: '#fff',
-                        marginVertical: 12,
-                    }}
-                >
-                    {/* Post header */}
-                    <TouchableOpacity
+        <View>
+            <CommentModal
+                visible={showComment}
+                onRequestClose={() => setShowComment(false)}
+                postId={postIdComment}
+            />
+            <FlatList
+                data={posts}
+                ListHeaderComponent={headers}
+                showsVerticalScrollIndicator={false}
+                onEndReached={fetchNextPage}
+                onEndReachedThreshold={0.4}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
+                ListFooterComponent={footer}
+                renderItem={({ item, index }) => (
+                    <View
+                        key={index}
                         style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginTop: 12,
-                            paddingBottom: 10,
+                            backgroundColor: '#fff',
+                            flexDirection: 'column',
+                            width: '100%',
+                            borderWidth: 1,
+                            borderTopColor: '#cccc',
+                            borderColor: '#fff',
+                            marginVertical: 12,
                         }}
-                        onPress={() => viewDetailPost(item._id)}
                     >
+                        {/* Post header */}
                         <TouchableOpacity
                             style={{
                                 flexDirection: 'row',
+                                justifyContent: 'space-between',
                                 alignItems: 'center',
-                                marginHorizontal: 8,
+                                marginTop: 12,
+                                paddingBottom: 10,
                             }}
-                            onPress={() => viewProfile(item.ownerId)}
+                            onPress={() => viewDetailPost(item._id)}
                         >
-                            <Image
-                                source={item.ownerAvatar}
+                            <TouchableOpacity
                                 style={{
-                                    height: 52,
-                                    width: 52,
-                                    borderRadius: 26,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    marginHorizontal: 8,
                                 }}
+                                onPress={() => viewProfile(item.ownerId)}
+                            >
+                                <Image
+                                    source={item.ownerAvatar}
+                                    style={{
+                                        height: 52,
+                                        width: 52,
+                                        borderRadius: 26,
+                                    }}
+                                />
+
+                                <View style={{ marginLeft: 12 }}>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            fontWeight: 'bold',
+                                        }}
+                                    >
+                                        {item.ownerDisplayname}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <MaterialCommunityIcons
+                                name="dots-vertical"
+                                size={24}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                        <View>
+                            <SliderBox
+                                images={item.media}
+                                paginationBoxVerticalPadding={5}
+                                activeOpacity={1}
+                                dotColor={COLORS.primary}
+                                inactiveDotColor={COLORS.white}
+                                sliderBoxHeight={500}
+                                dotStyle={{ width: 7, height: 7 }}
+                                onCurrentImagePressed={() =>
+                                    viewDetailPost(item._id)
+                                }
                             />
 
-                            <View style={{ marginLeft: 12 }}>
-                                <Text
-                                    style={{
-                                        ...FONTS.body5,
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    {item.ownerDisplayname}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-
-                        <MaterialCommunityIcons
-                            name="dots-vertical"
-                            size={24}
-                            color={COLORS.black}
-                        />
-                    </TouchableOpacity>
-                    <View>
-                        <SliderBox
-                            images={item.media}
-                            paginationBoxVerticalPadding={5}
-                            activeOpacity={1}
-                            dotColor={COLORS.primary}
-                            inactiveDotColor={COLORS.white}
-                            sliderBoxHeight={500}
-                            dotStyle={{ width: 7, height: 7 }}
-                            onCurrentImagePressed={() =>
-                                viewDetailPost(item._id)
-                            }
-                        />
-
-                        {/* <FlatList
+                            {/* <FlatList
                                     data={item}
                                     horizontal
                                     renderItem={({ item, index }) => (
@@ -370,301 +461,226 @@ const Post = ({
                                         </View>
                                     )}
                                 /> */}
-                    </View>
+                        </View>
 
-                    <View
-                        style={{
-                            marginHorizontal: 8,
-                            marginVertical: 8,
-                        }}
-                    >
-                        <LongText maxLength={150} content={item.content} />
-                    </View>
-                    <TouchableOpacity onPress={() => viewDetailPost(item._id)}>
                         <View
                             style={{
-                                paddingLeft: 10,
-                                paddingBottom: 5,
+                                marginHorizontal: 8,
+                                marginVertical: 8,
                             }}
+                        >
+                            <LongText maxLength={150} content={item.content} />
+                        </View>
+                        <TouchableOpacity
+                            onPress={() => viewDetailPost(item._id)}
                         >
                             <View
                                 style={{
-                                    paddingVertical: 10,
-                                    marginTop: 10,
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
+                                    paddingLeft: 10,
+                                    paddingBottom: 5,
                                 }}
                             >
                                 <View
-                                    activeOpacity={0.8}
                                     style={{
+                                        paddingVertical: 10,
+                                        marginTop: 10,
                                         flexDirection: 'row',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
                                     }}
                                 >
-                                    <Text
+                                    <View
+                                        activeOpacity={0.8}
                                         style={{
-                                            color: COLORS.black,
-                                            fontSize: 15,
-                                            marginLeft: 5,
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
                                         }}
                                     >
-                                        Đã tham gia:{' '}
+                                        <Text
+                                            style={{
+                                                color: COLORS.black,
+                                                fontSize: 15,
+                                                marginLeft: 5,
+                                            }}
+                                        >
+                                            Đã tham gia:{' '}
+                                            <Text
+                                                style={{
+                                                    color: COLORS.primary,
+                                                    fontSize: 15,
+                                                    fontWeight: 'bold',
+                                                }}
+                                            >
+                                                {item.totalUserJoin} /{' '}
+                                                {item.participants}
+                                            </Text>
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        activeOpacity={0.8}
+                                        style={{
+                                            flexDirection: 'row',
+                                            marginRight: 10,
+                                        }}
+                                    >
                                         <Text
                                             style={{
                                                 color: COLORS.primary,
                                                 fontSize: 15,
-                                                fontWeight: 'bold',
+                                                marginLeft: 10,
                                             }}
                                         >
-                                            {item.totalUserJoin} /{' '}
-                                            {item.participants}
+                                            {(
+                                                (item.totalUserJoin /
+                                                    item.participants) *
+                                                100
+                                            ).toFixed(0)}{' '}
+                                            %
                                         </Text>
-                                    </Text>
+                                    </TouchableOpacity>
                                 </View>
-                                <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    style={{
-                                        flexDirection: 'row',
-                                        marginRight: 10,
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            color: COLORS.primary,
-                                            fontSize: 15,
-                                            marginLeft: 10,
-                                        }}
-                                    >
-                                        {(
-                                            (item.totalUserJoin /
-                                                item.participants) *
-                                            100
-                                        ).toFixed(0)}{' '}
-                                        %
-                                    </Text>
-                                </TouchableOpacity>
+                                <Progress.Bar
+                                    progress={
+                                        item.totalUserJoin / item.participants
+                                    }
+                                    color="#FF493C"
+                                    height={8}
+                                    width={SIZES.width - 20}
+                                    unfilledColor="#F5F5F5"
+                                    borderColor="#F5F5F5"
+                                    borderRadius={25}
+                                />
                             </View>
-                            <Progress.Bar
-                                progress={
-                                    item.totalUserJoin / item.participants
-                                }
-                                color="#FF493C"
-                                height={8}
-                                width={SIZES.width - 20}
-                                unfilledColor="#F5F5F5"
-                                borderColor="#F5F5F5"
-                                borderRadius={25}
-                            />
-                        </View>
-                        <View
-                            style={{
-                                margin: 8,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Ionicons
-                                name="location-outline"
-                                size={22}
-                                color={COLORS.primary}
-                            />
-                            <Text
-                                style={{
-                                    fontSize: 13,
-                                    fontFamily: 'regular',
-                                    color: COLORS.primary,
-                                    marginLeft: 4,
-                                    marginRight: 10,
-                                }}
-                            >
-                                {item.address}
-                            </Text>
-                        </View>
-                        <View
-                            style={{
-                                marginHorizontal: 8,
-                                marginBottom: 8,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Ionicons
-                                name="calendar-outline"
-                                size={21}
-                                color={COLORS.blue}
-                            />
-                            <DaysDifference
-                                exprirationDate={item.exprirationDate}
-                            />
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* Posts likes and comments */}
-
-                    <View
-                        style={{
-                            marginHorizontal: 8,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            paddingBottom: 6,
-                        }}
-                    >
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                            }}
-                        >
-                            <LikeButton
-                                postId={item._id}
-                                unLikePost={unLikePost}
-                                likePost={likePost}
-                            />
                             <View
                                 style={{
+                                    margin: 8,
                                     flexDirection: 'row',
-                                    marginRight: SIZES.padding2,
                                     alignItems: 'center',
                                 }}
                             >
-                                <MaterialCommunityIcons
-                                    name="message-text-outline"
-                                    size={25}
-                                    color={COLORS.black}
+                                <Ionicons
+                                    name="location-outline"
+                                    size={22}
+                                    color={COLORS.primary}
                                 />
                                 <Text
                                     style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 2,
+                                        fontSize: 13,
+                                        fontFamily: 'regular',
+                                        color: COLORS.primary,
+                                        marginLeft: 4,
+                                        marginRight: 10,
                                     }}
                                 >
-                                    {item.numOfComment}
+                                    {item.address}
                                 </Text>
                             </View>
                             <View
                                 style={{
+                                    marginHorizontal: 8,
+                                    marginBottom: 8,
                                     flexDirection: 'row',
-
                                     alignItems: 'center',
                                 }}
                             >
-                                <Image
-                                    source={require(share)}
-                                    style={{
-                                        width: 25,
-                                        height: 25,
-                                    }}
+                                <Ionicons
+                                    name="calendar-outline"
+                                    size={21}
+                                    color={COLORS.blue}
+                                />
+                                <DaysDifference
+                                    exprirationDate={item.exprirationDate}
                                 />
                             </View>
-                        </View>
+                        </TouchableOpacity>
+
+                        {/* Posts likes and comments */}
+
                         <View
                             style={{
-                                flexDirection: 'row',
-                            }}
-                        >
-                            {type === 'Organization' ||
-                            !type ? null : item.isJoin ? (
-                                <View
-                                    style={{
-                                        backgroundColor: '#ccc',
-                                        borderRadius: 10,
-                                        padding: 5,
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            ...FONTS.body5,
-                                            color: 'black',
-                                        }}
-                                    >
-                                        Đã tham gia
-                                    </Text>
-                                </View>
-                            ) : item.isExprired ? (
-                                <View
-                                    style={{
-                                        backgroundColor: '#cccc',
-                                        borderRadius: 10,
-                                        padding: 5,
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            ...FONTS.body5,
-                                            color: 'black',
-                                        }}
-                                    >
-                                        Đã hết hạn
-                                    </Text>
-                                </View>
-                            ) : (
-                                <TouchableOpacity
-                                    style={{
-                                        backgroundColor: COLORS.primary,
-                                        borderRadius: 10,
-                                        padding: 5,
-                                    }}
-                                    onPress={() => viewDetailPost(item._id)}
-                                >
-                                    <Text
-                                        style={{
-                                            ...FONTS.body5,
-                                            color: 'white',
-                                        }}
-                                    >
-                                        Tham Gia
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    </View>
-
-                    {/* comment section */}
-
-                    {!avatar ? null : (
-                        <View
-                            style={{
-                                flexDirection: 'row',
                                 marginHorizontal: 8,
-                                paddingVertical: 18,
-                                borderTopWidth: 1,
-                                borderTopColor: '#FFF',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                paddingBottom: 6,
                             }}
                         >
-                            <Image
-                                source={avatar ? { uri: avatar } : ImageAvata}
-                                contentFit="contain"
-                                style={{
-                                    height: 52,
-                                    width: 52,
-                                    borderRadius: 26,
-                                }}
-                            />
-
                             <View
                                 style={{
-                                    flex: 1,
-                                    height: 52,
-                                    borderRadius: 26,
-                                    borderWidth: 1,
-                                    borderColor: '#CCC',
-                                    marginLeft: 12,
-                                    paddingLeft: 12,
-                                    justifyContent: 'center',
+                                    flexDirection: 'row',
                                 }}
                             >
-                                <TextInput
-                                    placeholder="Thêm bình luận"
-                                    placeholderTextColor="#CCC"
+                                <LikeButton
+                                    postId={item._id}
+                                    unLikePost={unLikePost}
+                                    likePost={likePost}
                                 />
                             </View>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                }}
+                            >
+                                {type === 'Organization' ||
+                                !type ? null : item.isJoin ? (
+                                    <View
+                                        style={{
+                                            backgroundColor: '#ccc',
+                                            borderRadius: 10,
+                                            padding: 5,
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                color: 'black',
+                                            }}
+                                        >
+                                            Đã tham gia
+                                        </Text>
+                                    </View>
+                                ) : item.isExprired ? (
+                                    <View
+                                        style={{
+                                            backgroundColor: '#cccc',
+                                            borderRadius: 10,
+                                            padding: 5,
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                color: 'black',
+                                            }}
+                                        >
+                                            Đã hết hạn
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <TouchableOpacity
+                                        style={{
+                                            backgroundColor: COLORS.primary,
+                                            borderRadius: 10,
+                                            padding: 5,
+                                        }}
+                                        onPress={() => viewDetailPost(item._id)}
+                                    >
+                                        <Text
+                                            style={{
+                                                ...FONTS.body5,
+                                                color: 'white',
+                                            }}
+                                        >
+                                            Tham Gia
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
                         </View>
-                    )}
-                </View>
-            )}
-        />
+                    </View>
+                )}
+            />
+        </View>
     )
 }
 

@@ -271,6 +271,7 @@ function FeaturedArticle({ navigation }) {
             <FlatList
                 onEndReached={fetchNextPage}
                 onEndReachedThreshold={0.4}
+                showsVerticalScrollIndicator= {false}
                 data={posts}
                 refreshControl={
                     <RefreshControl

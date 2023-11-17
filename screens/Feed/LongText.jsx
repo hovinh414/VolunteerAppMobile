@@ -25,15 +25,12 @@ const LongText = ({ content, maxLength }) => {
 
     return (
         <View>
-            <Text style={{ fontSize: 16, textAlign: 'justify' }}>
-                {displayText}
-            </Text>
-
             {content.length > maxLength && (
-                <TouchableOpacity onPress={toggleTextVisibility}>
-                    <Text
-                        style={{ fontWeight: '500', color: COLORS.primary }}
-                    >
+                <TouchableOpacity activeOpacity={1} onPress={toggleTextVisibility}>
+                    <Text style={{ fontSize: 16, textAlign: 'justify' }}>
+                        {displayText}
+                    </Text>
+                    <Text style={{ fontWeight: '500', color: COLORS.primary }}>
                         {isFullTextVisible ? '...Thu gọn' : '...Xem thêm'}
                     </Text>
                 </TouchableOpacity>

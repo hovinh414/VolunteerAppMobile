@@ -4,9 +4,6 @@ import {
     TouchableOpacity,
     ScrollView,
     FlatList,
-    TextInput,
-    RefreshControl,
-    Modal,
     StyleSheet,
     ActivityIndicator,
 } from 'react-native'
@@ -749,12 +746,5 @@ const Feed = ({ navigation, route }) => {
             </View>
         </SafeAreaView>
     )
-}
-const headerStyle = {
-    position: 'absolute',
-    top: 50,
-    left: 12,
-    right: 0,
-    zIndex: 2,
 }
 export default Feed
