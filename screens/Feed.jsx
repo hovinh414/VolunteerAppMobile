@@ -173,7 +173,7 @@ const Feed = ({ navigation, route }) => {
                 setIsLoading(false)
                 Toast.show({
                     type: 'warning',
-                    text1: 'Chưa có bài viết mới!',
+                    text1: 'Bạn đã coi hết bài viết!',
                     visibilityTime: 2500,
                 })
                 console.log('API Error get more post:', error)

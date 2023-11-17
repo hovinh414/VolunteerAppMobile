@@ -26,10 +26,12 @@ import AsyncStoraged from '../../services/AsyncStoraged'
 import API_URL from '../../interfaces/config'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import { format } from 'date-fns'
+import ModalLoading from '../../components/ModalLoading'
 const DetailPost = ({ navigation, route }) => {
     const [items, setItems] = useState(route.params)
     const [type, setType] = useState('')
     const [email, setEmail] = useState('')
+    const [showLoading, setShowLoading] = useState(false)
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
@@ -151,6 +153,7 @@ const DetailPost = ({ navigation, route }) => {
     }
     const joinActivity = async () => {
         try {
+            setShowLoading(true)
             const res = await axios({
                 method: 'put',
                 url: API_URL.API_URL + '/activity/' + items.activityId,
@@ -167,6 +170,7 @@ const DetailPost = ({ navigation, route }) => {
                     text2: 'Tham gia thành công',
                     visibilityTime: 2500,
                 })
+                setShowLoading(false)
                 refreshDetail()
             }
         } catch (error) {
@@ -177,6 +181,7 @@ const DetailPost = ({ navigation, route }) => {
                     text2: 'Tham gia thất bại!',
                     visibilityTime: 2500,
                 })
+                setShowLoading(false)
                 console.log(error)
             }
         }
@@ -378,6 +383,7 @@ const DetailPost = ({ navigation, route }) => {
             >
                 <Toast config={toastConfig} />
             </View>
+            <ModalLoading visible={showLoading} />
             <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={{

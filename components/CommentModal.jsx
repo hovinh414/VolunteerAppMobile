@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
     Modal,
     Text,
@@ -16,16 +16,42 @@ import axios from 'axios'
 import API_URL from '../interfaces/config'
 import ImageAvata from '../assets/hero2.jpg'
 const cover = '../assets/cover.jpg'
-const CommentModal = ({ visible, onRequestClose, postId }) => {
+const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
     const [parentId, setParentId] = useState('')
     const [token, setToken] = useState('')
     const [comment, setComment] = useState([])
     const [text, setText] = useState('')
+    const inputRef = useRef()
+    const [placeholderText, setPlaceholderText] = useState('Thêm bình luận')
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
+    const handleButtonClick = () => {
+        if (parentId) {
+            const ownerDisplayName = comment.find(
+                (item) => item._id === parentId
+            )?.ownerDisplayname
+            setPlaceholderText(`Trả lời ${ownerDisplayName}`)
+        }
+        inputRef.current.focus()
+    }
 
+    const handleBlur = () => {
+        setPlaceholderText('Thêm bình luận')
+        setParentId(null)
+    }
+
+    const handleFocus = () => {
+        if (parentId) {
+            const ownerDisplayName = comment.find(
+                (item) => item._id === parentId
+            )?.ownerDisplayname
+            setPlaceholderText(`Trả lời ${ownerDisplayName}`)
+        } else {
+            setPlaceholderText('Thêm bình luận')
+        }
+    }
     useEffect(() => {
         getToken()
     }, [])
@@ -91,7 +117,6 @@ const CommentModal = ({ visible, onRequestClose, postId }) => {
             }
         }
     }
-    console.log(parentId)
     const buildNestedComments = (comments, parentId = null) => {
         const nestedComments = []
         for (const comment of comments) {
@@ -105,15 +130,13 @@ const CommentModal = ({ visible, onRequestClose, postId }) => {
         }
         return nestedComments
     }
-
     const renderCommentItem = ({ item }) => (
-        
         <View style={{ paddingHorizontal: 15 }}>
             <View
                 style={{
                     flexDirection: 'row',
                     marginTop: 18,
-                    marginLeft: (item.level * 50) + 20 || 0,
+                    marginLeft: item.level * 50 + 20 || 0,
                 }}
             >
                 <Image
@@ -132,7 +155,10 @@ const CommentModal = ({ visible, onRequestClose, postId }) => {
                     </Text>
                     <Text style={{ color: '#696969' }}>{item.content}</Text>
                     <TouchableOpacity
-                        onPress={() => setParentId(item._id)}
+                        onPress={() => {
+                            setParentId(item._id)
+                            handleButtonClick()
+                        }}
                         style={{ marginTop: 5 }}
                     >
                         <Text style={{ color: '#696969', fontWeight: '500' }}>
@@ -153,7 +179,7 @@ const CommentModal = ({ visible, onRequestClose, postId }) => {
             )}
         </View>
     )
-
+    console.log(parentId)
     return (
         <Modal
             animationType="slide"
@@ -259,11 +285,14 @@ const CommentModal = ({ visible, onRequestClose, postId }) => {
                             }}
                         >
                             <TextInput
+                                ref={inputRef}
                                 style={{ height: '100%', width: '90%' }}
-                                placeholder="Thêm bình luận"
+                                placeholder={placeholderText}
                                 placeholderTextColor="#CCC"
                                 value={text}
                                 onChangeText={(text) => setText(text)}
+                                onFocus={handleFocus}
+                                onBlur={handleBlur}
                             />
                             {text ? (
                                 <TouchableOpacity onPress={comments}>
