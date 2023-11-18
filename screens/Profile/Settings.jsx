@@ -157,7 +157,6 @@ const Settings = ({ navigation }) => {
         const getBarCodeScannerPermissions = async () => {
             const { status } = await BarCodeScanner.requestPermissionsAsync()
             setHasPermission(status === 'granted')
-            console.log(hasPermission)
         }
         getBarCodeScannerPermissions()
     }, [])

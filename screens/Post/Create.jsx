@@ -332,9 +332,11 @@ const Create = ({ navigation }) => {
                 visible={showChoose}
                 animationType="fade"
                 transparent
-                onRequestClose={showChoose}
+                onRequestClose={() => setShowChoose(false)}
             >
-                <View
+                <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => setShowChoose(false)}
                     style={{
                         flex: 1,
                         justifyContent: 'center',
@@ -352,7 +354,7 @@ const Create = ({ navigation }) => {
                             position: 'relative',
                         }}
                     >
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             style={{
                                 position: 'absolute',
                                 top: 10,
@@ -361,7 +363,7 @@ const Create = ({ navigation }) => {
                             onPress={() => setShowChoose(false)}
                         >
                             <AntDesign name="close" size={30} />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                         {/* <View style={{ borderBottomWidth: 1 }}>
                             <Text
                                 style={{
@@ -381,8 +383,7 @@ const Create = ({ navigation }) => {
                             <TouchableOpacity
                                 style={{
                                     borderRadius: 15,
-                                    marginHorizontal: 10,
-                                    marginTop: 20,
+                                    margin: 10,
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                     borderBottomWidth: 1, // Add border bottom here
@@ -435,7 +436,7 @@ const Create = ({ navigation }) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
             <View
                 style={{

@@ -222,6 +222,28 @@ const Feed = ({ navigation, route }) => {
             console.log('API Error:', error)
         }
     }
+    const viewProfile = async (_orgId) => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        }
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/profile/' + _orgId,
+                config
+            )
+            if (response.data.status === 'SUCCESS') {
+                navigation.navigate(
+                    'ProfileUser',
+                    response.data.data.profileResult
+                )
+            }
+        } catch (error) {
+            console.log('API Error:', error)
+        }
+    }
     const RenderSuggestionsContainer = () => {
         return (
             <View
@@ -236,7 +258,7 @@ const Feed = ({ navigation, route }) => {
                 <FlatList
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
-                    data={friends}
+                    data={posts}
                     renderItem={({ item, index }) => (
                         <View
                             key={index}
@@ -248,14 +270,14 @@ const Feed = ({ navigation, route }) => {
                             }}
                         >
                             <TouchableOpacity
-                                onPress={() => console.log('Pressed')}
+                                onPress={() => viewProfile(item.ownerId)}
                                 style={{
                                     paddingVertical: 4,
                                     marginLeft: 12,
                                 }}
                             >
                                 <Image
-                                    source={item.image}
+                                    source={item.ownerAvatar}
                                     contentFit="contain"
                                     style={{
                                         width: 80,
@@ -694,7 +716,7 @@ const Feed = ({ navigation, route }) => {
                             style={{
                                 fontSize: 16,
                                 color: COLORS.blue,
-                                fontWeight:'bold',
+                                fontWeight: 'bold',
                                 marginTop: 5,
                                 marginRight: 5,
                             }}

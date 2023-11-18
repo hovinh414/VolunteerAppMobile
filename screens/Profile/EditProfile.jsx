@@ -119,12 +119,6 @@ const EditProfile = ({ navigation, route }) => {
     const formData = new FormData()
     const randomNum = Math.floor(Math.random() * (10000 - 10 + 1)) + 10
     const handleUpdateUser = async () => {
-        if (!fullname || !username || !email || !phone) {
-            setMess('Vui lòng điền đầy đủ thông tin!')
-            setIcon()
-            setShowWarning(true)
-            return
-        }
         if (selectedImage.length > 0) {
             formData.append('fullname', fullname)
             formData.append('username', username)
