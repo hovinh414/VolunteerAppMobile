@@ -6,8 +6,7 @@ import {
     FlatList,
     TextInput,
     RefreshControl,
-    Modal,
-    StyleSheet,
+    Share,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
 import React, { useState, useEffect } from 'react'
@@ -31,8 +30,7 @@ import { Image } from 'expo-image'
 import axios from 'axios'
 import ImageAvata from '../../assets/hero2.jpg'
 import AsyncStoraged from '../../services/AsyncStoraged'
-import { tr } from 'date-fns/locale'
-
+import { format } from 'date-fns';
 const share = '../../assets/share.png'
 const Post = ({
     posts,
@@ -109,7 +107,7 @@ const Post = ({
         }
     }
     const [postIdComment, setPostIdComment] = useState('')
-    function LikeButton({ postId, likePost, unLikePost }) {
+    function LikeButton({ postId, likePost, unLikePost, post }) {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
 
@@ -218,21 +216,20 @@ const Post = ({
                                 color={COLORS.black}
                             />
                         </TouchableOpacity>
-                        <View
+                        <TouchableOpacity
+                            onPress={() => sharePost(post)}
                             style={{
                                 flexDirection: 'row',
 
                                 alignItems: 'center',
                             }}
                         >
-                            <Image
-                                source={require(share)}
-                                style={{
-                                    width: 25,
-                                    height: 25,
-                                }}
+                            <Feather
+                                name="share-2"
+                                size={25}
+                                color={COLORS.black}
                             />
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     <Text
                         style={{ ...FONTS.body5, marginLeft: 5, marginTop: 8 }}
@@ -279,21 +276,20 @@ const Post = ({
                                 color={COLORS.black}
                             />
                         </TouchableOpacity>
-                        <View
+                        <TouchableOpacity
+                            onPress={() => sharePost(post)}
                             style={{
                                 flexDirection: 'row',
 
                                 alignItems: 'center',
                             }}
                         >
-                            <Image
-                                source={require(share)}
-                                style={{
-                                    width: 25,
-                                    height: 25,
-                                }}
+                            <MaterialCommunityIcons
+                                name="message-processing-outline"
+                                size={25}
+                                color={COLORS.black}
                             />
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     <Text
                         style={{ ...FONTS.body5, marginLeft: 5, marginTop: 8 }}
@@ -346,6 +342,60 @@ const Post = ({
             console.log('API Error:', error)
         }
     }
+    const removeHashtagsAndUrlsFromContent = (content) => {
+        // Regex để tìm kiếm ký tự # và URL
+        const hashtagRegex = /#/g
+        const urlRegex = /https?:\/\/[^\s]+/g
+
+        // Thay thế tất cả các ký tự # bằng chuỗi trống
+        const contentWithoutHashtags = content.replace(hashtagRegex, '')
+
+        // Thay thế tất cả các URL bằng chuỗi trống
+        const contentWithoutUrls = contentWithoutHashtags.replace(urlRegex, '')
+
+        return contentWithoutUrls
+    }
+    function extractUrlsFromContent(content) {
+        const urlRegex = /https?:\/\/[^\s]+/g
+        const urls = content.match(urlRegex)
+        return urls || []
+    }
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        const formattedDate = new Date(dateString).toLocaleDateString('en-US', options);
+        return formattedDate;
+      };
+    const sharePost = async (post) => {
+        try {
+            const cleanedContent = removeHashtagsAndUrlsFromContent(
+                post.content
+            )
+            let mediaContent = ''
+            
+            // Duyệt qua mảng media và thêm từng URL vào nội dung chia sẻ
+            post.media.forEach((mediaUrl, index) => {
+                mediaContent += `Hình ${index + 1}: ${mediaUrl}\n`
+            })
+            const formattedDate = format(new Date(post.exprirationDate), 'dd-MM-yyyy');
+            const result = await Share.share({
+                message: `${cleanedContent} \n\nĐịa điểm: ${post.address}\nThời hạn: ${formattedDate}\nSố người tham gia: ${post.participants}`,
+                url: extractUrlsFromContent(post.content),
+            })
+            if(result.action === Share.sharedAction) {
+                if(result.activityType) {
+                    console.log('Share with activity type: ', result.activityType)
+                }
+                else {
+                    console.log('shared')
+                }
+            } else if (result.action === Share.dismissedAction) {
+                console.log('dismissed')
+            }
+        } catch (error) {
+            console.error('Error sharing post:', error.message)
+        }
+    }
+
     return (
         <View>
             <CommentModal
@@ -614,6 +664,7 @@ const Post = ({
                                     postId={item._id}
                                     unLikePost={unLikePost}
                                     likePost={likePost}
+                                    post={item}
                                 />
                             </View>
                             <View

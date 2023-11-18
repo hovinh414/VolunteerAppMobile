@@ -16,7 +16,7 @@ import CustomButton from '../../components/CustomButton'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import ImageAvata from '../../assets/hero2.jpg'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
-import { addYears, format, addDays, parse } from 'date-fns'
+import { addYears, format, addDays, parse, isAfter } from 'date-fns'
 import axios from 'axios'
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
@@ -24,7 +24,6 @@ import { AntDesign } from '@expo/vector-icons'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
-import da from 'date-fns/esm/locale/da/index.js'
 
 const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
@@ -237,6 +236,7 @@ const Create = ({ navigation }) => {
                 name: images.fileName,
             })
         })
+
         formData.append('exprirationDate', exprirationDate)
         formData.append('dateActivity', dateActivity)
         formData.append('scope', scope)
@@ -244,7 +244,6 @@ const Create = ({ navigation }) => {
         formData.append('participants', participants)
         formData.append('type', _type)
         setButtonPress(true)
-        console.log(formData)
         if (
             selectedImages.length === 0 ||
             !content ||
@@ -260,18 +259,28 @@ const Create = ({ navigation }) => {
             setButtonPress(false)
             return
         }
-        // const date1 = new Date(exprirationDate)
-        // const date2 = new Date(dateActivity)
-        // if (date1 > date2) {
-        //     Toast.show({
-        //         type: 'warning',
-        //         text1: 'Cảnh báo',
-        //         text2: 'Ngày diễn ra phải sau ngày hết hạn!',
-        //         visibilityTime: 2500,
-        //     })
-        //     setButtonPress(false)
-        //     return
-        // }
+        const date1 = exprirationDate
+        const date2 = format(
+            parse(dateActivity, 'MM-dd-yyyy', new Date()),
+            'dd-MM-yyyy'
+        )
+        const [day1, month1, year1] = date1.split('-').map(Number)
+        const [day2, month2, year2] = date2.split('-').map(Number)
+
+        const dateOne = new Date(year1, month1 - 1, day1)
+        const dateTwo = new Date(year2, month2 - 1, day2)
+        const timeDiff = dateOne.getTime() - dateTwo.getTime()
+        const daysDiff = timeDiff / (1000 * 3600 * 24)
+        if (daysDiff > 0) {
+            Toast.show({
+                type: 'warning',
+                text1: 'Cảnh báo',
+                text2: 'Ngày diễn ra phải sau ngày hết hạn!',
+                visibilityTime: 2500,
+            })
+            setButtonPress(false)
+            return
+        }
         axios
             .post(API_URL.API_URL + '/post', formData, {
                 headers: {

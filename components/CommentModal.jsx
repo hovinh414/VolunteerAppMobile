@@ -76,7 +76,10 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
 
         try {
             const response = await axios.get(
-                API_URL.API_URL + '/post/' + postId + '/comments'
+                API_URL.API_URL +
+                    '/post/' +
+                    postId +
+                    '/comments?page=1&limit=5'
             )
 
             if (response.data.status === 'SUCCESS') {
@@ -89,9 +92,41 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
     }
     useEffect(() => {
         if (visible) {
+            setCurrentPage(1)
             getComments()
         }
     }, [visible])
+    const [loadingMore, setLoadingMore] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const fetchComment = async () => {
+        if (!loadingMore) {
+            setLoadingMore(true)
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            }
+
+            try {
+                const response = await axios.get(
+                    `${API_URL.API_URL}/post/${postId}/comments?page=${
+                        currentPage + 1
+                    }&limit=5`
+                )
+                if (response.data.status === 'SUCCESS') {
+                    setComment([...comment, ...response.data.data])
+                    setCurrentPage(currentPage + 1)
+                } else {
+                    setComment([...comment, ...response.data.data])
+                }
+            } catch (error) {
+                console.log('API Error get more comment:', error)
+            } finally {
+                setLoadingMore(false)
+            }
+        }
+    }
     const comments = async () => {
         try {
             const res = await axios({
@@ -173,13 +208,14 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
                 <FlatList
                     data={item.replies}
                     renderItem={renderCommentItem}
-                    keyExtractor={(reply) => reply._id}
                     showsVerticalScrollIndicator={false}
+                    onEndReached={fetchComment}
+                    onEndReachedThreshold={0.4}
                 />
             )}
         </View>
     )
-    console.log(parentId)
+    
     return (
         <Modal
             animationType="slide"
@@ -243,12 +279,11 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
                         </View>
                     ) : (
                         <FlatList
-                            data={buildNestedComments(
-                                comment.slice().reverse()
-                            )}
+                            data={buildNestedComments(comment)}
                             renderItem={renderCommentItem}
-                            keyExtractor={(item) => item._id}
                             showsVerticalScrollIndicator={false}
+                            onEndReached={fetchComment}
+                            onEndReachedThreshold={0.4}
                         />
                     )}
                     <View
