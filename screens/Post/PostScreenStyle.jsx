@@ -56,7 +56,7 @@ export const styles = StyleSheet.create({
         marginRight:5,
     },
     content: {
-
+        flexDirection:'row'
     },
     row: {
         flexDirection: 'row',
@@ -87,7 +87,7 @@ export const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
     content_detail: {
-        height: 150,
+        height: 180,
         marginHorizontal: 10,
         paddingHorizontal: 10,
         fontSize: 16,
@@ -104,7 +104,7 @@ export const styles = StyleSheet.create({
         // fontWeight: '500'
     },
     address: {
-        width: '40%',
+        width: '95%',
         marginHorizontal: 10,
         paddingHorizontal: 10,
         height: 50,
@@ -146,14 +146,12 @@ export const styles = StyleSheet.create({
     inputBtn: {
         flex: 1, flexDirection: 'row',
         alignItems: 'center',
-        width: '40%',
         marginHorizontal: 10,
         paddingHorizontal: 10,
         height: 50,
         justifyContent: 'center',
         borderRadius: 10,
         borderWidth: 1.5,
-        marginLeft: 50,
         borderColor: COLORS.primary,
     },
     centeredView: {

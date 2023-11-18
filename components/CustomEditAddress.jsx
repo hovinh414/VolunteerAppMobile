@@ -6,7 +6,6 @@ import { COLORS, FONTS } from "../constants/theme";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { Dropdown } from 'react-native-element-dropdown';
 import CustomInput from "./CustomInput";
-import CustomAlert from "./CustomAlert";
 import { useNavigation } from '@react-navigation/native';
 import AsyncStoraged from "../services/AsyncStoraged";
 import API_URL from '../interfaces/config'
@@ -155,16 +154,7 @@ const CustomEditAddress = ({ visible, close, onRequestClose, onPress, title }) =
       transparent={true}
       visible={visible}
       onRequestClose={onRequestClose}>
-      <CustomAlert
-        visible={showWarning}
-        mess={mess}
-        onRequestClose={() =>
-          setShowWarning(false)
-        }
-        onPress={() => (setShowWarning(false))}
-        title={'ĐÓNG'}
-        icon={icon}
-      />
+
       <KeyboardAvoidingView
         style={{
           flex: 1,

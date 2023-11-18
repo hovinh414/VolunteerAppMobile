@@ -1,153 +1,107 @@
 import React, { useRef, useState } from 'react'
-import {
-    StyleSheet,
-    Text,
-    View,
-    Animated,
-    Button,
-    TouchableOpacity,
-    Dimensions,
-} from 'react-native'
-import { AntDesign, Entypo } from '@expo/vector-icons'
+import { Modal, Text, View, TouchableOpacity } from 'react-native'
+import { Feather, Ionicons } from '@expo/vector-icons'
+import { COLORS } from '../constants'
 
-const ModalAlert = () => {
-    const windowHeight = Dimensions.get('window').height
-    const popAnim = useRef(new Animated.Value(windowHeight * -1)).current
-    const [status, setStatus] = useState(null);
-    const successColor = '#6dcf81'
-    const successHeader = 'Thành công!'
-    const successMessage = 'Thành công nha'
-    const failColor = '#bf6060'
-    const failHeader = 'Thất bại!'
-    const failMessage = 'Thất bại rồi'
-    const warningColor = '#FFE600'
-    const warningHeader = 'Cảnh báo!'
-    const warningMessage = 'Cảnh cáo mày'
-
-    const popIn = () => {
-        Animated.timing(popAnim, {
-            toValue: windowHeight * 0.35 * -1,
-            duration: 300,
-            useNativeDriver: true,
-        }).start(popOut())
-    }
-
-    const popOut = () => {
-        setTimeout(() => {
-            Animated.timing(popAnim, {
-                toValue: windowHeight * -1,
-                duration: 300,
-                useNativeDriver: true,
-            }).start()
-        }, 2000)
-    }
-
-    const instantPopOut = () => {
-        Animated.timing(popAnim, {
-            toValue: windowHeight * -1,
-            duration: 150,
-            useNativeDriver: true,
-        }).start()
-    }
-
+const ModalAlert = ({ visible, onRequestClose }) => {
     return (
-        <View>
-            <Animated.View
-                style={[
-                    styles.toastContainer,
-                    {
-                        transform: [{ translateY: popAnim }],
-                    },
-                ]}
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={visible}
+            onRequestClose={onRequestClose}
+        >
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                }}
             >
-                <View style={styles.toastRow}>
-                    <AntDesign
-                        name={
-                            status === 'success'
-                                ? 'checkcircleo'
-                                : status === 'fail'
-                                ? 'closecircleo'
-                                : 'exclamationcircleo'
-                        }
-                        size={24}
-                        color={
-                            status === 'success'
-                                ? successColor
-                                : status === 'fail'
-                                ? failColor
-                                : warningColor
-                        }
-                    />
-                    <View style={styles.toastText}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>
-                            {status === 'success'
-                                ? successHeader
-                                : status === 'fail'
-                                ? failHeader
-                                : warningHeader}
-                        </Text>
-                        <Text style={{ fontSize: 12 }}>
-                            {status === 'success'
-                                ? successMessage
-                                : status === 'fail'
-                                ? failMessage
-                                : warningMessage}
-                        </Text>
-                    </View>
-                    <TouchableOpacity onPress={instantPopOut}>
-                        <Entypo name="cross" size={24} color="black" />
+                <View
+                    style={{
+                        width: '100%',
+                        height: '25%',
+                        backgroundColor: '#fff',
+                        borderRadius: 25,
+                        padding:30,
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={onRequestClose}
+                        style={{ position: 'absolute', top: 10, right: 10 }}
+                    >
+                        <Feather name="x" size={26} color={COLORS.black} />
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'flex-start',
+                            alignItems: 'center',
+                            marginTop: 25,
+                        }}
+                    >
+                        <Ionicons name="calendar-outline" size={30} />
+                        <Text
+                            style={{
+                                fontSize: 16,
+                                fontWeight: '700',
+                                marginHorizontal: 15,
+                            }}
+                        >
+                            Các hoạt động
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'flex-start',
+                            alignItems: 'center',
+                            marginTop: 18,
+                        }}
+                    >
+                        <Ionicons name="newspaper-outline" size={30} />
+                        <Text
+                            style={{
+                                fontSize: 16,
+                                fontWeight: '700',
+                                marginHorizontal: 15,
+                            }}
+                        >
+                            Các bài viết đang diễn ra
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'flex-start',
+                            alignItems: 'center',
+                            marginTop: 18,
+                        }}
+                    >
+                        <Ionicons name="trash-bin-outline" size={30} />
+                        <Text
+                            style={{
+                                fontSize: 16,
+                                fontWeight: '700',
+                                marginHorizontal: 15,
+                            }}
+                        >
+                            Các bài viết hết hạn
+                        </Text>
+                    </TouchableOpacity>
+
+                    <View style={{ flexDirection: 'row' }}>
+                        <TouchableOpacity
+                            style={{ backgroundColor: COLORS.primary }}
+                        ></TouchableOpacity>
+                    </View>
                 </View>
-            </Animated.View>
-            <Button
-                title="Success Message"
-                onPress={() => {
-                    setStatus('success')
-                    popIn()
-                }}
-                style={{ marginTop: 30 }}
-            ></Button>
-            <Button
-                title="Fail Message"
-                onPress={() => {
-                    setStatus('fail')
-                    popIn()
-                }}
-                style={{ marginTop: 30 }}
-            ></Button>
-        </View>
+            </View>
+        </Modal>
     )
 }
 
 export default ModalAlert
-
-const styles = StyleSheet.create({
-    toastContainer: {
-        height: 60,
-        width: 350,
-        backgroundColor: '#f5f5f5',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 10,
-
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-
-        elevation: 5,
-    },
-    toastRow: {
-        width: '90%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-evenly',
-    },
-    toastText: {
-        width: '70%',
-        padding: 2,
-    },
-})

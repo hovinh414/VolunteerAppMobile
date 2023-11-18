@@ -9,7 +9,7 @@ import {
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { COLORS } from '../constants'
 import {
-    ChatTest,
+    Search,
     LoginScreen,
     Notifications,
     Profile,
@@ -75,14 +75,14 @@ const BottomTabNavigation = () => {
                 }}
             />
             <Tab.Screen
-                name="ChatTest"
-                component={ChatTest}
+                name="Search"
+                component={Search}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return (
-                            <Ionicons
-                                name="chatbox-outline"
-                                size={24}
+                            <Feather
+                                name="search"
+                                size={25}
                                 color={focused ? COLORS.primary : COLORS.black}
                             />
                         )

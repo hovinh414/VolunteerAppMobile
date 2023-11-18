@@ -36,12 +36,12 @@ import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const share = '../../assets/share.png'
 const cover = '../../assets/cover.jpg'
-const question = '../../assets/question.png'
 const PostsRoute = () => {
     const [orgId, setOrgId] = useState()
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
     const [type, setType] = useState('')
+    
     const [showWarning, setShowWarning] = useState(false)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -371,88 +371,6 @@ const PostsRoute = () => {
                 paddingTop: 12,
             }}
         >
-            <Modal
-                visible={showWarning}
-                animationType="fade"
-                transparent
-                onRequestClose={() => setShowWarning(false)}
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        shadowColor: '#000',
-                        shadowOffset: {
-                            width: 0,
-                            height: 2,
-                        },
-                        shadowOpacity: 0.75,
-                        shadowRadius: 4,
-                        elevation: 5,
-                    }}
-                >
-                    <View
-                        style={{
-                            width: 300,
-                            height: 200,
-                            backgroundColor: '#ffffff',
-                            borderRadius: 25,
-                            alignItems: 'center', // Đảm bảo nội dung nằm ở giữa
-                            justifyContent: 'center', //
-                        }}
-                    >
-                        <Image
-                            source={require(question)}
-                            style={{
-                                marginTop: 15,
-                                width: 50,
-                                height: 50,
-                            }}
-                        />
-                        <Text
-                            style={{
-                                marginTop: 15,
-                                fontWeight: 'bold',
-                                fontSize: 18,
-                            }}
-                        >
-                            Bạn có muốn tham gia hoạt động?
-                        </Text>
-
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginTop: 30,
-                            }}
-                        >
-                            <View
-                                style={{
-                                    width: 80,
-                                    marginRight: 15,
-                                }}
-                            >
-                                <CustomButtonV2
-                                    title="ĐÓNG"
-                                    onPress={() => setShowWarning(false)}
-                                />
-                            </View>
-                            <View
-                                style={{
-                                    width: 80,
-                                }}
-                            >
-                                <CustomButton
-                                    title="ĐỒNG Ý"
-                                    onPress={() =>
-                                        joinActivity(item.activityId)
-                                    }
-                                />
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
             <FlatList
                 data={posts}
                 onEndReached={fetchNextPage}
@@ -683,7 +601,7 @@ const PostsRoute = () => {
                                 </View>
                             </View>
 
-                            <View style={{ flexDirection: 'row' }}>
+                            {/* <View style={{ flexDirection: 'row' }}>
                                 {type ===
                                 'Organization' ? null : !item.isJoin ? (
                                     <TouchableOpacity
@@ -721,7 +639,7 @@ const PostsRoute = () => {
                                         </Text>
                                     </View>
                                 )}
-                            </View>
+                            </View> */}
                         </View>
                     </View>
                 )}
@@ -1000,12 +918,14 @@ const ProfileOrganisation = ({ navigation, route }) => {
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
     const [isActive, setIsActive] = useState(false)
+    const [follower, setFollower] = useState('')
     const [routes, setRoute] = useState([])
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
         setFullname(userStored.fullname)
         setIsActive(userStored.isActiveOrganization)
+        setFollower(userStored.follower)
     }
     const getUserStoredEdit = async () => {
         const userStored = await AsyncStoraged.getData()
@@ -1071,34 +991,50 @@ const ProfileOrganisation = ({ navigation, route }) => {
         success: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#6dcf81' }}
+                style={{
+                    borderLeftColor: '#379A4F',
+                    backgroundColor: '#379A4F',
+                    borderRadius: 12,
+                }}
                 text1Style={{
+                    color: '#fff',
                     fontSize: 18,
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={SuccessToast}
             />
         ),
 
         error: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FF0035' }}
+                style={{
+                    borderLeftColor: '#FF0035',
+                    backgroundColor: '#FF0035',
+                    borderRadius: 12,
+                }}
                 text1Style={{
                     fontSize: 18,
+                    color: '#fff',
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={ErrorToast}
             />
         ),
         warning: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FFE600' }}
+                style={{
+                    borderLeftColor: '#FFE600',
+                    backgroundColor: '#FFE600',
+                    borderRadius: 12,
+                }}
                 text1Style={{
                     fontSize: 18,
                 }}
@@ -1106,8 +1042,66 @@ const ProfileOrganisation = ({ navigation, route }) => {
                     fontSize: 16,
                     color: '#696969',
                 }}
+                renderLeadingIcon={WarningToast}
             />
         ),
+    }
+    const WarningToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="alert-circle-outline"
+                    size={35}
+                    color={COLORS.black}
+                />
+            </View>
+        )
+    }
+    const SuccessToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="checkmark-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
+    }
+    const ErrorToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="close-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
     }
     return (
         <SafeAreaView
@@ -1128,7 +1122,7 @@ const ProfileOrganisation = ({ navigation, route }) => {
                     <View
                         style={{
                             width: '100%',
-                            height: '55%',
+                            height: 'auto',
                             position: 'relative',
                         }}
                     >
@@ -1321,7 +1315,7 @@ const ProfileOrganisation = ({ navigation, route }) => {
                                             color: COLORS.black,
                                         }}
                                     >
-                                        200
+                                        {follower}
                                     </Text>
                                     <Text
                                         style={{
@@ -1390,7 +1384,7 @@ const ProfileOrganisation = ({ navigation, route }) => {
                     </View>
                 </View>
             </View>
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, top:-67 }}>
                 <TabView
                     navigationState={{ index, routes }}
                     renderScene={renderScene}

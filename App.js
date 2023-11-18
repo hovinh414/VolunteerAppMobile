@@ -20,7 +20,8 @@ import ChatDetail from './screens/Chat/ChatDetail'
 import DetailPost from './screens/Post/DetailPost'
 import ViewDetailImage from './screens/Post/ViewDetailImage'
 import ProfileUser from './screens/Profile/ProfileUser'
-
+import FeaturedArticle from './screens/Feed/FeaturedArticle'
+import NotificationScreen from './screens/Feed/NotificationScreen'
 const Stack = createNativeStackNavigator()
 
 SplashScreen.preventAutoHideAsync()
@@ -50,13 +51,6 @@ export default function App() {
         <SafeAreaProvider onLayout={onLayoutRootView}>
             <NavigationContainer>
                 <Stack.Navigator>
-                    <Stack.Screen
-                        name="Welcome"
-                        component={Welcome}
-                        options={{
-                            headerShown: false,
-                        }}
-                    />
                     <Stack.Screen
                         name="BottomTabNavigation"
                         component={BottomTabNavigation}
@@ -144,6 +138,20 @@ export default function App() {
                     <Stack.Screen
                         name="ProfileUser"
                         component={ProfileUser}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="FeaturedArticle"
+                        component={FeaturedArticle}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="NotificationScreen"
+                        component={NotificationScreen}
                         options={{
                             headerShown: false,
                         }}

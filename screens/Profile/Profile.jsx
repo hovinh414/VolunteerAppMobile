@@ -5,6 +5,8 @@ import {
     FlatList,
     ScrollView,
     TouchableOpacity,
+    Dimensions,
+    RefreshControl,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -18,23 +20,214 @@ import {
 } from '@expo/vector-icons'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
 import CustomViewInfo from '../../components/CustomViewInfo'
-import AsyncStoraged from '../../services/AsyncStoraged'
 import ImageAvata from '../../assets/hero2.jpg'
 import { Image } from 'expo-image'
-import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
-
+import AsyncStoraged from '../../services/AsyncStoraged'
+import axios from 'axios'
+import API_URL from '../../interfaces/config'
+import { useNavigation } from '@react-navigation/native'
+import { format } from 'date-fns'
 const cover = '../../assets/cover.jpg'
-const PostsRoute = () => (
-    <View
-        style={{
-            flex: 1,
-            paddingTop: 12,
-        }}
-    ></View>
-)
+const PostsRoute = () => {
+    const screenWidth = Dimensions.get('window').width
+    const [posts, setPosts] = useState([])
+    const [token, setToken] = useState('')
+    const [avatar, setAvatar] = useState(null)
+    const [type, setType] = useState(null)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [refreshing, setRefreshing] = useState(false)
+    const navigation = useNavigation()
+    useEffect(() => {
+        getToken()
+    }, [])
+
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
+    }
+    const onRefresh = () => {
+        setRefreshing(true)
+        setCurrentPage(1)
+        getPosts().then(() => {
+            setRefreshing(false)
+        })
+    }
+    const getPosts = async () => {
+        const config = {
+            headers: {
+                Authorization: token,
+            },
+        }
+
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/activity/join',
+                config
+            )
+
+            if (response.data.status === 'SUCCESS') {
+                setPosts(response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error get activity:', error)
+        }
+    }
+
+    useEffect(() => {
+        getPosts()
+    }, [token])
+    const viewDetailPost = async (_postId) => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        }
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/post/' + _postId,
+                config
+            )
+            if (response.data.status === 'SUCCESS') {
+                navigation.navigate('DetailPost', response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error:', error)
+        }
+    }
+    return (
+        <View>
+            {posts.length === 0 ? (
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+                        Chưa tham gia hoạt động nào
+                    </Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={posts}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
+                    renderItem={({ item, index }) => (
+                        <TouchableOpacity
+                            key={index}
+                            style={{
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                            activeOpacity={0.8}
+                            onPress={() => viewDetailPost(item._postId)}
+                        >
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    backgroundColor: '#F0F0F0',
+                                    width: screenWidth - 24,
+                                    height: 100,
+                                    marginHorizontal: 12,
+                                    marginTop: 15,
+                                    justifyContent: 'flex-start',
+                                    borderRadius: 15,
+                                    padding: 10,
+                                }}
+                            >
+                                <Image
+                                    source={item.media}
+                                    style={{
+                                        width: 80,
+                                        height: 80,
+                                        borderRadius: 15,
+                                    }}
+                                />
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        marginTop:10,
+                                        justifyContent: 'flex-start',
+                                        marginLeft: 12,
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontSize: 17,
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                marginLeft: 12,
+                                                marginTop: 15,
+                                                fontWeight: '700',
+                                                color: COLORS.primary,
+                                            }}
+                                        >
+                                            {item.ownerDisplayname}
+                                        </Text>
+                                    </Text>
+                                    <View
+                                        style={{
+                                            marginTop: 8,
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                        }}
+                                    >
+                                        <View
+                                            activeOpacity={0.8}
+                                            style={{
+                                                flexDirection: 'row',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                            }}
+                                        >
+                                            <Text
+                                                style={{
+                                                    color: COLORS.black,
+                                                    fontSize: 14,
+                                                }}
+                                            >
+                                                Ngày diễn ra:{' '}
+                                                <Text
+                                                    style={{
+                                                        color: COLORS.primary,
+                                                        fontSize: 14,
+                                                        fontWeight: 'bold',
+                                                    }}
+                                                >
+                                                    {
+                                                        (formattedDate = format(
+                                                            new Date(
+                                                                item.dateActivity
+                                                            ),
+                                                            'dd-MM-yyyy'
+                                                        ))
+                                                    }
+                                                </Text>
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                />
+            )}
+        </View>
+    )
+}
 
 const InfoRoute = ({ navigation }) => {
-
     const [address, setAddress] = useState('')
     const [email, setEmail] = useState('')
     const [phone, setPhone] = useState('')
@@ -49,14 +242,26 @@ const InfoRoute = ({ navigation }) => {
     }, [])
     return (
         <ScrollView style={{ flex: 1, marginHorizontal: 22 }}>
-            <View style={{paddingTop: 20 }}>
-                <CustomViewInfo value={address} icon={'location-outline'} height={70}/>
+            <View style={{ paddingTop: 20 }}>
+                <CustomViewInfo
+                    value={address}
+                    icon={'location-outline'}
+                    height={70}
+                />
             </View>
-            <View style={{paddingTop: 20 }}>
-                <CustomViewInfo value={email} icon={'mail-outline'} height={48}/>
+            <View style={{ paddingTop: 20 }}>
+                <CustomViewInfo
+                    value={email}
+                    icon={'mail-outline'}
+                    height={48}
+                />
             </View>
-            <View style={{paddingTop: 20 }}>
-                <CustomViewInfo value={phone} icon={'call-outline'} height={48}/>
+            <View style={{ paddingTop: 20 }}>
+                <CustomViewInfo
+                    value={phone}
+                    icon={'call-outline'}
+                    height={48}
+                />
             </View>
         </ScrollView>
     )
@@ -81,7 +286,7 @@ const Profile = ({ navigation, route }) => {
     const layout = useWindowDimensions()
     const [index, setIndex] = useState(0)
     const [routes] = useState([
-        { key: 'first', title: 'Chưa biết để cái gì', icon: 'home' },
+        { key: 'first', title: 'Hoạt động đã tham gia', icon: 'home' },
         { key: 'second', title: 'Thông tin', icon: 'user' },
     ])
 
@@ -119,48 +324,6 @@ const Profile = ({ navigation, route }) => {
 
         return unsubscribe
     }, [navigation])
-    const toastConfig = {
-        success: (props) => (
-            <BaseToast
-                {...props}
-                style={{ borderLeftColor: '#6dcf81' }}
-                text1Style={{
-                    fontSize: 18,
-                }}
-                text2Style={{
-                    fontSize: 16,
-                    color: '#696969',
-                }}
-            />
-        ),
-
-        error: (props) => (
-            <BaseToast
-                {...props}
-                style={{ borderLeftColor: '#FF0035' }}
-                text1Style={{
-                    fontSize: 18,
-                }}
-                text2Style={{
-                    fontSize: 16,
-                    color: '#696969',
-                }}
-            />
-        ),
-        warning: (props) => (
-            <BaseToast
-                {...props}
-                style={{ borderLeftColor: '#FFE600' }}
-                text1Style={{
-                    fontSize: 18,
-                }}
-                text2Style={{
-                    fontSize: 16,
-                    color: '#696969',
-                }}
-            />
-        ),
-    }
     return (
         <SafeAreaView
             style={{
@@ -173,7 +336,7 @@ const Profile = ({ navigation, route }) => {
                     style={{
                         width: '100%',
                         position: 'relative',
-                        height: '55%',
+                        height: 'auto',
                     }}
                 >
                     <Image
@@ -226,7 +389,9 @@ const Profile = ({ navigation, route }) => {
                                     borderRadius: 15,
                                     marginHorizontal: 10,
                                 }}
-                                onPress={() => navigation.navigate('EditProfile')}
+                                onPress={() =>
+                                    navigation.navigate('EditProfile')
+                                }
                             >
                                 <Text
                                     style={{
@@ -369,11 +534,11 @@ const Profile = ({ navigation, route }) => {
                     </View>
                 </View>
             </View>
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1 , top:-67 }}>
                 <View
                     style={{
                         flex: 1,
-                        marginHorizontal: 22,
+                        marginHorizontal: 12,
                     }}
                 >
                     <TabView

@@ -7,8 +7,8 @@ import {
     ScrollView,
     TouchableOpacity,
     TextInput,
-    Modal,
     RefreshControl,
+    Modal,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { styles } from './PostScreenStyle'
@@ -16,33 +16,34 @@ import CustomButton from '../../components/CustomButton'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import ImageAvata from '../../assets/hero2.jpg'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
-import { addYears, format, addDays, parse } from 'date-fns'
+import { addYears, format, addDays, parse, isAfter } from 'date-fns'
 import axios from 'axios'
-import { MaterialIcons } from '@expo/vector-icons'
+import { MaterialIcons, Ionicons } from '@expo/vector-icons'
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
 import { AntDesign } from '@expo/vector-icons'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
-
+import ModalLoading from '../../components/ModalLoading'
 const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
 const fundraising = '../../assets/fundraising.png'
 const empathy = '../../assets/empathy.png'
-const Create = () => {
+const Create = ({ navigation }) => {
     const [selectedImages, setSelectedImage] = useState([])
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
     const [address, setAddress] = useState('')
     const [token, setToken] = useState()
     const [exprirationDate, setExprirationDate] = useState('Chọn ngày')
+    const [dateActivity, setDateActivity] = useState('Chọn ngày')
     const [scope, setScope] = useState('public')
     const [content, setContent] = useState('')
     const [participants, setParticipants] = useState('')
     const [ButtonPress, setButtonPress] = useState('')
     const [showChoose, setShowChoose] = useState(false)
-
     const [openStartDatePicker, setOpenStartDatePicker] = useState(false)
+    const [openActiDatePicker, setOpenActiDatePicker] = useState(false)
     const currentDate = new Date()
     function handleChangeStartDate(propDate) {
         setStartedDate(propDate)
@@ -52,6 +53,9 @@ const Create = () => {
         setOpenStartDatePicker(!openStartDatePicker)
     }
 
+    const handleOnPressActiDate = () => {
+        setOpenActiDatePicker(!openActiDatePicker)
+    }
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
@@ -73,34 +77,53 @@ const Create = () => {
         success: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#6dcf81' }}
+                style={{
+                    borderLeftColor: '#379A4F',
+                    backgroundColor: '#379A4F',
+                    borderRadius: 12,
+                    width: '90%',
+                }}
                 text1Style={{
+                    color: '#fff',
                     fontSize: 18,
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={SuccessToast}
             />
         ),
 
         error: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FF0035' }}
+                style={{
+                    borderLeftColor: '#FF0035',
+                    backgroundColor: '#FF0035',
+                    borderRadius: 12,
+                    width: '90%',
+                }}
                 text1Style={{
                     fontSize: 18,
+                    color: '#fff',
                 }}
                 text2Style={{
                     fontSize: 16,
-                    color: '#696969',
+                    color: '#fff',
                 }}
+                renderLeadingIcon={ErrorToast}
             />
         ),
         warning: (props) => (
             <BaseToast
                 {...props}
-                style={{ borderLeftColor: '#FFE600' }}
+                style={{
+                    borderLeftColor: '#FFE600',
+                    backgroundColor: '#FFE600',
+                    borderRadius: 12,
+                    width: '90%',
+                }}
                 text1Style={{
                     fontSize: 18,
                 }}
@@ -108,8 +131,66 @@ const Create = () => {
                     fontSize: 16,
                     color: '#696969',
                 }}
+                renderLeadingIcon={WarningToast}
             />
         ),
+    }
+    const WarningToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="alert-circle-outline"
+                    size={35}
+                    color={COLORS.black}
+                />
+            </View>
+        )
+    }
+    const SuccessToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="checkmark-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
+    }
+    const ErrorToast = () => {
+        // Your component logic here
+
+        return (
+            <View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft: 12,
+                }}
+            >
+                <Ionicons
+                    name="close-circle-outline"
+                    size={35}
+                    color={'#fff'}
+                />
+            </View>
+        )
     }
     const handleImageSelection = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -119,7 +200,6 @@ const Create = () => {
             quality: 1,
         })
         delete result.cancelled
-        console.log(result.assets)
         if (!result.canceled) {
             if (!selectedImages) {
                 setSelectedImage(result.assets)
@@ -155,13 +235,14 @@ const Create = () => {
                 name: images.fileName,
             })
         })
+
         formData.append('exprirationDate', exprirationDate)
+        formData.append('dateActivity', dateActivity)
         formData.append('scope', scope)
         formData.append('content', content)
         formData.append('participants', participants)
         formData.append('type', _type)
         setButtonPress(true)
-
         if (
             selectedImages.length === 0 ||
             !content ||
@@ -172,6 +253,28 @@ const Create = () => {
                 type: 'warning',
                 text1: 'Cảnh báo',
                 text2: 'Nhập đầy đủ thông tin bao gồm ảnh!',
+                visibilityTime: 2500,
+            })
+            setButtonPress(false)
+            return
+        }
+        const date1 = exprirationDate
+        const date2 = format(
+            parse(dateActivity, 'MM-dd-yyyy', new Date()),
+            'dd-MM-yyyy'
+        )
+        const [day1, month1, year1] = date1.split('-').map(Number)
+        const [day2, month2, year2] = date2.split('-').map(Number)
+
+        const dateOne = new Date(year1, month1 - 1, day1)
+        const dateTwo = new Date(year2, month2 - 1, day2)
+        const timeDiff = dateOne.getTime() - dateTwo.getTime()
+        const daysDiff = timeDiff / (1000 * 3600 * 24)
+        if (daysDiff > 0) {
+            Toast.show({
+                type: 'warning',
+                text1: 'Cảnh báo',
+                text2: 'Ngày diễn ra phải sau ngày hết hạn!',
                 visibilityTime: 2500,
             })
             setButtonPress(false)
@@ -191,6 +294,12 @@ const Create = () => {
                         text1: 'Thành công',
                         text2: 'Đăng bài thành công',
                         visibilityTime: 2500,
+                        autoHide: true,
+                        onHide: () => {
+                            navigation.navigate('BottomTabNavigation', {
+                                name: 'Feed',
+                            })
+                        },
                     })
                     resetForm()
                     setButtonPress(false)
@@ -216,8 +325,9 @@ const Create = () => {
                 backgroundColor: '#fff',
                 paddingTop: 15,
             }}
-            behavior="padding"
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
+            <ModalLoading visible={ButtonPress} />
             <Modal
                 visible={showChoose}
                 animationType="fade"
@@ -234,8 +344,6 @@ const Create = () => {
                 >
                     <View
                         style={{
-                            width: 350,
-                            height: 250,
                             backgroundColor: '#ffffff',
                             borderRadius: 25,
                             alignItems: 'center',
@@ -248,92 +356,83 @@ const Create = () => {
                             style={{
                                 position: 'absolute',
                                 top: 10,
-                                right: 10,
+                                right: 15,
                             }}
                             onPress={() => setShowChoose(false)}
                         >
-                            <AntDesign name="close" size={24} />
+                            <AntDesign name="close" size={30} />
                         </TouchableOpacity>
-                        <Text
-                            style={{
-                                fontWeight: 'bold',
-                                fontSize: 18,
-                            }}
-                        >
-                            Hình thức đăng bài
-                        </Text>
+                        {/* <View style={{ borderBottomWidth: 1 }}>
+                            <Text
+                                style={{
+                                    fontWeight: 'bold',
+                                    fontSize: 18,
+                                }}
+                            >
+                                Hình thức đăng bài
+                            </Text>
+                        </View> */}
                         <View
                             style={{
-                                flexDirection: 'row',
+                                flexDirection: 'column',
                                 justifyContent: 'center',
                             }}
                         >
                             <TouchableOpacity
                                 style={{
-                                    backgroundColor: COLORS.white,
                                     borderRadius: 15,
-                                    margin: 10,
+                                    marginHorizontal: 10,
+                                    marginTop: 20,
+                                    flexDirection: 'row',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
+                                    borderBottomWidth: 1, // Add border bottom here
+                                    paddingBottom: 10, // Add padding bottom to separate text from the border
                                 }}
                                 onPress={() => (
                                     uploadPost('activity'), setShowChoose(false)
                                 )}
                             >
-                                <Image
-                                    source={require(empathy)}
-                                    style={{
-                                        width: 100,
-                                        height: 100,
-                                        margin: 5,
-                                    }}
+                                <Ionicons
+                                    name="person-add-outline"
+                                    size={35}
+                                    color={COLORS.black}
                                 />
                                 <Text
                                     style={{
                                         fontSize: 13,
                                         fontWeight: 'bold',
+                                        marginLeft: 10,
                                     }}
                                 >
-                                    TÌNH NGUYỆN
+                                    HOẠT ĐỘNG TÌNH NGUYỆN
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={{
-                                    backgroundColor: COLORS.white,
                                     borderRadius: 15,
                                     margin: 10,
+                                    flexDirection: 'row',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
                                 }}
                                 onPress={() => (
                                     uploadPost('fund'), setShowChoose(false)
                                 )}
                             >
-                                <Image
-                                    source={require(fundraising)}
-                                    style={{
-                                        width: 100,
-                                        height: 100,
-                                        margin: 5,
-                                    }}
+                                <Ionicons
+                                    name="wallet-outline"
+                                    size={35}
+                                    color={COLORS.black}
                                 />
                                 <Text
                                     style={{
+                                        marginLeft: 10,
                                         fontSize: 13,
                                         fontWeight: 'bold',
                                     }}
                                 >
-                                    GÂY QUỸ
+                                    HOẠT ĐỘNG GÂY QUỸ
                                 </Text>
                             </TouchableOpacity>
-                        </View>
-                        <View
-                            style={{
-                                marginTop: 15,
-                                width: 200,
-                            }}
-                        >
-                            {/* <CustomButton title={title} onPress={onPress} /> */}
                         </View>
                     </View>
                 </View>
@@ -383,7 +482,7 @@ const Create = () => {
                     </View>
 
                     <View style={{ paddingHorizontal: 10 }}>
-                        <View style={styles.content}>
+                        <View>
                             <Text style={styles.headerInput}>
                                 Nhập nội dung bài viết:
                             </Text>
@@ -401,16 +500,6 @@ const Create = () => {
                                 <Text style={styles.headerInput}>
                                     Số tình nguyện viên:
                                 </Text>
-                                <Text
-                                    style={{
-                                        paddingVertical: 10,
-                                        marginHorizontal: 10,
-                                        fontSize: 18,
-                                        marginLeft: 50,
-                                    }}
-                                >
-                                    Ngày hết hạn:
-                                </Text>
                             </View>
                             <View style={{ flex: 1, flexDirection: 'row' }}>
                                 <TextInput
@@ -423,13 +512,18 @@ const Create = () => {
                                     placeholder="100"
                                     keyboardType="numeric"
                                 />
+                            </View>
+                        </View>
+                        <View style={styles.content}>
+                            <View style={{ flex: 1, flexDirection: 'column' }}>
+                                <Text style={styles.headerInput}>
+                                    Ngày hết hạn:
+                                </Text>
                                 <KeyboardAvoidingView
                                     behavior={
                                         Platform.OS == 'ios' ? 'padding' : ''
                                     }
                                     style={{
-                                        width: '100%',
-                                        height: '100%',
                                         backgroundColor: '#fff',
                                     }}
                                 >
@@ -547,6 +641,174 @@ const Create = () => {
                                     </View>
                                 </KeyboardAvoidingView>
                             </View>
+                            <View style={{ flex: 1, flexDirection: 'column' }}>
+                                <Text style={styles.headerInput}>
+                                    Ngày diễn ra:
+                                </Text>
+                                <KeyboardAvoidingView
+                                    behavior={
+                                        Platform.OS == 'ios' ? 'padding' : ''
+                                    }
+                                    style={{
+                                        backgroundColor: '#fff',
+                                    }}
+                                >
+                                    <View>
+                                        <View>
+                                            <TouchableOpacity
+                                                style={styles.inputBtn}
+                                                onPress={handleOnPressActiDate}
+                                            >
+                                                {dateActivity !==
+                                                'Chọn ngày' ? (
+                                                    <Text
+                                                        style={{
+                                                            flex: 1,
+                                                            fontSize: 16,
+                                                            marginLeft: 10,
+                                                            paddingVertical: 13,
+                                                            width: 29,
+                                                            color: '#696969',
+                                                        }}
+                                                    >
+                                                        {format(
+                                                            parse(
+                                                                dateActivity,
+                                                                'MM-dd-yyyy',
+                                                                new Date()
+                                                            ),
+                                                            'dd-MM-yyyy'
+                                                        )}
+                                                    </Text>
+                                                ) : (
+                                                    <Text
+                                                        style={{
+                                                            flex: 1,
+                                                            fontSize: 16,
+                                                            marginLeft: 10,
+                                                            paddingVertical: 13,
+                                                            width: 29,
+                                                            color: '#696969',
+                                                        }}
+                                                    >
+                                                        {dateActivity}
+                                                    </Text>
+                                                )}
+
+                                                <View style={styles.iconStyle}>
+                                                    <Image
+                                                        style={styles.icon}
+                                                        source={require('../../assets/calendar.png')}
+                                                    />
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+
+                                        {/* Create modal for date picker */}
+                                        <Modal
+                                            animationType="slide"
+                                            transparent={true}
+                                            visible={openActiDatePicker}
+                                        >
+                                            <View style={styles.centeredView}>
+                                                <View style={styles.modalView}>
+                                                    <DatePicker
+                                                        mode="calendar"
+                                                        minimumDate={format(
+                                                            addDays(
+                                                                currentDate,
+                                                                1
+                                                            ),
+                                                            'yyyy-MM-dd'
+                                                        )}
+                                                        maximumDate={format(
+                                                            addYears(
+                                                                currentDate,
+                                                                1
+                                                            ),
+                                                            'yyyy-MM-dd'
+                                                        )}
+                                                        onDateChanged={
+                                                            handleChangeStartDate
+                                                        }
+                                                        onSelectedChange={(
+                                                            date
+                                                        ) =>
+                                                            setDateActivity(
+                                                                format(
+                                                                    parse(
+                                                                        date,
+                                                                        'yyyy/MM/dd',
+                                                                        new Date()
+                                                                    ),
+                                                                    'MM-dd-yyyy'
+                                                                )
+                                                            )
+                                                        }
+                                                        options={{
+                                                            backgroundColor:
+                                                                '#FFF',
+                                                            textHeaderColor:
+                                                                COLORS.primary,
+                                                            textDefaultColor:
+                                                                COLORS.black,
+                                                            selectedTextColor:
+                                                                '#fff',
+                                                            mainColor:
+                                                                COLORS.primary,
+                                                            textSecondaryColor:
+                                                                '#FFFFFF',
+                                                            borderColor:
+                                                                'rgba(122, 146, 165, 0.1)',
+                                                        }}
+                                                    />
+
+                                                    <TouchableOpacity
+                                                        style={{
+                                                            padding: 10,
+                                                            borderRadius: 16,
+                                                            backgroundColor:
+                                                                COLORS.primary,
+                                                        }}
+                                                        onPress={
+                                                            handleOnPressActiDate
+                                                        }
+                                                    >
+                                                        <Text
+                                                            style={{
+                                                                color: '#fff',
+                                                                fontSize: 16,
+                                                                fontFamily:
+                                                                    'regular',
+                                                            }}
+                                                        >
+                                                            Đóng
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        </Modal>
+                                    </View>
+                                </KeyboardAvoidingView>
+                            </View>
+                        </View>
+                        <View
+                            style={{
+                                marginTop: 5,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    fontStyle: 'italic',
+                                    color: COLORS.primary,
+                                }}
+                            >
+                                (* Lưu ý: ngày diễn ra phải sau ngày hết hạn
+                                đăng ký)
+                            </Text>
                         </View>
                         <Text style={styles.headerInput}>
                             Hình ảnh bài viết:
