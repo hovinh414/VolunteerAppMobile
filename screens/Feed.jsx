@@ -172,8 +172,9 @@ const Feed = ({ navigation, route }) => {
             } catch (error) {
                 setIsLoading(false)
                 Toast.show({
-                    type: 'warning',
-                    text1: 'Bạn đã coi hết bài viết!',
+                    type: 'noPost',
+                    text1: 'Bạn đã xem hết rồi',
+                    text2: 'Bạn đã xem tất cả bài viết mới nhất',
                     visibilityTime: 2500,
                 })
                 console.log('API Error get more post:', error)
@@ -620,8 +621,8 @@ const Feed = ({ navigation, route }) => {
             <BaseToast
                 {...props}
                 style={{
-                    borderLeftColor: '#FFE600',
-                    backgroundColor: '#FFE600',
+                    borderLeftColor: '#E0E0E0',
+                    backgroundColor: '#E0E0E0',
                     borderRadius: 12,
                 }}
                 text1Style={{
@@ -633,6 +634,76 @@ const Feed = ({ navigation, route }) => {
                 }}
                 renderLeadingIcon={WarningToast}
             />
+        ),
+        noPost: ({ text1, text2, email }) => (
+            <View
+                style={{
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    width: '100%',
+                    height: 'auto',
+                    borderLeftColor: '#E0E0E0',
+                    backgroundColor: '#E0E0E0',
+                    borderRadius: 12,
+                    padding: 10,
+                    justifyContent: 'center',
+                }}
+            >
+                <View
+                    style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: 5,
+                    }}
+                >
+                    <Ionicons
+                        name="checkmark-circle-outline"
+                        size={70}
+                        color={COLORS.black}
+                    />
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: 5,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontSize: 18,
+                            fontWeight: '700',
+                            color: COLORS.black,
+                        }}
+                    >
+                        {text1}
+                    </Text>
+                    <Text
+                        style={{
+                            fontSize: 16,
+                            color: COLORS.black,
+                            marginTop: 5,
+                            marginRight: 5,
+                        }}
+                    >
+                        {text2}
+                    </Text>
+                    <TouchableOpacity onPress={onRefreshPost}>
+                        <Text
+                            style={{
+                                fontSize: 16,
+                                color: COLORS.blue,
+                                fontWeight:'bold',
+                                marginTop: 5,
+                                marginRight: 5,
+                            }}
+                        >
+                            Làm mới lại trang chủ
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
         ),
     }
     const WarningToast = () => {
@@ -665,9 +736,13 @@ const Feed = ({ navigation, route }) => {
             </TouchableOpacity>
             <TouchableOpacity
                 style={{ position: 'absolute', right: 48, top: 55 }}
-                onPress={() => navigation.navigate('Chat')}
+                onPress={() => navigation.navigate('NotificationScreen')}
             >
-                <Ionicons name="notifications-outline" size={26} color={COLORS.black} />
+                <Ionicons
+                    name="notifications-outline"
+                    size={26}
+                    color={COLORS.black}
+                />
             </TouchableOpacity>
             <View
                 style={{
@@ -675,8 +750,8 @@ const Feed = ({ navigation, route }) => {
                     top: 50,
                     left: 12,
                     width: '55%',
-                    height: '23%',
-                    zIndex: 333,
+                    height: '10%',
+                    zIndex: 5,
                 }}
             >
                 <MenuProvider skipInstanceCheck>
@@ -727,7 +802,7 @@ const Feed = ({ navigation, route }) => {
             </View>
             <View
                 style={{
-                    zIndex: 2,
+                    zIndex: 10,
                 }}
             >
                 <Toast config={toastConfig} />

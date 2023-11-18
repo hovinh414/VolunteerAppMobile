@@ -335,7 +335,7 @@ const EditProfile = ({ navigation,route }) => {
                 backgroundColor: '#fff',
                 paddingTop: 65,
             }}
-            behavior="padding"
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
             <View
                 style={{

@@ -303,7 +303,7 @@ const ChangeAddress = () => {
                 backgroundColor:'#fff',
                 height:1000,
             }}
-            behavior="padding"
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
              <View
                 style={{

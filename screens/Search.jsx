@@ -1,25 +1,89 @@
-import React, { useState, useEffect } from 'react'
 import {
     View,
     Text,
-    Dimensions,
-    TouchableOpacity,
+    useWindowDimensions,
     FlatList,
-    KeyboardAvoidingView,
+    ScrollView,
+    TouchableOpacity,
+    Dimensions,
     RefreshControl,
-    SafeAreaView,
-    TextInput, // Import TextInput
+    TextInput,
 } from 'react-native'
-
-import { MaterialIcons } from '@expo/vector-icons'
-import { COLORS, FONTS } from '../../constants'
-import AsyncStoraged from '../../services/AsyncStoraged'
-import axios from 'axios'
-import API_URL from '../../interfaces/config'
+import React, { useState, useEffect } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Progress from 'react-native-progress'
+import { COLORS, FONTS, SIZES, images } from '../constants'
+import {
+    Feather,
+    AntDesign,
+    Ionicons,
+    MaterialIcons,
+    MaterialCommunityIcons,
+} from '@expo/vector-icons'
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
+import CustomViewInfo from '../components/CustomViewInfo'
+import ImageAvata from '../assets/hero2.jpg'
 import { Image } from 'expo-image'
-const loading = '../../assets/loading.gif'
-function FeaturedArticle({ navigation }) {
+import AsyncStoraged from '../services/AsyncStoraged'
+import axios from 'axios'
+import API_URL from '../interfaces/config'
+import { useNavigation } from '@react-navigation/native'
+import { format } from 'date-fns'
+const search = '../assets/search.png'
+const loading = '../assets/loading.gif'
+const AccountSearch = () => {
+    return (
+        <View>
+            <View style={{ marginTop: 25 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 15 }}>
+                    Tìm kiếm gần đây
+                </Text>
+            </View>
+            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <View
+                    style={{
+                        marginTop: 25,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: 210,
+                        height: 210,
+                        backgroundColor: '#F0F0F0',
+                        borderRadius: 105,
+                    }}
+                >
+                    <Image
+                        source={require(search)}
+                        style={{ width: 180, height: 180 }}
+                    />
+                </View>
+            </View>
+            <View
+                style={{
+                    marginTop: 25,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+            >
+                <Text style={{ fontSize: 15, color: '#696969' }}>
+                    Không có tìm kiếm nào gần đây
+                </Text>
+            </View>
+        </View>
+    )
+}
+
+const PostSearch = ({ navigation }) => {
+    const labels = [
+        { id: '1', text: 'Người mù quáng trong tình yêu' },
+        { id: '2', text: 'Trẻ em' },
+        { id: '3', text: 'Người khuyết tật' },
+        { id: '4', text: 'Người già' },
+        { id: '5', text: 'Người nghèo' },
+        { id: '6', text: 'Bệnh hiểm nghèo' },
+        { id: '7', text: 'Thiên tai' },
+        { id: '8', text: 'Giáo dục' },
+        { id: '9', text: 'Cứu trợ khẩn cấp' },
+    ]
     const screenWidth = Dimensions.get('window').width
 
     const [posts, setPosts] = useState([])
@@ -32,13 +96,6 @@ function FeaturedArticle({ navigation }) {
     const [refreshing, setRefreshing] = useState(false)
     const [showSearchInput, setShowSearchInput] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
-            onRefreshPost()
-        })
-
-        return unsubscribe
-    }, [navigation])
 
     useEffect(() => {
         getToken()
@@ -138,9 +195,9 @@ function FeaturedArticle({ navigation }) {
                 }
             } catch (error) {
                 setIsLoading(false)
-                
+
                 console.log('API Error:', error)
-                return;
+                return
             } finally {
                 setIsFetchingNextPage(false)
             }
@@ -166,10 +223,6 @@ function FeaturedArticle({ navigation }) {
             console.log('API Error:', error)
         }
     }
-
-    const toggleSearchInput = () => {
-        setShowSearchInput(!showSearchInput)
-    }
     const RenderLoader = () => {
         return (
             <View>
@@ -190,112 +243,35 @@ function FeaturedArticle({ navigation }) {
             </View>
         )
     }
-    return (
-        <KeyboardAvoidingView
-            KeyboardAvoidingView
-            style={{
-                flex: 1,
-                backgroundColor: '#fff',
-                paddingHorizontal: 13,
-                paddingTop: 55,
-                paddingBottom: 30,
-            }}
-            behavior="height"
-            enabled
-        >
-            <View
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingTop: 7,
-                    justifyContent: 'space-between',
-                }}
-            >
-                <TouchableOpacity
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        paddingVertical: 7,
-                    }}
-                    onPress={() => {
-                        showSearchInput
-                            ? setShowSearchInput(false)
-                            : navigation.goBack()
-                    }}
-                >
-                    {showSearchInput ? (
-                        <MaterialIcons
-                            name="keyboard-arrow-left"
-                            size={30}
-                            color={COLORS.black}
-                        />
-                    ) : (
-                        <MaterialIcons
-                            name="keyboard-arrow-left"
-                            size={30}
-                            color={COLORS.black}
-                        />
-                    )}
-                    {showSearchInput ? null : (
-                        <Text
-                            style={{
-                                ...FONTS.body5,
-                                fontSize: 16,
-                                marginLeft: 10,
-                            }}
-                        >
-                            Chiến dịch nổi bật
-                        </Text>
-                    )}
-                </TouchableOpacity>
 
-                {showSearchInput ? (
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            borderRadius: 10,
-                            borderColor: '#cccc',
-                            borderWidth: 1,
-                            marginLeft: 15,
-                            marginRight: 8,
-                            flex: 1,
-                            padding: 7,
-                            alignItems: 'center',
-                        }}
-                    >
-                        <MaterialIcons
-                            name="search"
-                            size={30}
-                            color={'#cccc'}
-                            style={{ paddingLeft: 10, borderRadius: 30 }}
-                        />
-                        <TextInput
-                            placeholder="Nhập từ khóa tìm kiếm"
-                            style={{
-                                marginLeft: 10,
-                            }}
-                            // Xử lý sự kiện nhập liệu, tìm kiếm, vv.
-                        />
-                    </View>
-                ) : (
-                    <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={toggleSearchInput}
-                    >
-                        <MaterialIcons
-                            name="search"
-                            size={30}
-                            color={COLORS.black}
-                            style={{ marginRight: 8 }}
-                        />
-                    </TouchableOpacity>
-                )}
+    const renderItem = ({ item }) => (
+        <TouchableOpacity
+            style={{
+                backgroundColor: '#F0F0F0',
+                padding: 10,
+                borderRadius: 15,
+                marginRight: 10,
+                marginTop: 25,
+            }}
+        >
+            <Text>{item.text}</Text>
+        </TouchableOpacity>
+    )
+    return (
+        <View>
+            {/* Sử dụng FlatList để hiển thị danh sách */}
+            <View style={{marginBottom:10}}>
+                <FlatList
+                    showsHorizontalScrollIndicator={false}
+                    data={labels}
+                    horizontal={true}
+                    renderItem={renderItem}
+                />
             </View>
             <FlatList
                 onEndReached={fetchNextPage}
                 onEndReachedThreshold={0.4}
-                showsVerticalScrollIndicator= {false}
+                showsVerticalScrollIndicator={false}
                 data={posts}
                 refreshControl={
                     <RefreshControl
@@ -480,8 +456,109 @@ function FeaturedArticle({ navigation }) {
                     </TouchableOpacity>
                 )}
             />
-        </KeyboardAvoidingView>
+        </View>
     )
 }
 
-export default FeaturedArticle
+const renderScene = SceneMap({
+    first: AccountSearch,
+    second: PostSearch,
+})
+const Search = ({ navigation, route }) => {
+    const layout = useWindowDimensions()
+    const [index, setIndex] = useState(0)
+    const [routes] = useState([
+        { key: 'first', title: 'Tài khoản', icon: 'home' },
+        { key: 'second', title: 'Hoạt động', icon: 'user' },
+    ])
+
+    const renderTabBar = (props) => (
+        <TabBar
+            {...props}
+            indicatorStyle={{
+                backgroundColor: COLORS.primary,
+            }}
+            style={{
+                backgroundColor: '#fff',
+            }}
+            renderLabel={({ focused, route }) => (
+                <Text
+                    style={[
+                        {
+                            color: focused ? COLORS.primary : 'gray',
+                            fontSize: 15,
+                            fontWeight: 'bold',
+                        },
+                    ]}
+                >
+                    {route.title}
+                </Text>
+            )}
+        />
+    )
+
+    return (
+        <SafeAreaView
+            style={{
+                flex: 1,
+                backgroundColor: '#fff',
+            }}
+        >
+            <View style={{ padding: 12 }}>
+                <View
+                    style={{
+                        width: '100%',
+                        position: 'relative',
+                        height: 50,
+                    }}
+                >
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            borderRadius: 10,
+                            borderColor: '#cccc',
+                            borderWidth: 1,
+                            marginLeft: 15,
+                            marginRight: 8,
+                            flex: 1,
+                            padding: 7,
+                            alignItems: 'center',
+                        }}
+                    >
+                        <MaterialIcons
+                            name="search"
+                            size={30}
+                            color={'#cccc'}
+                            style={{ paddingLeft: 10, borderRadius: 30 }}
+                        />
+                        <TextInput
+                            placeholder="Nhập từ khóa tìm kiếm"
+                            style={{
+                                marginLeft: 10,
+                                height: 40,
+                            }}
+                        />
+                    </View>
+                </View>
+            </View>
+            <View style={{ flex: 1 }}>
+                <View
+                    style={{
+                        flex: 1,
+                        marginHorizontal: 12,
+                    }}
+                >
+                    <TabView
+                        navigationState={{ index, routes }}
+                        renderScene={renderScene}
+                        onIndexChange={setIndex}
+                        initialLayout={{ width: layout.width }}
+                        renderTabBar={renderTabBar}
+                    />
+                </View>
+            </View>
+        </SafeAreaView>
+    )
+}
+
+export default Search

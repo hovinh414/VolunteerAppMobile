@@ -7,8 +7,8 @@ import {
     ScrollView,
     TouchableOpacity,
     TextInput,
-    Modal,
     RefreshControl,
+    Modal,
 } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { styles } from './PostScreenStyle'
@@ -24,7 +24,7 @@ import { AntDesign } from '@expo/vector-icons'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
-
+import ModalLoading from '../../components/ModalLoading'
 const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
 const fundraising = '../../assets/fundraising.png'
@@ -200,7 +200,6 @@ const Create = ({ navigation }) => {
             quality: 1,
         })
         delete result.cancelled
-        console.log(result.assets)
         if (!result.canceled) {
             if (!selectedImages) {
                 setSelectedImage(result.assets)
@@ -326,8 +325,9 @@ const Create = ({ navigation }) => {
                 backgroundColor: '#fff',
                 paddingTop: 15,
             }}
-            behavior="padding"
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
+            <ModalLoading visible={ButtonPress} />
             <Modal
                 visible={showChoose}
                 animationType="fade"
@@ -344,8 +344,6 @@ const Create = ({ navigation }) => {
                 >
                     <View
                         style={{
-                            width: 350,
-                            height: 250,
                             backgroundColor: '#ffffff',
                             borderRadius: 25,
                             alignItems: 'center',
@@ -358,92 +356,83 @@ const Create = ({ navigation }) => {
                             style={{
                                 position: 'absolute',
                                 top: 10,
-                                right: 10,
+                                right: 15,
                             }}
                             onPress={() => setShowChoose(false)}
                         >
-                            <AntDesign name="close" size={24} />
+                            <AntDesign name="close" size={30} />
                         </TouchableOpacity>
-                        <Text
-                            style={{
-                                fontWeight: 'bold',
-                                fontSize: 18,
-                            }}
-                        >
-                            Hình thức đăng bài
-                        </Text>
+                        {/* <View style={{ borderBottomWidth: 1 }}>
+                            <Text
+                                style={{
+                                    fontWeight: 'bold',
+                                    fontSize: 18,
+                                }}
+                            >
+                                Hình thức đăng bài
+                            </Text>
+                        </View> */}
                         <View
                             style={{
-                                flexDirection: 'row',
+                                flexDirection: 'column',
                                 justifyContent: 'center',
                             }}
                         >
                             <TouchableOpacity
                                 style={{
-                                    backgroundColor: COLORS.white,
                                     borderRadius: 15,
-                                    margin: 10,
+                                    marginHorizontal: 10,
+                                    marginTop: 20,
+                                    flexDirection: 'row',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
+                                    borderBottomWidth: 1, // Add border bottom here
+                                    paddingBottom: 10, // Add padding bottom to separate text from the border
                                 }}
                                 onPress={() => (
                                     uploadPost('activity'), setShowChoose(false)
                                 )}
                             >
-                                <Image
-                                    source={require(empathy)}
-                                    style={{
-                                        width: 100,
-                                        height: 100,
-                                        margin: 5,
-                                    }}
+                                <Ionicons
+                                    name="person-add-outline"
+                                    size={35}
+                                    color={COLORS.black}
                                 />
                                 <Text
                                     style={{
                                         fontSize: 13,
                                         fontWeight: 'bold',
+                                        marginLeft: 10,
                                     }}
                                 >
-                                    TÌNH NGUYỆN
+                                    HOẠT ĐỘNG TÌNH NGUYỆN
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={{
-                                    backgroundColor: COLORS.white,
                                     borderRadius: 15,
                                     margin: 10,
+                                    flexDirection: 'row',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
                                 }}
                                 onPress={() => (
                                     uploadPost('fund'), setShowChoose(false)
                                 )}
                             >
-                                <Image
-                                    source={require(fundraising)}
-                                    style={{
-                                        width: 100,
-                                        height: 100,
-                                        margin: 5,
-                                    }}
+                                <Ionicons
+                                    name="wallet-outline"
+                                    size={35}
+                                    color={COLORS.black}
                                 />
                                 <Text
                                     style={{
+                                        marginLeft: 10,
                                         fontSize: 13,
                                         fontWeight: 'bold',
                                     }}
                                 >
-                                    GÂY QUỸ
+                                    HOẠT ĐỘNG GÂY QUỸ
                                 </Text>
                             </TouchableOpacity>
-                        </View>
-                        <View
-                            style={{
-                                marginTop: 15,
-                                width: 200,
-                            }}
-                        >
-                            {/* <CustomButton title={title} onPress={onPress} /> */}
                         </View>
                     </View>
                 </View>

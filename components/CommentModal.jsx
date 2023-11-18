@@ -167,11 +167,12 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
     }
     const renderCommentItem = ({ item }) => (
         <View style={{ paddingHorizontal: 15 }}>
-            <View
+            {!item.parentId ? (
+                <View
                 style={{
                     flexDirection: 'row',
                     marginTop: 18,
-                    marginLeft: item.level * 50 + 20 || 0,
+                    marginLeft: 10,
                 }}
             >
                 <Image
@@ -202,6 +203,41 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
                     </TouchableOpacity>
                 </View>
             </View>
+            ) : (<View
+                style={{
+                    flexDirection: 'row',
+                    marginTop: 18,
+                    marginLeft: 40,
+                }}
+            >
+                <Image
+                    source={item.ownerAvatar}
+                    style={{ width: 30, height: 30, borderRadius: 20 }}
+                />
+                <View
+                    style={{
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        marginLeft: 10,
+                    }}
+                >
+                    <Text style={{ fontWeight: '800', marginBottom: 3, fontSize:13 }}>
+                        {item.ownerDisplayname}
+                    </Text>
+                    <Text style={{ color: '#696969' }}>{item.content}</Text>
+                    <TouchableOpacity
+                        onPress={() => {
+                            setParentId(item._id)
+                            handleButtonClick()
+                        }}
+                        style={{ marginTop: 5 }}
+                    >
+                        <Text style={{ color: '#696969', fontWeight: '500' }}>
+                            Trả lời
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>)}
 
             {/* Render nested replies */}
             {item.replies && item.replies.length > 0 && (

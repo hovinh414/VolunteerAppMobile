@@ -1,5 +1,5 @@
 const API_URL = 'http://192.168.9.10:3000/api/v1';
-//192.168.9.3
+//192.168.9.10
 //172.20.10.6
 const SOCKET_URL = 'http://localhost:3200';
 

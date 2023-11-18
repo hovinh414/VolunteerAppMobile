@@ -154,14 +154,14 @@ const PostsRoute = () => {
                                 <View
                                     style={{
                                         flexDirection: 'column',
-                                        justifyContent: 'center',
+                                        marginTop:10,
+                                        justifyContent: 'flex-start',
                                         marginLeft: 12,
                                     }}
                                 >
                                     <Text
                                         style={{
-                                            marginTop: 15,
-                                            fontSize: 15,
+                                            fontSize: 17,
                                         }}
                                     >
                                         <Text
@@ -216,6 +216,7 @@ const PostsRoute = () => {
                                             </Text>
                                         </View>
                                     </View>
+                                    
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -335,7 +336,7 @@ const Profile = ({ navigation, route }) => {
                     style={{
                         width: '100%',
                         position: 'relative',
-                        height: '55%',
+                        height: 'auto',
                     }}
                 >
                     <Image
@@ -533,7 +534,7 @@ const Profile = ({ navigation, route }) => {
                     </View>
                 </View>
             </View>
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1 , top:-67 }}>
                 <View
                     style={{
                         flex: 1,

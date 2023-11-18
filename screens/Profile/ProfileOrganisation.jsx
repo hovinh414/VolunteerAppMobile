@@ -1122,7 +1122,7 @@ const ProfileOrganisation = ({ navigation, route }) => {
                     <View
                         style={{
                             width: '100%',
-                            height: '55%',
+                            height: 'auto',
                             position: 'relative',
                         }}
                     >
@@ -1384,7 +1384,7 @@ const ProfileOrganisation = ({ navigation, route }) => {
                     </View>
                 </View>
             </View>
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, top:-67 }}>
                 <TabView
                     navigationState={{ index, routes }}
                     renderScene={renderScene}

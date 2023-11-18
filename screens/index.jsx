@@ -4,7 +4,7 @@ import Profile from './Profile/Profile'
 import ProfileOrganisation from './Profile/ProfileOrganisation'
 import Notifications from './Notifications'
 import Welcome from './Welcome'
-import ChatTest from './ChatTest'
+import Search from './Search'
 import LoginScreen from './Login/LoginScreen'
 import SignupType from './Signup/SignType'
 import Signup from './Signup/Signup'
@@ -17,10 +17,11 @@ import ChatDetail from './Chat/ChatDetail'
 import DetailPost from './Post/DetailPost'
 import ViewDetailImage from './Post/ViewDetailImage'
 import ProfileUser from './Profile/ProfileUser'
+import NotificationScreen from './Feed/NotificationScreen'
 
 
 export { Feed, Create, Profile, Notifications, 
     Welcome, Chat, LoginScreen, Signup, 
     SignupType, SignupOrganisation, EditProfile, 
     Settings, ChangePassword, ProfileOrganisation, 
-    ChatTest, ChatDetail, DetailPost, ViewDetailImage, ProfileUser }
+    Search, ChatDetail, DetailPost, ViewDetailImage, ProfileUser, NotificationScreen }

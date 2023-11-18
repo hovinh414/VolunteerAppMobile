@@ -414,7 +414,9 @@ const DetailPost = ({ navigation, route }) => {
                             activeOpacity={1}
                             dotColor={COLORS.primary}
                             inactiveDotColor={COLORS.white}
-                            sliderBoxHeight={300}
+                            sliderBoxHeight={250}
+                            resizeMode={'contain'}
+                            autoplay
                             dotStyle={{ width: 7, height: 7 }}
                         />
                     </View>
