@@ -192,19 +192,25 @@ const LoginScreen = ({ navigation }) => {
                     password,
                 },
             })
-
-            if (
-                res.data.status === 'SUCCESS' &&
-                res.data.data.accessToken !== null
-            ) {
+            if (res.data.status === 'SUCCESS') {
                 if (!res.data.data.userResult) {
                     AsyncStoraged.storeData(res.data.data.orgResult)
+                    // AsyncStoraged.setIsActive(res.data.data.orgResult.isActiveOrganization)
+                    // AsyncStoraged.setFollower(res.data.data.orgResult.follower)
                 } else {
                     AsyncStoraged.storeData(res.data.data.userResult)
                 }
 
                 AsyncStoraged.setToken(res.data.data.refreshToken)
-                navigation.push('BottomTabNavigation')
+                navigation.reset({
+                    index: 0,
+                    routes: [
+                        {
+                            name: 'BottomTabNavigation',
+                            params: { screen: 'Feed' },
+                        },
+                    ],
+                })
             }
         } catch (error) {
             if (error) {

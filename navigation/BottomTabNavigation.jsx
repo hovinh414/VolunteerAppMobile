@@ -22,8 +22,9 @@ import AsyncStoraged from '../services/AsyncStoraged'
 import ImageAvata from '../assets/hero2.jpg'
 
 import ProfileOrganisation from '../screens/Profile/ProfileOrganisation'
+import NotificationScreen from '../screens/Feed/NotificationScreen'
 import { Image } from 'expo-image';
-
+import { useFocusEffect } from '@react-navigation/native';
 const Tab = createBottomTabNavigator()
 
 const screenOptions = {
@@ -47,16 +48,23 @@ const BottomTabNavigation = () => {
     const [avatar, setAvatar] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
-        if (userStored === null) {
-            setType('')
-        } else {
-            setType(userStored.type)
+        if (userStored) {
             setAvatar(userStored.avatar)
+            setType(userStored.type)
+        } else {
+            setAvatar(null)
+            setType(null)
         }
     }
     useEffect(() => {
         getUserStored()
     }, [])
+    useFocusEffect(
+        React.useCallback(() => {
+            // Fetch data each time the screen comes into focus
+            getUserStored();
+        }, [])
+    );
     return (
         <Tab.Navigator screenOptions={screenOptions}>
             <Tab.Screen
@@ -123,8 +131,8 @@ const BottomTabNavigation = () => {
             ) : null}
 
             <Tab.Screen
-                name="Notifications"
-                component={Notifications}
+                name="NotificationScreen"
+                component={NotificationScreen}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return (

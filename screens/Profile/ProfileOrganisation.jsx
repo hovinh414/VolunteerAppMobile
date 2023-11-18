@@ -653,11 +653,9 @@ const VerifyRoute = ({ navigation }) => {
     const [token, setToken] = useState()
     const [ButtonPress, setButtonPress] = useState('')
     const [orgId, setOrgId] = useState()
-    const [isActive, setIsActive] = useState(false)
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setOrgId(userStored._id)
-        setIsActive(userStored.isActiveOrganization)
     }
     useEffect(() => {
         getUserStored()

@@ -24,8 +24,7 @@ import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
-
-const EditProfile = ({ navigation,route }) => {
+const EditProfile = ({ navigation, route }) => {
     const [selectedImage, setSelectedImage] = useState('')
     const [avatar, setAvatar] = useState()
     const [fullname, setFullname] = useState('')
@@ -40,6 +39,7 @@ const EditProfile = ({ navigation,route }) => {
     const [userId, setUserId] = useState()
     const [token, setToken] = useState()
     const [ButtonPress, setButtonPress] = useState('')
+    const [type, setType] = useState('')
 
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
@@ -50,6 +50,7 @@ const EditProfile = ({ navigation,route }) => {
         setAddress(userStored.address)
         setAvatar(userStored.avatar)
         setUserId(userStored._id)
+        setType(userStored.type)
     }
     useEffect(() => {
         getUserStored()
@@ -156,16 +157,29 @@ const EditProfile = ({ navigation,route }) => {
                     AsyncStoraged.storeData(
                         response.data.data.userResultForUpdate
                     )
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Thành công',
-                        text2: 'Thay đổi thông tin thành công',
-                        visibilityTime: 2500,
-                        autoHide: true,
-                        onHide: () => {
-                            navigation.navigate('BottomTabNavigation')
-                        },
-                    })
+                    if (type === 'Organization') {
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Thành công',
+                            text2: 'Thay đổi thông tin thành công',
+                            visibilityTime: 2500,
+                            autoHide: true,
+                            onHide: () => {
+                                navigation.navigate('ProfileOrganisation')
+                            },
+                        })
+                    } else {
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Thành công',
+                            text2: 'Thay đổi thông tin thành công',
+                            visibilityTime: 2500,
+                            autoHide: true,
+                            onHide: () => {
+                                navigation.navigate('Profile')
+                            },
+                        })
+                    }
                     onRefreshInfo()
                     setButtonPress(false)
                 }

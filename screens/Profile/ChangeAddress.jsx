@@ -37,6 +37,7 @@ const ChangeAddress = () => {
     const [ButtonPress, setButtonPress] = useState('')
     const [userId, setUserId] = useState()
     const [token, setToken] = useState()
+    const [type, setType] = useState('')
     const navigation = useNavigation()
 
     const getToken = async () => {
@@ -46,6 +47,7 @@ const ChangeAddress = () => {
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setUserId(userStored._id)
+        setType(userStored.type)
     }
     useEffect(() => {
         getUserStored()
@@ -156,16 +158,29 @@ const ChangeAddress = () => {
                     AsyncStoraged.storeData(
                         response.data.data.userResultForUpdate
                     )
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Thành công',
-                        text2: 'Thay đổi địa chỉ thành công',
-                        visibilityTime: 2500,
-                        autoHide: true,
-                        onHide: () => {
-                            navigation.navigate('BottomTabNavigation')
-                        },
-                    })
+                    if (type === 'Organization') {
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Thành công',
+                            text2: 'Thay đổi địa chỉ thành công',
+                            visibilityTime: 2500,
+                            autoHide: true,
+                            onHide: () => {
+                                navigation.navigate('ProfileOrganisation')
+                            },
+                        })
+                    } else {
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Thành công',
+                            text2: 'Thay đổi địa chỉ thành công',
+                            visibilityTime: 2500,
+                            autoHide: true,
+                            onHide: () => {
+                                navigation.navigate('Profile')
+                            },
+                        })
+                    }
                     onRefresh()
                     setButtonPress(false)
                 }
@@ -300,23 +315,22 @@ const ChangeAddress = () => {
     return (
         <KeyboardAvoidingView
             style={{
-                backgroundColor:'#fff',
-                height:1000,
+                backgroundColor: '#fff',
+                height: 1000,
             }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-             <View
+            <View
                 style={{
                     zIndex: 2,
                 }}
             >
                 <Toast config={toastConfig} />
             </View>
-            <ScrollView style={{zIndex:1}}>
+            <ScrollView style={{ zIndex: 1 }}>
                 <View
                     style={{
                         flex: 1,
-
                     }}
                 >
                     <View
@@ -510,7 +524,7 @@ const ChangeAddress = () => {
                             }}
                         >
                             <CustomButton
-                                onPress={() => (handleUpdateAddress())}
+                                onPress={() => handleUpdateAddress()}
                                 title="CẬP NHẬT ĐỊA CHỈ"
                                 isLoading={ButtonPress}
                             />

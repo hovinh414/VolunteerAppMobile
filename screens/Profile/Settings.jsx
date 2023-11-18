@@ -3,7 +3,7 @@ import {
     Text,
     TouchableOpacity,
     ScrollView,
-    Image,
+    Dimensions,
     Alert,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
@@ -11,8 +11,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS } from '../../constants/theme'
 import { MaterialIcons } from '@expo/vector-icons'
 import AsyncStoraged from '../../services/AsyncStoraged'
-
-const question = '../../assets/question.png'
+import QRCode from 'react-native-qrcode-svg'
+import Modal from 'react-native-modal'
+import { BarCodeScanner } from 'expo-barcode-scanner'
+import { Image } from 'expo-image'
+const { width, height } = Dimensions.get('screen')
 const Settings = ({ navigation }) => {
     const removeData = async () => {
         await AsyncStoraged.removeData()
@@ -20,15 +23,163 @@ const Settings = ({ navigation }) => {
     const removeToken = async () => {
         await AsyncStoraged.removeToken()
     }
+    const [type, setType] = useState('')
+    const [avatar, setAvatar] = useState('')
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        if (userStored === null) {
+            setType('')
+        } else {
+            setType(userStored.type)
+            setAvatar(userStored.avatar)
+        }
+    }
+    useEffect(() => {
+        getUserStored()
+    }, [])
+    const [isModalVisible, setModalVisible] = useState(false)
 
+    const toggleModal = () => {
+        setModalVisible(!isModalVisible)
+    }
+    const [isScanner, setIsScanner] = useState(false)
+
+    const toggleScan = () => {
+        setIsScanner(!isScanner)
+    }
+    // Other existing code...
+
+    const renderQrCodeModal = () => (
+        <Modal
+            isVisible={isModalVisible}
+            onBackdropPress={toggleModal}
+            animationIn="fadeIn"
+            animationOut="fadeOut"
+        >
+            <TouchableOpacity
+                style={{ flex: 1 }}
+                activeOpacity={1}
+                onPressOut={() => setModalVisible(false)}
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <QRCode
+                        value="https://www.facebook.com/zinhhh.1003"
+                        size={250}
+                    />
+                </View>
+            </TouchableOpacity>
+        </Modal>
+    )
+    const renderScanQrCodeModal = () => (
+        <Modal
+            isVisible={isScanner}
+            onBackdropPress={toggleScan}
+            animationIn="fadeIn"
+            animationOut="fadeOut"
+        >
+            <TouchableOpacity
+                style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+                activeOpacity={1}
+                onPressOut={() => setIsScanner(false)}
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <View
+                        style={{
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginBottom: 25,
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: '#fff',
+                                fontWeight: 'bold',
+                                fontSize: 18,
+                            }}
+                        >
+                            Scan QR để điểm danh
+                        </Text>
+                    </View>
+                    <BarCodeScanner
+                        onBarCodeScanned={scanned}
+                        style={{
+                            position: 'absolute',
+                            width: 300,
+                            height: 300,
+                        }}
+                    />
+                    <Image
+                        source={require('../../assets/qrcode.png')}
+                        style={{ width: 350, height: 350 }}
+                    />
+                    <View
+                        style={{
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginTop: 25,
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: '#fff',
+                                fontWeight: '500',
+                                fontSize: 15.5,
+                            }}
+                        >
+                            Cảm ơn bạn đã tham gia tình nguyện cùng Việc Tử Tế,
+                            Hãy quét mã QR của người tổ chức để điểm danh!
+                        </Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        </Modal>
+    )
+    const [hasPermission, setHasPermission] = useState(null)
+    const [scanned, setScanned] = useState(false)
+
+    useEffect(() => {
+        const getBarCodeScannerPermissions = async () => {
+            const { status } = await BarCodeScanner.requestPermissionsAsync()
+            setHasPermission(status === 'granted')
+            console.log(hasPermission)
+        }
+        getBarCodeScannerPermissions()
+    }, [])
+
+    const handleBarCodeScanned = () => {
+        setScanned(true)
+    }
+
+    if (hasPermission === null) {
+        return <Text>Requesting for camera permission</Text>
+    }
+    if (hasPermission === false) {
+        return <Text>No access to camera</Text>
+    }
     const navigateToEditProfile = () => {
         navigation.navigate('EditProfile')
     }
 
     const navigateToSecurity = () => {
         console.log('Security function')
+        toggleModal() // Show the QR code modal
     }
-
     const navigateToNotifications = () => {
         console.log('Notifications function')
     }
@@ -77,7 +228,15 @@ const Settings = ({ navigation }) => {
                 onPress: () => {
                     removeData()
                     removeToken()
-                    navigation.push('BottomTabNavigation')
+                    navigation.reset({
+                        index: 0,
+                        routes: [
+                            {
+                                name: 'BottomTabNavigation',
+                                params: { screen: 'Feed' },
+                            },
+                        ],
+                    })
                 },
             },
         ])
@@ -89,7 +248,11 @@ const Settings = ({ navigation }) => {
             text: 'Chỉnh sửa thông tin',
             action: navigateToEditProfile,
         },
-        { icon: 'security', text: 'Bảo mật', action: navigateToSecurity },
+        {
+            icon: type === 'Organization' ? 'qr-code-2' : 'qr-code-scanner',
+            text: type === 'Organization' ? 'Show mã QR' : 'Quét mã QR',
+            action: type === 'Organization' ? toggleModal : toggleScan,
+        },
         {
             icon: 'notifications-none',
             text: 'Thông báo',
@@ -101,6 +264,28 @@ const Settings = ({ navigation }) => {
             action: navigateToPrivacy,
         },
     ]
+
+    // Render accountItems
+    accountItems.map((item, index) => (
+        <TouchableOpacity key={index} onPress={item.action}>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 10,
+                }}
+            >
+                <MaterialIcons
+                    name={item.icon}
+                    size={24}
+                    color={COLORS.primary}
+                />
+                <Text style={{ marginLeft: 15, fontSize: 16 }}>
+                    {item.text}
+                </Text>
+            </View>
+        </TouchableOpacity>
+    ))
 
     const supportItems = [
         {
@@ -158,6 +343,8 @@ const Settings = ({ navigation }) => {
                 backgroundColor: '#fff',
             }}
         >
+            {renderQrCodeModal()}
+            {renderScanQrCodeModal()}
             <View
                 style={{
                     marginHorizontal: 12,
