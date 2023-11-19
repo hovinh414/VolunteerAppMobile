@@ -127,16 +127,14 @@ const DetailPost = ({ navigation, route }) => {
 
         return (
             <View>
-                <Text
-                    style={{
-                        fontSize: 16,
-                        textAlign: 'justify',
-                    }}
-                >
-                    {displayText}
-                </Text>
                 {content.length > maxLength && (
-                    <TouchableOpacity onPress={toggleTextVisibility}>
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={toggleTextVisibility}
+                    >
+                        <Text style={{ fontSize: 16, textAlign: 'justify' }}>
+                            {displayText}
+                        </Text>
                         <Text
                             style={{ fontWeight: '500', color: COLORS.primary }}
                         >

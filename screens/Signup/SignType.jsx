@@ -1,7 +1,7 @@
 import { View, Text, Image, Pressable, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
-import COLORS from '../../constants/colors';
+import {COLORS} from '../../constants/theme';
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from './SignupScreenStyle';
 import { MaterialIcons } from "@expo/vector-icons";
@@ -12,7 +12,7 @@ const Signup = ({ navigation }) => {
     const [isPasswordShown, setIsPasswordShown] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
             <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={{
@@ -38,6 +38,7 @@ const Signup = ({ navigation }) => {
                     title="Tổ chức"
                     filled
                     style={{
+                        backgroundColor:COLORS.primary,
                         marginTop: 18,
                         marginBottom: 4,
                     }}
@@ -47,6 +48,7 @@ const Signup = ({ navigation }) => {
                     title="Cá nhân"
                     filled
                     style={{
+                        backgroundColor:COLORS.primary,
                         marginTop: 18,
                         marginBottom: 4,
                     }}

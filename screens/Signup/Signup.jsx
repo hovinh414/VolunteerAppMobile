@@ -133,7 +133,7 @@ const Signup = ({ navigation }) => {
                         autoHide: true,
                         onHide: () => {
 
-                            navigation.navigate('LoginScreen')
+                            navigation.navigate('BottomTabNavigation')
                         },
                     })
                     setButtonPress(false)

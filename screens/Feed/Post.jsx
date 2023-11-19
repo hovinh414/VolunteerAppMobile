@@ -408,7 +408,7 @@ const Post = ({
                 ListHeaderComponent={headers}
                 showsVerticalScrollIndicator={false}
                 onEndReached={fetchNextPage}
-                onEndReachedThreshold={0.4}
+                onEndReachedThreshold={0.1}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}

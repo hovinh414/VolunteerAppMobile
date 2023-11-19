@@ -16,6 +16,7 @@ import axios from 'axios'
 import { signUpApi } from '../../services/UserService'
 import Auth from '../Login/Auth'
 import CustomInput from '../../components/CustomInput'
+import { Ionicons } from '@expo/vector-icons'
 import CustomButton from '../../components/CustomButton'
 import API_URL from '../../interfaces/config'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
@@ -128,7 +129,7 @@ const Signup = ({ navigation }) => {
                         visibilityTime: 2500,
                         autoHide: true,
                         onHide: () => {
-                            navigation.navigate('LoginScreen')
+                            navigation.navigate('BottomTabNavigation')
                         },
                     })
                     setButtonPress(false)

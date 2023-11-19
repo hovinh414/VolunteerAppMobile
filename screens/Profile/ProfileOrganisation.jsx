@@ -157,7 +157,6 @@ const PostsRoute = () => {
                 {isLoading ? (
                     <View
                         style={{
-                            marginBottom: 50,
                             justifyContent: 'center',
                             alignItems: 'center',
                         }}
@@ -935,7 +934,7 @@ const ProfileOrganisation = ({ navigation, route }) => {
                     </View>
                 </View>
             </View>
-            <View style={{ flex: 1, top: -67 }}>
+            <View style={{ flex: 1, top: -67}}>
                 <TabView
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
