@@ -162,13 +162,14 @@ const DetailPost = ({ navigation, route }) => {
             })
             console.log(res.data.status)
             if (res.data.status === 'SUCCESS') {
+                setShowLoading(false)
                 Toast.show({
                     type: 'joinToast',
                     text1: 'Thành công',
                     text2: 'Tham gia thành công',
                     visibilityTime: 2500,
                 })
-                setShowLoading(false)
+
                 refreshDetail()
             }
         } catch (error) {

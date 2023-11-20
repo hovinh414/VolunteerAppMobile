@@ -310,7 +310,7 @@ const Create = ({ navigation }) => {
                 Toast.show({
                     type: 'error',
                     text1: 'Thất bại',
-                    text2: 'Đăng ký thất bại!',
+                    text2: 'Đăng bài thất bại!',
                     visibilityTime: 2500,
                 })
                 setButtonPress(false)

@@ -1,58 +1,45 @@
-import {
-    View,
-    Text,
-    FlatList,
-    TextInput,
-    TouchableOpacity,
-} from 'react-native'
+import { View, Text, FlatList, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, images } from '../../constants'
 import { MaterialIcons } from '@expo/vector-icons'
 import { styles } from './ChatStyle'
-import { Image } from 'expo-image';
+import { Image } from 'expo-image'
 
 const Chat = ({ navigation }) => {
     const chat = [
         {
             id: '1',
-            name: 'Lan Anh',
-            image: images.friend1,
-            lastMessage: 'Thành Vinh đẹp trai',
+            name: 'Quỹ từ thiện Việt Nam',
+            image: images.post4,
+            lastMessage: 'Bạn cần tìm hoạt động như nào vậy?',
             lastMessageTime: '10 phút',
             isSeen: false,
         },
         {
             id: '2',
-            name: 'Kim Khánh',
-            image: images.friend2,
-            lastMessage: 'Bạn: Xin chào',
+            name: 'Quỹ thiện tâm',
+            image: images.post5,
+            lastMessage:
+                'Bạn: Cho mình xin thêm thông tin về hoạt động này với?',
             lastMessageTime: '12 phút',
             isSeen: true,
         },
         {
             id: '3',
-            name: 'Trung',
-            image: images.friend3,
-            lastMessage: 'Đang bán cơm',
+            name: 'Sài gòn xanh',
+            image: images.user7,
+            lastMessage: 'Hoạt động này sẽ hết hạn đăng ký sau 10 ngày nha bạn',
             lastMessageTime: '15 phút',
             isSeen: false,
         },
         {
             id: '4',
             name: 'Đạt',
-            image: images.friend4,
-            lastMessage: 'Bạn: Chào em trai thầy Toàn',
+            image: images.user4,
+            lastMessage: 'Bạn: Cho mình hỏi hiện tại đang có những hoạt động nào?',
             lastMessageTime: 'Hôm qua',
             isSeen: true,
-        },
-        {
-            id: '5',
-            name: 'Thanh Thuận',
-            image: images.friend5,
-            lastMessage: 'Mới quay lại vui quá hehehehe',
-            lastMessageTime: 'Hôm qua',
-            isSeen: false,
         },
     ]
     const [filteredChat, setFilteredChat] = useState(chat)
@@ -97,7 +84,11 @@ const Chat = ({ navigation }) => {
             <FlatList
                 data={filteredChat}
                 renderItem={({ item, index }) => (
-                    <TouchableOpacity style={styles.chat} key={index} onPress={() => navigation.navigate('ChatDetail')}>
+                    <TouchableOpacity
+                        style={styles.chat}
+                        key={index}
+                        onPress={() => navigation.navigate('ChatDetail')}
+                    >
                         <View style={styles.viewChat}>
                             <Image source={item.image} style={styles.avatar} />
                             {item.isSeen ? (
@@ -114,7 +105,12 @@ const Chat = ({ navigation }) => {
                                     </Text>
                                     <Text style={{ fontSize: 14 }}>
                                         {' '}
-                                        {item.lastMessage}{' '}
+                                        {item.lastMessage.length > 28
+                                            ? `${item.lastMessage.slice(
+                                                  0,
+                                                  28
+                                              )}...`
+                                            : item.lastMessage}
                                     </Text>
                                 </View>
                             ) : (
@@ -137,7 +133,12 @@ const Chat = ({ navigation }) => {
                                         }}
                                     >
                                         {' '}
-                                        {item.lastMessage}{' '}
+                                        {item.lastMessage.length > 28
+                                            ? `${item.lastMessage.slice(
+                                                  0,
+                                                  28
+                                              )}...`
+                                            : item.lastMessage}
                                     </Text>
                                 </View>
                             )}

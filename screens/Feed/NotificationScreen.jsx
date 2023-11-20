@@ -24,31 +24,45 @@ const NotificationScreen = ({ navigation }) => {
     useEffect(() => {
         getToken()
     }, [])
-    
+
     const organization = [
         {
             id: '651d0055a528879d9d06ce27',
-            image: images.post1,
-            name: 'Hội chữ thập đỏ',
+            image: images.user6,
+            name: 'Giày ấm',
             isActive: true,
-            username: '@chuthapdo',
+            username: '@giayam',
         },
         {
             id: '6544e7c4084e4b75ef3d365e',
-            image: images.post2,
-            name: 'Hội người cao tuổi',
+            image: images.user5,
+            name: 'Quỹ từ thiện tu viện Tường Vân',
             isActive: false,
-            username: '@hoinguoicaotuoi',
+            username: '@tuvientuongvan',
+        },
+        {
+            id: '6523fc90d176717dd38932b2',
+            image: images.user4,
+            name: 'Hội từ thiện Thiện Tâm',
+            isActive: true,
+            username: '@thientam',
+        },
+    ]
+    const noti = [
+        {
+            id: '1',
+            image: images.post4,
+            name: 'Quỹ từ thiện Việt Nam',
+            date: '30 phút trước',
+            content: 'đã thêm 1 ảnh mới',
         },
         {
             id: '6523fc90d176717dd38932b2',
             image: images.post3,
-            name: 'Hội người FA',
-            isActive: true,
-            username: '@hoinguoifa',
+            name: 'Hội người khuyết tật Bình Đinh',
+            date: '2 giờ trước',
+            content: 'đã thêm 3 ảnh mới',
         },
-    ]
-    const noti = [
         {
             id: '651d0055a528879d9d06ce27',
             image: images.post1,
@@ -60,36 +74,23 @@ const NotificationScreen = ({ navigation }) => {
             id: '6544e7c4084e4b75ef3d365e',
             image: images.post2,
             name: 'Hội người già neo đơn',
-            date: '1 ngày trước',
-            content: 'đã thêm 5 ảnh mới',
+            date: '2 ngày trước',
+            content: 'đã thêm 3 ảnh mới',
         },
-        {
-            id: '6523fc90d176717dd38932b2',
-            image: images.post3,
-            name: 'Hội người FA',
-            date: '1 ngày trước',
-            content: 'đã thêm 5 ảnh mới',
-        },
-        {
-            id: '1',
-            image: images.post1,
-            name: 'Hội chữ thập đỏ',
-            date: '1 ngày trước',
-            content: 'đã thêm 5 ảnh mới',
-        },
+
         {
             id: '2',
-            image: images.post2,
-            name: 'Hội người cao tuổi',
-            date: '1 ngày trước',
-            content: 'đã thêm 5 ảnh mới',
+            image: images.post5,
+            name: 'Quỹ thiện tâm',
+            date: '3 ngày trước',
+            content: 'đã thêm 6 ảnh mới',
         },
         {
             id: '3',
-            image: images.post3,
-            name: 'Hội người FA',
-            date: '1 ngày trước',
-            content: 'đã thêm 5 ảnh mới',
+            image: images.user7,
+            name: 'Sài gòn xanh',
+            date: '3 ngày trước',
+            content: 'đã thêm 1 ảnh mới',
         },
     ]
     const viewProfile = async (_orgId) => {
