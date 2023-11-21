@@ -662,7 +662,7 @@ const Feed = ({ navigation, route }) => {
                 style={{
                     flexDirection: 'column',
                     alignItems: 'center',
-                    width: '100%',
+                    width: '95%',
                     height: 'auto',
                     borderLeftColor: '#E0E0E0',
                     backgroundColor: '#E0E0E0',
@@ -834,7 +834,7 @@ const Feed = ({ navigation, route }) => {
             >
                 <Post
                     posts={posts}
-                    fetchNextPage={fetchNextPage}
+                    // fetchNextPage={fetchNextPage}
                     refreshing={refreshing}
                     onRefresh={onRefresh}
                     headers={<RenderSuggestionsContainer />}

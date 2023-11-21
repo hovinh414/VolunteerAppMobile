@@ -37,7 +37,7 @@ const screenOptions = {
         right: 0,
         left: 0,
         elevation: 0,
-        height: 60,
+        height: 80,
         backgroundColor: '#fff',
         // borderTopLeftRadius: 20,
         // borderTopRightRadius: 20,
@@ -75,7 +75,7 @@ const BottomTabNavigation = () => {
                         return (
                             <Feather
                                 name="home"
-                                size={24}
+                                size={25}
                                 color={focused ? COLORS.primary : COLORS.black}
                             />
                         )
@@ -120,7 +120,7 @@ const BottomTabNavigation = () => {
                                 >
                                     <Feather
                                         name="plus-circle"
-                                        size={24}
+                                        size={25}
                                         color={'#fff'}
                                     />
                                 </LinearGradient>
@@ -138,7 +138,7 @@ const BottomTabNavigation = () => {
                         return (
                             <FontAwesome5
                                 name="heart"
-                                size={24}
+                                size={25}
                                 color={focused ? COLORS.primary : COLORS.black}
                             />
                         )
@@ -157,8 +157,8 @@ const BottomTabNavigation = () => {
                                         avatar ? { uri: avatar } : ImageAvata
                                     }
                                     style={{
-                                        height: 24,
-                                        width: 24,
+                                        height: 25,
+                                        width: 25,
                                         borderWidth: 1,
                                         borderRadius: 85,
                                         borderColor: focused
@@ -182,8 +182,8 @@ const BottomTabNavigation = () => {
                                         avatar ? { uri: avatar } : ImageAvata
                                     }
                                     style={{
-                                        height: 24,
-                                        width: 24,
+                                        height: 25,
+                                        width: 25,
                                         borderWidth: 1,
                                         borderRadius: 85,
                                         borderColor: focused
@@ -204,7 +204,7 @@ const BottomTabNavigation = () => {
                             return (
                                 <FontAwesome
                                     name="user-circle"
-                                    size={24}
+                                    size={25}
                                     color={
                                         focused ? COLORS.primary : COLORS.black
                                     }

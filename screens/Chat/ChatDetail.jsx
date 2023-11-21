@@ -98,6 +98,7 @@ function ChatDetail({ navigation }) {
             quality: 1,
         })
         delete result.cancelled
+        console.log(result)
         if (!result.canceled) {
             if (!selectedImages) {
                 setSelectedImage(result.assets)

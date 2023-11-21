@@ -108,49 +108,6 @@ const PostsRoute = () => {
         }
     }
     const navigation = useNavigation()
-    const viewDetailPost = async (_postId) => {
-        try {
-            const response = await axios.get(
-                API_URL.API_URL + '/post/' + _postId
-            )
-            if (response.data.status === 'SUCCESS') {
-                navigation.navigate('DetailPost', response.data.data)
-            }
-        } catch (error) {
-            console.log('API Error:', error)
-        }
-    }
-    function LongText({ content, maxLength }) {
-        const [isFullTextVisible, setIsFullTextVisible] = useState(false)
-
-        // Hàm này được gọi khi người dùng bấm vào nút "Xem thêm" hoặc "Thu gọn"
-        const toggleTextVisibility = () => {
-            setIsFullTextVisible(!isFullTextVisible)
-        }
-
-        // Hiển thị nội dung đầy đủ hoặc ngắn gọn tùy thuộc vào trạng thái
-        const displayText = isFullTextVisible
-            ? content
-            : content.slice(0, maxLength)
-
-        return (
-            <View>
-                <Text style={{ fontSize: 16, textAlign: 'justify' }}>
-                    {displayText}
-                </Text>
-
-                {content.length > maxLength && (
-                    <TouchableOpacity onPress={toggleTextVisibility}>
-                        <Text
-                            style={{ fontWeight: '500', color: COLORS.primary }}
-                        >
-                            {isFullTextVisible ? '...Thu gọn' : '...Xem thêm'}
-                        </Text>
-                    </TouchableOpacity>
-                )}
-            </View>
-        )
-    }
     const RenderLoader = () => {
         return (
             <View>
