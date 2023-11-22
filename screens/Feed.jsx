@@ -55,6 +55,7 @@ const Feed = ({ navigation, route }) => {
         setCurrentPage(0)
         setPosts([])
         getPosts()
+        setTypePost('normal')
     }
     const Divider = () => (
         <View
@@ -834,7 +835,7 @@ const Feed = ({ navigation, route }) => {
             >
                 <Post
                     posts={posts}
-                    // fetchNextPage={fetchNextPage}
+                    fetchNextPage={fetchNextPage}
                     refreshing={refreshing}
                     onRefresh={onRefresh}
                     headers={<RenderSuggestionsContainer />}

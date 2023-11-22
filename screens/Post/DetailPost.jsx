@@ -3,12 +3,13 @@ import {
     Text,
     TouchableOpacity,
     ScrollView,
-    Modal,
     Alert,
-    KeyboardAvoidingView,
+    Dimensions,
     Image,
     FlatList,
 } from 'react-native'
+import QRCode from 'react-native-qrcode-svg'
+import Modal from 'react-native-modal'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { COLORS, FONTS, SIZES } from '../../constants/theme'
@@ -27,16 +28,21 @@ import API_URL from '../../interfaces/config'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import { format } from 'date-fns'
 import ModalLoading from '../../components/ModalLoading'
+
 const DetailPost = ({ navigation, route }) => {
     const [items, setItems] = useState(route.params)
+    const screenWidth = Dimensions.get('window').width
     const [type, setType] = useState('')
     const [email, setEmail] = useState('')
     const [showLoading, setShowLoading] = useState(false)
+    const [orgId, setOrgId] = useState('')
+    const [isModalVisible, setModalVisible] = useState(false)
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
             setType(userStored.type)
             setEmail(userStored.email)
+            setOrgId(userStored._id)
         } else {
             setType(null)
         }
@@ -373,8 +379,50 @@ const DetailPost = ({ navigation, route }) => {
         const formattedDate = format(new Date(originalDate), 'dd-MM-yyyy')
         return formattedDate
     }
+    const renderQrCodeModal = () => (
+        <Modal
+            isVisible={isModalVisible}
+            animationIn="fadeIn"
+            animationOut="fadeOut"
+        >
+            <TouchableOpacity
+                style={{ flex: 1 }}
+                activeOpacity={1}
+                onPressOut={() => setModalVisible(false)}
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <View
+                        style={{
+                            backgroundColor: COLORS.white,
+                            padding: 20,
+                            borderRadius: 20,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontWeight: 'bold',
+                                fontSize: 17,
+                                marginBottom: 10,
+                            }}
+                        >
+                            Quét mã QR này để điểm danh
+                        </Text>
+                        <QRCode value={items._id} size={250} />
+                    </View>
+                </View>
+            </TouchableOpacity>
+        </Modal>
+    )
     return (
-        <View>
+        <View style={{ flex: 1 }}>
             <View
                 style={{
                     zIndex: 4,
@@ -383,6 +431,7 @@ const DetailPost = ({ navigation, route }) => {
                 <Toast config={toastConfig} />
             </View>
             <ModalLoading visible={showLoading} />
+            {renderQrCodeModal()}
             <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={{
@@ -721,7 +770,15 @@ const DetailPost = ({ navigation, route }) => {
                         >
                             Câu chuyện
                         </Text>
-                        <LongText maxLength={250} content={items.content} />
+                        {items.content.length > 100 ? (
+                            <LongText maxLength={250} content={items.content} />
+                        ) : (
+                            <Text
+                                style={{ fontSize: 16, textAlign: 'justify' }}
+                            >
+                                {items.content}
+                            </Text>
+                        )}
                     </View>
                     <View
                         style={{
@@ -775,7 +832,41 @@ const DetailPost = ({ navigation, route }) => {
                                 </View>
                             )}
                         />
-                        {type === 'Organization' || !type ? (
+                        {type === 'Organization' && orgId === items.ownerId ? (
+                            <View
+                                style={{
+                                    marginBottom: 50,
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => setModalVisible(true)}
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.primary,
+                                        height: 50,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.white,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        Điểm danh
+                                    </Text>
+                                    <MaterialIcons
+                                        name={'qr-code-scanner'}
+                                        size={30}
+                                        color={COLORS.white}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        ) : items.isAttended ? (
                             <View
                                 style={{
                                     marginBottom: 50,
@@ -783,6 +874,7 @@ const DetailPost = ({ navigation, route }) => {
                             >
                                 <View
                                     style={{
+                                        backgroundColor: '#ccc',
                                         height: 44,
                                         borderRadius: 16,
                                         alignItems: 'center',
@@ -794,7 +886,9 @@ const DetailPost = ({ navigation, route }) => {
                                             fontFamily: 'monterrat',
                                             color: '#000',
                                         }}
-                                    ></Text>
+                                    >
+                                        ĐÃ ĐIỂM DANH
+                                    </Text>
                                 </View>
                             </View>
                         ) : items.isJoin ? (
@@ -846,6 +940,22 @@ const DetailPost = ({ navigation, route }) => {
                                         Đã hết hạn
                                     </Text>
                                 </View>
+                            </View>
+                        ) : type === 'Organization' || !type ? (
+                            <View
+                                style={{
+                                    marginBottom: 50,
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        backgroundColor: '#fff',
+                                        height: 44,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                ></View>
                             </View>
                         ) : (
                             <View

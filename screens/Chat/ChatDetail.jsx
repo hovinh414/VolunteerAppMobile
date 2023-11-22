@@ -132,7 +132,7 @@ function ChatDetail({ navigation }) {
         <KeyboardAvoidingView
             KeyboardAvoidingView
             style={styles.container}
-            behavior="height"
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             enabled
         >
             <View style={styles.header}>

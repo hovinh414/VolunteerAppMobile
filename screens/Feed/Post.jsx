@@ -30,7 +30,7 @@ import { Image } from 'expo-image'
 import axios from 'axios'
 import ImageAvata from '../../assets/hero2.jpg'
 import AsyncStoraged from '../../services/AsyncStoraged'
-import { format } from 'date-fns';
+import { format } from 'date-fns'
 const share = '../../assets/share.png'
 const Post = ({
     posts,
@@ -361,31 +361,39 @@ const Post = ({
         return urls || []
     }
     const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        const formattedDate = new Date(dateString).toLocaleDateString('en-US', options);
-        return formattedDate;
-      };
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' }
+        const formattedDate = new Date(dateString).toLocaleDateString(
+            'en-US',
+            options
+        )
+        return formattedDate
+    }
     const sharePost = async (post) => {
         try {
             const cleanedContent = removeHashtagsAndUrlsFromContent(
                 post.content
             )
             let mediaContent = ''
-            
+
             // Duyệt qua mảng media và thêm từng URL vào nội dung chia sẻ
             post.media.forEach((mediaUrl, index) => {
                 mediaContent += `Hình ${index + 1}: ${mediaUrl}\n`
             })
-            const formattedDate = format(new Date(post.exprirationDate), 'dd-MM-yyyy');
+            const formattedDate = format(
+                new Date(post.exprirationDate),
+                'dd-MM-yyyy'
+            )
             const result = await Share.share({
                 message: `${cleanedContent} \n\nĐịa điểm: ${post.address}\nThời hạn: ${formattedDate}\nSố người tham gia: ${post.participants}`,
                 url: extractUrlsFromContent(post.content),
             })
-            if(result.action === Share.sharedAction) {
-                if(result.activityType) {
-                    console.log('Share with activity type: ', result.activityType)
-                }
-                else {
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    console.log(
+                        'Share with activity type: ',
+                        result.activityType
+                    )
+                } else {
                     console.log('shared')
                 }
             } else if (result.action === Share.dismissedAction) {
@@ -519,7 +527,21 @@ const Post = ({
                                 marginVertical: 8,
                             }}
                         >
-                            <LongText maxLength={150} content={item.content} />
+                            {item.content.length > 100 ? (
+                                <LongText
+                                    maxLength={150}
+                                    content={item.content}
+                                />
+                            ) : (
+                                <Text
+                                    style={{
+                                        fontSize: 16,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {item.content}
+                                </Text>
+                            )}
                         </View>
                         <TouchableOpacity
                             onPress={() => viewDetailPost(item._id)}

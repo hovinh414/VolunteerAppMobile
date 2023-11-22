@@ -177,7 +177,7 @@ function ShowQr({ navigation }) {
                                 marginBottom: 10,
                             }}
                         >
-                            Quét mã Qr này để điểm danh
+                            Quét mã QR này để điểm danh
                         </Text>
                         <QRCode value={postId} size={250} />
                     </View>
@@ -448,19 +448,35 @@ function ShowQr({ navigation }) {
                                     </View>
                                 </View>
                             </View>
-                            <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() => setModalVisible(true)}
+                            <View
                                 style={{
+                                    flexDirection: 'column',
                                     justifyContent: 'center',
                                     alignItems: 'center',
+                                    marginLeft:10,
                                 }}
                             >
                                 <Text style={{ fontWeight: 'bold' }}>
-                                    Show Qr
+                                    Điểm danh
                                 </Text>
-                                <QRCode value={item._id} size={50} />
-                            </TouchableOpacity>
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    onPress={() => setModalVisible(true)}
+                                    style={{
+                                        justifyContent: 'center',
+                                        marginTop:10,
+                                        alignItems: 'center',
+                                        backgroundColor: COLORS.primary,
+                                        borderRadius:10,
+                                    }}
+                                >
+                                    <MaterialIcons
+                                        name={'qr-code-2'}
+                                        size={50}
+                                        color={COLORS.white}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </TouchableOpacity>
                 )}
