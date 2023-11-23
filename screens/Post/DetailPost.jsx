@@ -841,7 +841,7 @@ const DetailPost = ({ navigation, route }) => {
                                 </View>
                             )}
                         />
-                        {type === 'Organization' && orgId === items.ownerId ? (
+                        {type === 'Organization' && orgId === items.ownerId && items.isEnableQr ? (
                             <View
                                 style={{
                                     marginBottom: 50,
@@ -866,7 +866,7 @@ const DetailPost = ({ navigation, route }) => {
                                             marginRight: 10,
                                         }}
                                     >
-                                        Điểm danh
+                                        ĐIỂM DANH
                                     </Text>
                                     <MaterialIcons
                                         name={'qr-code-scanner'}
