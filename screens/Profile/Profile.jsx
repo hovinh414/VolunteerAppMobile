@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Dimensions,
     RefreshControl,
+    Linking,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -154,7 +155,7 @@ const PostsRoute = () => {
                                 <View
                                     style={{
                                         flexDirection: 'column',
-                                        marginTop:10,
+                                        marginTop: 10,
                                         justifyContent: 'flex-start',
                                         marginLeft: 12,
                                     }}
@@ -216,7 +217,6 @@ const PostsRoute = () => {
                                             </Text>
                                         </View>
                                     </View>
-                                    
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -240,10 +240,24 @@ const InfoRoute = ({ navigation }) => {
     useEffect(() => {
         getUserStored()
     }, [])
+    const handleMap = () => {
+        const mapAddress = encodeURIComponent(address)
+        const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapAddress}`
+        Linking.openURL(googleMapsUrl)
+    }
+    const handlePhone = () => {
+        const phoneUrl = `tel:${phone}`
+        Linking.openURL(phoneUrl)
+    }
+    const handleEmail = () => {
+        const emailUrl = `mailto:${email}`
+        Linking.openURL(emailUrl)
+    }
     return (
         <ScrollView style={{ flex: 1, marginHorizontal: 22 }}>
             <View style={{ paddingTop: 20 }}>
                 <CustomViewInfo
+                    onPress={handleMap}
                     value={address}
                     icon={'location-outline'}
                     height={70}
@@ -251,6 +265,7 @@ const InfoRoute = ({ navigation }) => {
             </View>
             <View style={{ paddingTop: 20 }}>
                 <CustomViewInfo
+                    onPress={handleEmail}
                     value={email}
                     icon={'mail-outline'}
                     height={48}
@@ -258,6 +273,7 @@ const InfoRoute = ({ navigation }) => {
             </View>
             <View style={{ paddingTop: 20 }}>
                 <CustomViewInfo
+                    onPress={handlePhone}
                     value={phone}
                     icon={'call-outline'}
                     height={48}
@@ -534,7 +550,7 @@ const Profile = ({ navigation, route }) => {
                     </View>
                 </View>
             </View>
-            <View style={{ flex: 1 , top:-67 }}>
+            <View style={{ flex: 1, top: -67 }}>
                 <View
                     style={{
                         flex: 1,

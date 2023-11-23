@@ -495,6 +495,7 @@ const Post = ({
                                 onCurrentImagePressed={() =>
                                     viewDetailPost(item._id)
                                 }
+                                // resizeMode={'contain'}
                             />
 
                             {/* <FlatList

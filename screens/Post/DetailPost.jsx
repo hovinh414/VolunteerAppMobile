@@ -7,6 +7,7 @@ import {
     Dimensions,
     Image,
     FlatList,
+    Linking
 } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import Modal from 'react-native-modal'
@@ -421,6 +422,12 @@ const DetailPost = ({ navigation, route }) => {
             </TouchableOpacity>
         </Modal>
     )
+    const handleMap = (_address) => {
+        const mapAddress = encodeURIComponent(_address)
+        const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapAddress}`
+        Linking.openURL(googleMapsUrl)
+    }
+    
     return (
         <View style={{ flex: 1 }}>
             <View
@@ -555,7 +562,9 @@ const DetailPost = ({ navigation, route }) => {
                             marginBottom: 5,
                         }}
                     >
-                        <View
+                        <TouchableOpacity
+                        onPress={() => handleMap(items.address)}
+                            activeOpacity={0.8}
                             style={{
                                 flexDirection: 'row',
                                 alignItems: 'center',
@@ -576,7 +585,7 @@ const DetailPost = ({ navigation, route }) => {
                             >
                                 {items.address}
                             </Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     <View
                         style={{
