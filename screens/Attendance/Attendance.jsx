@@ -55,25 +55,6 @@ const Attendance = ({ navigation, route }) => {
         setScanned(true)
         attendanceActivity(data)
     }
-    const viewDetailPost = async (_postId) => {
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: token,
-            },
-        }
-        try {
-            const response = await axios.get(
-                API_URL.API_URL + '/post/' + _postId,
-                config
-            )
-            if (response.data.status === 'SUCCESS') {
-                navigation.replace('DetailPost', response.data.data)
-            }
-        } catch (error) {
-            console.log('API Error:', error)
-        }
-    }
     const attendanceActivity = async (data) => {
         setShowLoading(true)
         try {
@@ -95,7 +76,6 @@ const Attendance = ({ navigation, route }) => {
                     visibilityTime: 2500,
                     autoHide: true,
                     onHide: () => {
-                        //
                         navigation.navigate('DetailPost', res.data.data)
                     },
                 })

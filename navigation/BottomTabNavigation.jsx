@@ -23,8 +23,8 @@ import ImageAvata from '../assets/hero2.jpg'
 
 import ProfileOrganisation from '../screens/Profile/ProfileOrganisation'
 import NotificationScreen from '../screens/Feed/NotificationScreen'
-import { Image } from 'expo-image';
-import { useFocusEffect } from '@react-navigation/native';
+import { Image } from 'expo-image'
+import { useFocusEffect } from '@react-navigation/native'
 const Tab = createBottomTabNavigator()
 
 const screenOptions = {
@@ -62,9 +62,9 @@ const BottomTabNavigation = () => {
     useFocusEffect(
         React.useCallback(() => {
             // Fetch data each time the screen comes into focus
-            getUserStored();
+            getUserStored()
         }, [])
-    );
+    )
     return (
         <Tab.Navigator screenOptions={screenOptions}>
             <Tab.Screen
@@ -73,11 +73,24 @@ const BottomTabNavigation = () => {
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return (
-                            <Feather
-                                name="home"
-                                size={25}
-                                color={focused ? COLORS.primary : COLORS.black}
-                            />
+                            <View
+                                style={{
+                                    paddingVertical: 8,
+                                    paddingHorizontal: 20,
+                                    backgroundColor: focused
+                                        ? '#ffdccc'
+                                        : COLORS.white,
+                                    borderRadius: 8,
+                                }}
+                            >
+                                <Feather
+                                    name="home"
+                                    size={25}
+                                    color={
+                                        focused ? COLORS.primary : COLORS.black
+                                    }
+                                />
+                            </View>
                         )
                     },
                 }}
@@ -88,11 +101,24 @@ const BottomTabNavigation = () => {
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return (
-                            <Feather
-                                name="search"
-                                size={25}
-                                color={focused ? COLORS.primary : COLORS.black}
-                            />
+                            <View
+                                style={{
+                                    paddingVertical: 8,
+                                    paddingHorizontal: 20,
+                                    backgroundColor: focused
+                                        ? '#ffdccc'
+                                        : COLORS.white,
+                                    borderRadius: 8,
+                                }}
+                            >
+                                <Feather
+                                    name="search"
+                                    size={25}
+                                    color={
+                                        focused ? COLORS.primary : COLORS.black
+                                    }
+                                />
+                            </View>
                         )
                     },
                 }}
@@ -136,11 +162,24 @@ const BottomTabNavigation = () => {
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return (
-                            <FontAwesome5
-                                name="heart"
-                                size={25}
-                                color={focused ? COLORS.primary : COLORS.black}
-                            />
+                            <View
+                                style={{
+                                    paddingVertical: 8,
+                                    paddingHorizontal: 20,
+                                    backgroundColor: focused
+                                        ? '#ffdccc'
+                                        : COLORS.white,
+                                    borderRadius: 8,
+                                }}
+                            >
+                                <FontAwesome5
+                                    name="heart"
+                                    size={25}
+                                    color={
+                                        focused ? COLORS.primary : COLORS.black
+                                    }
+                                />
+                            </View>
                         )
                     },
                 }}
@@ -152,20 +191,33 @@ const BottomTabNavigation = () => {
                     options={{
                         tabBarIcon: ({ focused }) => {
                             return (
-                                <Image
-                                    source={
-                                        avatar ? { uri: avatar } : ImageAvata
-                                    }
+                                <View
                                     style={{
-                                        height: 25,
-                                        width: 25,
-                                        borderWidth: 1,
-                                        borderRadius: 85,
-                                        borderColor: focused
-                                            ? COLORS.primary
-                                            : COLORS.black,
+                                        paddingVertical: 8,
+                                        paddingHorizontal: 20,
+                                        backgroundColor: focused
+                                            ? '#ffdccc'
+                                            : COLORS.white,
+                                        borderRadius: 8,
                                     }}
-                                />
+                                >
+                                    <Image
+                                        source={
+                                            avatar
+                                                ? { uri: avatar }
+                                                : ImageAvata
+                                        }
+                                        style={{
+                                            height: 25,
+                                            width: 25,
+                                            borderWidth: 1,
+                                            borderRadius: 85,
+                                            borderColor: focused
+                                                ? COLORS.primary
+                                                : COLORS.black,
+                                        }}
+                                    />
+                                </View>
                             )
                         },
                     }}
@@ -177,20 +229,33 @@ const BottomTabNavigation = () => {
                     options={{
                         tabBarIcon: ({ focused }) => {
                             return (
-                                <Image
-                                    source={
-                                        avatar ? { uri: avatar } : ImageAvata
-                                    }
+                                <View
                                     style={{
-                                        height: 25,
-                                        width: 25,
-                                        borderWidth: 1,
-                                        borderRadius: 85,
-                                        borderColor: focused
-                                            ? COLORS.primary
-                                            : COLORS.black,
+                                        paddingVertical: 8,
+                                        paddingHorizontal: 20,
+                                        backgroundColor: focused
+                                            ? '#ffdccc'
+                                            : COLORS.white,
+                                        borderRadius: 8,
                                     }}
-                                />
+                                >
+                                    <Image
+                                        source={
+                                            avatar
+                                                ? { uri: avatar }
+                                                : ImageAvata
+                                        }
+                                        style={{
+                                            height: 25,
+                                            width: 25,
+                                            borderWidth: 1,
+                                            borderRadius: 85,
+                                            borderColor: focused
+                                                ? COLORS.primary
+                                                : COLORS.black,
+                                        }}
+                                    />
+                                </View>
                             )
                         },
                     }}
@@ -202,13 +267,26 @@ const BottomTabNavigation = () => {
                     options={{
                         tabBarIcon: ({ focused }) => {
                             return (
-                                <FontAwesome
-                                    name="user-circle"
-                                    size={25}
-                                    color={
-                                        focused ? COLORS.primary : COLORS.black
-                                    }
-                                />
+                                <View
+                                    style={{
+                                        paddingVertical: 8,
+                                        paddingHorizontal: 20,
+                                        backgroundColor: focused
+                                            ? '#ffdccc'
+                                            : COLORS.white,
+                                        borderRadius: 8,
+                                    }}
+                                >
+                                    <FontAwesome
+                                        name="user-circle"
+                                        size={25}
+                                        color={
+                                            focused
+                                                ? COLORS.primary
+                                                : COLORS.black
+                                        }
+                                    />
+                                </View>
                             )
                         },
                     }}

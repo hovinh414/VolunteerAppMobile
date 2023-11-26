@@ -20,15 +20,13 @@ import { addYears, format, addDays, parse, isAfter } from 'date-fns'
 import axios from 'axios'
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'
 import DatePicker, { getFormatedDate } from 'react-native-modern-datepicker'
-import { AntDesign } from '@expo/vector-icons'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import API_URL from '../../interfaces/config'
 import { Image } from 'expo-image'
 import ModalLoading from '../../components/ModalLoading'
+import { SelectList } from 'react-native-dropdown-select-list'
 const checkin = '../../assets/checkin.png'
 const addPicture = '../../assets/add-image.png'
-const fundraising = '../../assets/fundraising.png'
-const empathy = '../../assets/empathy.png'
 const Create = ({ navigation }) => {
     const [selectedImages, setSelectedImage] = useState([])
     const [avatar, setAvatar] = useState('')
@@ -44,7 +42,12 @@ const Create = ({ navigation }) => {
     const [showChoose, setShowChoose] = useState(false)
     const [openStartDatePicker, setOpenStartDatePicker] = useState(false)
     const [openActiDatePicker, setOpenActiDatePicker] = useState(false)
+    const [selected, setSelected] = useState('')
     const currentDate = new Date()
+    const data = [
+        { key: 'activity', value: 'Hoạt động tình nguyện' },
+        { key: 'fund', value: 'Hoạt động gây quỹ' },
+    ]
     function handleChangeStartDate(propDate) {
         setStartedDate(propDate)
     }
@@ -227,7 +230,7 @@ const Create = ({ navigation }) => {
     }, [])
 
     const formData = new FormData()
-    const uploadPost = async (_type) => {
+    const uploadPost = async () => {
         selectedImages.forEach((images, index) => {
             formData.append('images', {
                 uri: images.uri,
@@ -241,13 +244,14 @@ const Create = ({ navigation }) => {
         formData.append('scope', scope)
         formData.append('content', content)
         formData.append('participants', participants)
-        formData.append('type', _type)
+        formData.append('type', selected)
         setButtonPress(true)
         if (
             selectedImages.length === 0 ||
             !content ||
             !scope ||
-            !participants
+            !participants ||
+            !selected
         ) {
             Toast.show({
                 type: 'warning',
@@ -323,121 +327,10 @@ const Create = ({ navigation }) => {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 backgroundColor: '#fff',
-                paddingTop: 15,
             }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
             <ModalLoading visible={ButtonPress} />
-            <Modal
-                visible={showChoose}
-                animationType="fade"
-                transparent
-                onRequestClose={() => setShowChoose(false)}
-            >
-                <TouchableOpacity
-                    activeOpacity={1}
-                    onPress={() => setShowChoose(false)}
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    }}
-                >
-                    <View
-                        style={{
-                            backgroundColor: '#ffffff',
-                            borderRadius: 25,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: 20,
-                            position: 'relative',
-                        }}
-                    >
-                        {/* <TouchableOpacity
-                            style={{
-                                position: 'absolute',
-                                top: 10,
-                                right: 15,
-                            }}
-                            onPress={() => setShowChoose(false)}
-                        >
-                            <AntDesign name="close" size={30} />
-                        </TouchableOpacity> */}
-                        {/* <View style={{ borderBottomWidth: 1 }}>
-                            <Text
-                                style={{
-                                    fontWeight: 'bold',
-                                    fontSize: 18,
-                                }}
-                            >
-                                Hình thức đăng bài
-                            </Text>
-                        </View> */}
-                        <View
-                            style={{
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                            }}
-                        >
-                            <TouchableOpacity
-                                style={{
-                                    borderRadius: 15,
-                                    margin: 10,
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    borderBottomWidth: 1, // Add border bottom here
-                                    paddingBottom: 10, // Add padding bottom to separate text from the border
-                                }}
-                                onPress={() => (
-                                    uploadPost('activity'), setShowChoose(false)
-                                )}
-                            >
-                                <Ionicons
-                                    name="person-add-outline"
-                                    size={35}
-                                    color={COLORS.black}
-                                />
-                                <Text
-                                    style={{
-                                        fontSize: 13,
-                                        fontWeight: 'bold',
-                                        marginLeft: 10,
-                                    }}
-                                >
-                                    HOẠT ĐỘNG TÌNH NGUYỆN
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{
-                                    borderRadius: 15,
-                                    margin: 10,
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                }}
-                                onPress={() => (
-                                    uploadPost('fund'), setShowChoose(false)
-                                )}
-                            >
-                                <Ionicons
-                                    name="wallet-outline"
-                                    size={35}
-                                    color={COLORS.black}
-                                />
-                                <Text
-                                    style={{
-                                        marginLeft: 10,
-                                        fontSize: 13,
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    HOẠT ĐỘNG GÂY QUỸ
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
             <View
                 style={{
                     zIndex: 2,
@@ -484,6 +377,24 @@ const Create = ({ navigation }) => {
 
                     <View style={{ paddingHorizontal: 10 }}>
                         <View>
+                            <Text style={styles.headerInput}>
+                                Chọn hình thức đăng bài:
+                            </Text>
+                            <SelectList
+                                setSelected={(val) => setSelected(val)}
+                                data={data}
+                                save="key"
+                                search={false}
+                                placeholder={'Chọn hình thức'}
+                                boxStyles={{
+                                    marginHorizontal: 10,
+                                    borderColor: COLORS.primary,
+                                }}
+                                dropdownStyles={{
+                                    marginHorizontal: 10,
+                                    borderColor: COLORS.primary,
+                                }}
+                            />
                             <Text style={styles.headerInput}>
                                 Nhập nội dung bài viết:
                             </Text>
@@ -870,8 +781,8 @@ const Create = ({ navigation }) => {
                             <Image
                                 source={require(addPicture)}
                                 style={{
-                                    height: 70,
-                                    width: 70,
+                                    height: 50,
+                                    width: 50,
                                     marginRight: 15,
                                 }}
                             />
@@ -886,7 +797,7 @@ const Create = ({ navigation }) => {
                                 <Text
                                     style={{
                                         fontStyle: 'italic',
-                                        fontSize: 18,
+                                        fontSize: 13,
                                         color: '#8B0000',
                                         backgroundColor: 'transparent',
                                     }}
@@ -902,10 +813,14 @@ const Create = ({ navigation }) => {
                                 alignItems: 'center',
                             }}
                         >
-                            <View style={{ width: 200 }}>
+                            <View
+                                style={{
+                                    width: 200,
+                                }}
+                            >
                                 <CustomButton
                                     title="ĐĂNG BÀI"
-                                    onPress={() => setShowChoose(true)}
+                                    onPress={() => uploadPost()}
                                     isLoading={ButtonPress}
                                 />
                             </View>
