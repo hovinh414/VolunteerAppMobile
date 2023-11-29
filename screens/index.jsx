@@ -20,9 +20,10 @@ import ProfileUser from './Profile/ProfileUser'
 import NotificationScreen from './Feed/NotificationScreen'
 import Attendance from './Attendance/Attendance'
 import ShowQr from './Attendance/ShowQr'
+import ScanQR from './Attendance/ScanQR'
 
 export { Feed, Create, Profile, Notifications, 
     Welcome, Chat, LoginScreen, Signup, ShowQr,
     SignupType, SignupOrganisation, EditProfile, 
     Settings, ChangePassword, ProfileOrganisation, Attendance,
-    Search, ChatDetail, DetailPost, ViewDetailImage, ProfileUser, NotificationScreen }
+    Search, ChatDetail, DetailPost, ViewDetailImage, ProfileUser, NotificationScreen, ScanQR }

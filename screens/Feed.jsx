@@ -11,7 +11,6 @@ import * as Progress from 'react-native-progress'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, SIZES, images } from '../constants'
-import { friends, posts } from '../constants/data'
 import {
     AntDesign,
     Ionicons,
@@ -25,6 +24,7 @@ import axios from 'axios'
 import API_URL from '../interfaces/config'
 import { Image } from 'expo-image'
 import AsyncStoraged from '../services/AsyncStoraged'
+import { useFocusEffect } from '@react-navigation/native';
 
 import Post from './Feed/Post'
 import {
@@ -44,19 +44,24 @@ import {
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 const loading = '../assets/loading.gif'
 const Feed = ({ navigation, route }) => {
-    React.useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
-            onRefreshPost()
-        })
+    // React.useEffect(() => {
+    //     const unsubscribe = navigation.addListener('focus', () => {
+    //         fetchNextPage()
+    //     })
 
-        return unsubscribe
-    }, [navigation])
+    //     return unsubscribe
+    // }, [navigation])
     const onRefreshPost = () => {
         setCurrentPage(0)
         setPosts([])
         getPosts()
         setTypePost('normal')
     }
+    // useFocusEffect(
+    //     React.useCallback(() => {
+    //       fetchNextPage();
+    //     }, []) 
+    //   );
     const Divider = () => (
         <View
             style={{
@@ -65,7 +70,7 @@ const Feed = ({ navigation, route }) => {
             }}
         />
     )
-    const [posts, setPosts] = useState()
+    const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
     const [avatar, setAvatar] = useState()
     const [typePost, setTypePost] = useState('normal')
@@ -102,7 +107,7 @@ const Feed = ({ navigation, route }) => {
         }
         try {
             const response = await axios.get(
-                API_URL.API_URL + '/posts?page=1&limit=6',
+                API_URL.API_URL + '/posts?page=1&limit=5',
                 config
             )
 
@@ -126,6 +131,7 @@ const Feed = ({ navigation, route }) => {
             setRefreshing(false)
         })
     }
+    
     const fetchNextPage = async () => {
         if (!isFetchingNextPage) {
             setIsFetchingNextPage(true)
@@ -136,13 +142,13 @@ const Feed = ({ navigation, route }) => {
                     Authorization: token,
                 },
             }
-
+            console.log(currentPage)
             try {
                 if (typePost === 'normal') {
                     const response = await axios.get(
                         `${API_URL.API_URL}/posts?page=${
                             currentPage + 1
-                        }&limit=6`,
+                        }&limit=5`,
                         config
                     )
                     if (response.data.status === 'SUCCESS') {
@@ -156,7 +162,7 @@ const Feed = ({ navigation, route }) => {
                         method: 'post',
                         url: `${API_URL.API_URL}/posts/follows?page=${
                             currentPage + 1
-                        }&limit=6`,
+                        }&limit=5`,
                         headers: {
                             'Content-Type': 'application/json',
                             Authorization: token,
@@ -176,7 +182,7 @@ const Feed = ({ navigation, route }) => {
                     type: 'noPost',
                     text1: 'Bạn đã xem hết rồi',
                     text2: 'Bạn đã xem tất cả bài viết mới nhất',
-                    visibilityTime: 2500,
+                    visibilityTime: 2500,   
                 })
                 console.log('API Error get more post:', error)
             } finally {
@@ -189,7 +195,7 @@ const Feed = ({ navigation, route }) => {
         try {
             const res = await axios({
                 method: 'post',
-                url: API_URL.API_URL + '/posts/follows?page=1&limit=6',
+                url: API_URL.API_URL + '/posts/follows?page=1&limit=5',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: token,

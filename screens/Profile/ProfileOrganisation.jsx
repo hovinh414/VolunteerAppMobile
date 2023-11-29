@@ -174,6 +174,7 @@ const VerifyRoute = ({ navigation }) => {
             quality: 1,
         })
         delete result.cancelled
+        console.log(result)
         if (!result.canceled) {
             if (selectedImages.length + result.assets.length > 5) {
                 Toast.show({

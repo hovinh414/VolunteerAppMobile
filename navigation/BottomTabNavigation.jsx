@@ -14,6 +14,7 @@ import {
     Notifications,
     Profile,
     Settings,
+    ScanQR,
 } from '../screens'
 import Feed from '../screens/Feed'
 import Create from '../screens/Post/Create'
@@ -26,7 +27,7 @@ import NotificationScreen from '../screens/Feed/NotificationScreen'
 import { Image } from 'expo-image'
 import { useFocusEffect } from '@react-navigation/native'
 const Tab = createBottomTabNavigator()
-
+const scan = '../assets/scan.gif'
 const screenOptions = {
     tabBarShowLabel: false,
     headerShown: false,
@@ -148,6 +149,39 @@ const BottomTabNavigation = () => {
                                         name="plus-circle"
                                         size={25}
                                         color={'#fff'}
+                                    />
+                                </LinearGradient>
+                            )
+                        },
+                    }}
+                />
+            ) : type === 'User' || type === 'Admin' || type === 'user' ? (
+                <Tab.Screen
+                    name="ScanQR"
+                    component={ScanQR}
+                    options={{
+                        tabBarIcon: ({ focused }) => {
+                            return (
+                                <LinearGradient
+                                    colors={['#ffdccc', '#ffdccc']}
+                                    style={{
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: Platform.OS == 'ios' ? 50 : 60,
+                                        height: Platform.OS == 'ios' ? 50 : 60,
+                                        top: Platform.OS == 'ios' ? -10 : -20,
+                                        borderRadius: 22,
+                                        borderColor: '#fff',
+                                        borderWidth: 4,
+                                    }}
+                                >
+                                    <Image
+                                        source={require(scan)}
+                                        style={{
+                                            height: 90,
+                                            width: 90,
+                                            // Các thiết lập khác của hình ảnh nếu cần
+                                        }}
                                     />
                                 </LinearGradient>
                             )
