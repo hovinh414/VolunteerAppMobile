@@ -232,7 +232,7 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
                             {item.ownerDisplayname}
                         </Text>
                         <Text style={{ color: '#696969' }}>{item.content}</Text>
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             onPress={() => {
                                 setParentId(item._id)
                                 handleButtonClick()
@@ -244,7 +244,7 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
                             >
                                 Trả lời
                             </Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
                 </View>
             )}
@@ -267,13 +267,17 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
             alert('hell')
         }
     }
+    const handleRequestClose = () => {
+        setComment([]); 
+        onRequestClose(); 
+    };
     return (
         <Modal
             animationType="slide"
             visible={visible}
-            onRequestClose={onRequestClose}
+            onRequestClose={handleRequestClose}
             customBackdrop={
-                <TouchableWithoutFeedback onPress={onRequestClose}>
+                <TouchableWithoutFeedback onPress={handleRequestClose}>
                     <View style={{ flex: 1 }} />
                 </TouchableWithoutFeedback>
             }
@@ -298,7 +302,7 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
                 }}
             >
                 <TouchableOpacity
-                    onPress={onRequestClose}
+                    onPress={handleRequestClose}
                     style={{
                         position: 'absolute',
                         top: 10,

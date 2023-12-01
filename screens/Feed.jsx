@@ -24,7 +24,7 @@ import axios from 'axios'
 import API_URL from '../interfaces/config'
 import { Image } from 'expo-image'
 import AsyncStoraged from '../services/AsyncStoraged'
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native'
 
 import Post from './Feed/Post'
 import {
@@ -44,23 +44,18 @@ import {
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 const loading = '../assets/loading.gif'
 const Feed = ({ navigation, route }) => {
-    // React.useEffect(() => {
-    //     const unsubscribe = navigation.addListener('focus', () => {
-    //         fetchNextPage()
-    //     })
-
-    //     return unsubscribe
-    // }, [navigation])
+    // const { postId } = ;
     const onRefreshPost = () => {
         setCurrentPage(0)
         setPosts([])
+        setJoinedPost([])
         getPosts()
         setTypePost('normal')
     }
     // useFocusEffect(
     //     React.useCallback(() => {
     //       fetchNextPage();
-    //     }, []) 
+    //     }, [])
     //   );
     const Divider = () => (
         <View
@@ -71,18 +66,21 @@ const Feed = ({ navigation, route }) => {
         />
     )
     const [posts, setPosts] = useState([])
+    const [joinedPost, setJoinedPost] = useState([])
     const [token, setToken] = useState('')
     const [avatar, setAvatar] = useState()
     const [typePost, setTypePost] = useState('normal')
     const [type, setType] = useState()
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
-    const [currentPage, setCurrentPage] = useState(1)
+    const [currentPage, setCurrentPage] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
-
+    useEffect(() => {
+        setJoinedPost((prevJoinedPost) => [...prevJoinedPost, route.params])
+    }, [route.params])
     useEffect(() => {
         getToken()
     }, [])
@@ -112,7 +110,8 @@ const Feed = ({ navigation, route }) => {
             )
 
             if (response.data.status === 'SUCCESS') {
-                setPosts(response.data.data)
+                setPosts(response.data.data.posts)
+                setJoinedPost(response.data.data.joinedPost)
             }
         } catch (error) {
             console.log('API Error get post:', error)
@@ -131,7 +130,7 @@ const Feed = ({ navigation, route }) => {
             setRefreshing(false)
         })
     }
-    
+
     const fetchNextPage = async () => {
         if (!isFetchingNextPage) {
             setIsFetchingNextPage(true)
@@ -142,7 +141,6 @@ const Feed = ({ navigation, route }) => {
                     Authorization: token,
                 },
             }
-            console.log(currentPage)
             try {
                 if (typePost === 'normal') {
                     const response = await axios.get(
@@ -152,10 +150,18 @@ const Feed = ({ navigation, route }) => {
                         config
                     )
                     if (response.data.status === 'SUCCESS') {
-                        setPosts([...posts, ...response.data.data])
+                        setPosts([...posts, ...response.data.data.posts])
+                        setJoinedPost([
+                            ...joinedPost,
+                            ...response.data.data.joinedPost,
+                        ])
                         setCurrentPage(currentPage + 1)
                     } else {
-                        setPosts([...posts, ...response.data.data])
+                        setPosts([...posts, ...response.data.data.posts])
+                        setJoinedPost([
+                            ...joinedPost,
+                            ...response.data.data.joinedPost,
+                        ])
                     }
                 } else {
                     const res = await axios({
@@ -177,14 +183,18 @@ const Feed = ({ navigation, route }) => {
                     }
                 }
             } catch (error) {
-                setIsLoading(false)
-                Toast.show({
-                    type: 'noPost',
-                    text1: 'Bạn đã xem hết rồi',
-                    text2: 'Bạn đã xem tất cả bài viết mới nhất',
-                    visibilityTime: 2500,   
-                })
-                console.log('API Error get more post:', error)
+                if (
+                    error.response.status === 400 ||
+                    error.response.status === 500
+                ) {
+                    setIsLoading(false)
+                    Toast.show({
+                        type: 'noPost',
+                        text1: 'Bạn đã xem hết rồi',
+                        text2: 'Bạn đã xem tất cả bài viết mới nhất',
+                        visibilityTime: 2500,
+                    })
+                }
             } finally {
                 setIsFetchingNextPage(false)
             }
@@ -435,9 +445,7 @@ const Feed = ({ navigation, route }) => {
                                                 fontSize: 14,
                                                 color: '#fff',
                                             }}
-                                        >
-                                            @username
-                                        </Text>
+                                        ></Text>
                                     </View>
                                 </View>
                             </View>
@@ -552,7 +560,9 @@ const Feed = ({ navigation, route }) => {
                                         }}
                                     >
                                         {type === 'Organization' ||
-                                        !type ? null : item.isJoin ? (
+                                        !type ? null : joinedPost.includes(
+                                              item._id
+                                          ) ? (
                                             <View
                                                 style={{
                                                     backgroundColor: '#ccc',
@@ -840,6 +850,7 @@ const Feed = ({ navigation, route }) => {
                 style={{ flex: 1, zIndex: 1, marginTop: 50, marginBottom: 20 }}
             >
                 <Post
+                    joinedPost={joinedPost}
                     posts={posts}
                     fetchNextPage={fetchNextPage}
                     refreshing={refreshing}

@@ -34,6 +34,7 @@ import { format } from 'date-fns'
 const share = '../../assets/share.png'
 const Post = ({
     posts,
+    joinedPost,
     fetchNextPage,
     refreshing,
     onRefresh,
@@ -106,11 +107,28 @@ const Post = ({
             }
         }
     }
+    
     const [postIdComment, setPostIdComment] = useState('')
     function LikeButton({ postId, likePost, unLikePost, post }) {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
+        useEffect(() => {
+            const fetchLikes = async () => {
+                try {
+                    const response = await axios.get(
+                        API_URL.API_URL + '/post/likes/' + postId
+                    )
 
+                    if (response.data.status === 'SUCCESS') {
+                        setTotalLike(response.data.data.totalLikes)
+                    }
+                } catch (error) {
+                    console.log('API Error:', error)
+                }
+            }
+
+            fetchLikes()
+        }, [])
         if (!token) {
             return
         } else {
@@ -138,25 +156,23 @@ const Post = ({
 
             useEffect(() => {
                 checkLikes()
+                // fetchLikes()
             }, [])
         }
-        const fetchLikes = async () => {
-            try {
-                const response = await axios.get(
-                    API_URL.API_URL + '/post/likes/' + postId
-                )
+        // const fetchLikes = async () => {
+        //     try {
+        //         const response = await axios.get(
+        //             API_URL.API_URL + '/post/likes/' + postId
+        //         )
 
-                if (response.data.status === 'SUCCESS') {
-                    setTotalLike(response.data.data.totalLikes)
-                }
-            } catch (error) {
-                console.log('API Error:', error)
-            }
-        }
+        //         if (response.data.status === 'SUCCESS') {
+        //             setTotalLike(response.data.data.totalLikes)
+        //         }
+        //     } catch (error) {
+        //         console.log('API Error:', error)
+        //     }
+        // }
 
-        useEffect(() => {
-            fetchLikes()
-        }, [])
         const handleLikeClick = async () => {
             try {
                 if (isLiked) {
@@ -167,7 +183,7 @@ const Post = ({
                     setIsLiked(true)
                 }
 
-                fetchLikes() // Gọi hàm này sau khi thực hiện like/unlike thành công
+                fetchLikes()
             } catch (error) {
                 console.log(error)
             }
@@ -349,7 +365,6 @@ const Post = ({
 
         // Thay thế tất cả các ký tự # bằng chuỗi trống
         const contentWithoutHashtags = content.replace(hashtagRegex, '')
-
         // Thay thế tất cả các URL bằng chuỗi trống
         const contentWithoutUrls = contentWithoutHashtags.replace(urlRegex, '')
 
@@ -416,7 +431,7 @@ const Post = ({
                 ListHeaderComponent={headers}
                 showsVerticalScrollIndicator={false}
                 onEndReached={fetchNextPage}
-                onEndReachedThreshold={0.1}
+                onEndReachedThreshold={0.4}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -545,6 +560,7 @@ const Post = ({
                             )}
                         </View>
                         <TouchableOpacity
+                            activeOpacity={0.8}
                             onPress={() => viewDetailPost(item._id)}
                         >
                             <View
@@ -696,7 +712,7 @@ const Post = ({
                                 }}
                             >
                                 {type === 'Organization' ||
-                                !type ? null : item.isJoin ? (
+                                !type ? null : joinedPost.includes(item._id) ? (
                                     <View
                                         style={{
                                             backgroundColor: '#ccc',
@@ -732,6 +748,7 @@ const Post = ({
                                     </View>
                                 ) : (
                                     <TouchableOpacity
+                                        activeOpacity={0.8}
                                         style={{
                                             backgroundColor: COLORS.primary,
                                             borderRadius: 10,

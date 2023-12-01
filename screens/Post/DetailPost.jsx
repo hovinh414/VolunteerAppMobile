@@ -7,7 +7,7 @@ import {
     Dimensions,
     Image,
     FlatList,
-    Linking
+    Linking,
 } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import Modal from 'react-native-modal'
@@ -17,7 +17,7 @@ import { COLORS, FONTS, SIZES } from '../../constants/theme'
 import * as Progress from 'react-native-progress'
 import {
     MaterialIcons,
-    FontAwesome5,
+    Feather,
     Ionicons,
     FontAwesome,
 } from '@expo/vector-icons'
@@ -38,6 +38,7 @@ const DetailPost = ({ navigation, route }) => {
     const [showLoading, setShowLoading] = useState(false)
     const [orgId, setOrgId] = useState('')
     const [isModalVisible, setModalVisible] = useState(false)
+    const [joinId, setJoinId] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
@@ -103,7 +104,7 @@ const DetailPost = ({ navigation, route }) => {
                         fontWeight: '500',
                     }}
                 >
-                    Đã hết hạn đăng ký
+                    Đã hết hạn
                 </Text>
             )
         } else {
@@ -176,7 +177,8 @@ const DetailPost = ({ navigation, route }) => {
                     text2: 'Tham gia thành công',
                     visibilityTime: 2500,
                 })
-
+                
+                setJoinId(items._id)
                 refreshDetail()
             }
         } catch (error) {
@@ -427,7 +429,7 @@ const DetailPost = ({ navigation, route }) => {
         const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapAddress}`
         Linking.openURL(googleMapsUrl)
     }
-    
+
     return (
         <View style={{ flex: 1 }}>
             <View
@@ -440,7 +442,7 @@ const DetailPost = ({ navigation, route }) => {
             <ModalLoading visible={showLoading} />
             {renderQrCodeModal()}
             <TouchableOpacity
-                onPress={() => navigation.goBack()}
+                onPress={() => navigation.navigate('Feed',  joinId)}
                 style={{
                     position: 'absolute',
                     top: 50,
@@ -563,7 +565,7 @@ const DetailPost = ({ navigation, route }) => {
                         }}
                     >
                         <TouchableOpacity
-                        onPress={() => handleMap(items.address)}
+                            onPress={() => handleMap(items.address)}
                             activeOpacity={0.8}
                             style={{
                                 flexDirection: 'row',
@@ -841,10 +843,12 @@ const DetailPost = ({ navigation, route }) => {
                                 </View>
                             )}
                         />
-                        {type === 'Organization' && orgId === items.ownerId && items.isEnableQr ? (
+                        {type === 'Organization' && items.isEnableQr ? (
                             <View
                                 style={{
                                     marginBottom: 50,
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
                                 }}
                             >
                                 <TouchableOpacity
@@ -852,6 +856,7 @@ const DetailPost = ({ navigation, route }) => {
                                     activeOpacity={0.8}
                                     style={{
                                         backgroundColor: COLORS.primary,
+                                        width: '48%',
                                         height: 50,
                                         borderRadius: 16,
                                         alignItems: 'center',
@@ -874,17 +879,84 @@ const DetailPost = ({ navigation, route }) => {
                                         color={COLORS.white}
                                     />
                                 </TouchableOpacity>
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.white,
+                                        height: 50,
+                                        borderWidth: 2,
+                                        borderColor: COLORS.primary,
+                                        width: '48%',
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.primary,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        TẠO GROUP CHAT
+                                    </Text>
+                                    <Feather
+                                        name={'users'}
+                                        size={30}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
                             </View>
-                        ) : items.isAttended ? (
+                        ) : orgId === items.ownerId ? (
                             <View
                                 style={{
                                     marginBottom: 50,
                                 }}
                             >
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.white,
+                                        height: 50,
+                                        borderWidth: 2,
+                                        borderColor: COLORS.primary,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.primary,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        TẠO GROUP CHAT
+                                    </Text>
+                                    <Feather
+                                        name={'users'}
+                                        size={30}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        ) : items.isAttended ? (
+                            <View
+                                style={{
+                                    marginBottom: 50,
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
                                 <View
                                     style={{
                                         backgroundColor: '#ccc',
-                                        height: 44,
+                                        height: 50,
+                                        width: '48%',
                                         borderRadius: 16,
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -899,17 +971,49 @@ const DetailPost = ({ navigation, route }) => {
                                         ĐÃ ĐIỂM DANH
                                     </Text>
                                 </View>
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.white,
+                                        height: 50,
+                                        borderWidth: 2,
+                                        borderColor: COLORS.primary,
+                                        width: '48%',
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.primary,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        THAM GIA GROUP
+                                    </Text>
+                                    <Feather
+                                        name={'users'}
+                                        size={30}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
                             </View>
                         ) : items.isJoin ? (
                             <View
                                 style={{
                                     marginBottom: 50,
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
                                 }}
                             >
                                 <View
                                     style={{
                                         backgroundColor: '#ccc',
-                                        height: 44,
+                                        height: 50,
+                                        width: '48%',
                                         borderRadius: 16,
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -924,6 +1028,35 @@ const DetailPost = ({ navigation, route }) => {
                                         ĐÃ THAM GIA
                                     </Text>
                                 </View>
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.white,
+                                        height: 50,
+                                        borderWidth: 2,
+                                        borderColor: COLORS.primary,
+                                        width: '48%',
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.primary,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        THAM GIA GROUP
+                                    </Text>
+                                    <Feather
+                                        name={'users'}
+                                        size={30}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
                             </View>
                         ) : items.isExprired ? (
                             <View
@@ -946,7 +1079,7 @@ const DetailPost = ({ navigation, route }) => {
                                             color: '#000',
                                         }}
                                     >
-                                        Đã hết hạn
+                                        ĐÃ HẾT HẠN
                                     </Text>
                                 </View>
                             </View>

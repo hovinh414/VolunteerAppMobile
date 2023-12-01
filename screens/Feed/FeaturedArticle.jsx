@@ -294,9 +294,9 @@ function FeaturedArticle({ navigation }) {
             </View>
             <FlatList
                 onEndReached={fetchNextPage}
-                onEndReachedThreshold={0.4}
+                onEndReachedThreshold={0.1}
                 showsVerticalScrollIndicator= {false}
-                data={posts}
+                data={posts.posts}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}

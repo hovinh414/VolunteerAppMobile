@@ -274,7 +274,7 @@ const Create = ({ navigation }) => {
         const dateTwo = new Date(year2, month2 - 1, day2)
         const timeDiff = dateOne.getTime() - dateTwo.getTime()
         const daysDiff = timeDiff / (1000 * 3600 * 24)
-        if (daysDiff > 0) {
+        if (daysDiff >= 0) {
             Toast.show({
                 type: 'warning',
                 text1: 'Cảnh báo',
