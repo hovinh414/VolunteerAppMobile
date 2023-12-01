@@ -87,7 +87,7 @@ export const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
     content_detail: {
-        height: 180,
+        height: 130,
         marginHorizontal: 10,
         paddingHorizontal: 10,
         fontSize: 16,

@@ -10,28 +10,29 @@ import {
     SafeAreaView,
     TextInput, // Import TextInput
 } from 'react-native'
-
+import QRCode from 'react-native-qrcode-svg'
 import { MaterialIcons } from '@expo/vector-icons'
 import { COLORS, FONTS } from '../../constants'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import axios from 'axios'
 import API_URL from '../../interfaces/config'
-import * as Progress from 'react-native-progress'
+import Modal from 'react-native-modal'
 import { Image } from 'expo-image'
 const loading = '../../assets/loading.gif'
-function FeaturedArticle({ navigation }) {
+function ShowQr({ navigation }) {
     const screenWidth = Dimensions.get('window').width
 
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
     const [avatar, setAvatar] = useState(null)
     const [type, setType] = useState(null)
-    const [typePost, setTypePost] = useState('normal')
+    const [orgId, setOrgId] = useState('normal')
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
     const [refreshing, setRefreshing] = useState(false)
     const [showSearchInput, setShowSearchInput] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [isModalVisible, setModalVisible] = useState(false)
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
             onRefreshPost()
@@ -58,6 +59,7 @@ function FeaturedArticle({ navigation }) {
         if (userStored) {
             setAvatar(userStored.avatar)
             setType(userStored.type)
+            setOrgId(userStored._id)
         } else {
             setAvatar(null)
             setType(null)
@@ -81,29 +83,20 @@ function FeaturedArticle({ navigation }) {
     }
 
     const getPosts = async () => {
-        const config = {
-            headers: {
-                Authorization: token,
-            },
-        }
-
-        try {
-            const response = await axios.get(
-                API_URL.API_URL + '/posts?page=1&limit=6',
-                config
-            )
-
-            if (response.data.status === 'SUCCESS') {
-                setPosts(response.data.data)
-            }
-        } catch (error) {
-            console.log('API Error get post:', error)
-        }
+        axios
+            .get(API_URL.API_URL + '/posts/' + orgId + '?page=1&limit=4')
+            .then((response) => {
+                if (response.data.status === 'SUCCESS') {
+                    setPosts(response.data.data)
+                }
+            })
+            .catch((error) => {
+                console.log('API Error:', error)
+            })
     }
-
     useEffect(() => {
         getPosts()
-    }, [token])
+    }, [orgId])
 
     const onRefresh = () => {
         setRefreshing(true)
@@ -138,38 +131,60 @@ function FeaturedArticle({ navigation }) {
                 }
             } catch (error) {
                 setIsLoading(false)
-                
+
                 console.log('API Error:', error)
-                return;
+                return
             } finally {
                 setIsFetchingNextPage(false)
             }
         }
     }
 
-    const viewDetailPost = async (_postId) => {
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: token,
-            },
-        }
-        try {
-            const response = await axios.get(
-                API_URL.API_URL + '/post/' + _postId,
-                config
-            )
-            if (response.data.status === 'SUCCESS') {
-                navigation.navigate('DetailPost', response.data.data)
-            }
-        } catch (error) {
-            console.log('API Error:', error)
-        }
-    }
-
     const toggleSearchInput = () => {
         setShowSearchInput(!showSearchInput)
     }
+    const renderQrCodeModal = (postId) => (
+        <Modal
+            isVisible={isModalVisible}
+            animationIn="fadeIn"
+            animationOut="fadeOut"
+        >
+            <TouchableOpacity
+                style={{ flex: 1 }}
+                activeOpacity={1}
+                onPressOut={() => setModalVisible(false)}
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <View
+                        style={{
+                            backgroundColor: COLORS.white,
+                            padding: 20,
+                            borderRadius: 20,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontWeight: 'bold',
+                                fontSize: 17,
+                                marginBottom: 10,
+                            }}
+                        >
+                            Quét mã QR này để điểm danh
+                        </Text>
+                        <QRCode value={postId} size={250} />
+                    </View>
+                </View>
+            </TouchableOpacity>
+        </Modal>
+    )
     const RenderLoader = () => {
         return (
             <View>
@@ -191,7 +206,7 @@ function FeaturedArticle({ navigation }) {
         )
     }
     return (
-        <KeyboardAvoidingView
+        <SafeAreaView
             KeyboardAvoidingView
             style={{
                 flex: 1,
@@ -200,8 +215,6 @@ function FeaturedArticle({ navigation }) {
                 paddingTop: 55,
                 paddingBottom: 30,
             }}
-            behavior="height"
-            enabled
         >
             <View
                 style={{
@@ -241,11 +254,11 @@ function FeaturedArticle({ navigation }) {
                         <Text
                             style={{
                                 ...FONTS.body5,
-                                fontSize: 16,
+                                fontSize: 18,
                                 marginLeft: 10,
                             }}
                         >
-                            Chiến dịch nổi bật
+                            Điểm danh
                         </Text>
                     )}
                 </TouchableOpacity>
@@ -294,9 +307,9 @@ function FeaturedArticle({ navigation }) {
             </View>
             <FlatList
                 onEndReached={fetchNextPage}
-                onEndReachedThreshold={0.1}
-                showsVerticalScrollIndicator= {false}
-                data={posts.posts}
+                onEndReachedThreshold={0.4}
+                showsVerticalScrollIndicator={false}
+                data={posts}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -313,17 +326,18 @@ function FeaturedArticle({ navigation }) {
                             justifyContent: 'center',
                         }}
                         activeOpacity={0.8}
-                        onPress={() => viewDetailPost(item._id)}
+                        onPress={() => setModalVisible(true)}
                     >
+                        {renderQrCodeModal(item._id)}
                         <View
                             style={{
                                 flexDirection: 'row',
                                 backgroundColor: '#F0F0F0',
-                                width: screenWidth - 25,
+                                width: screenWidth - 35,
                                 height: 130,
                                 marginHorizontal: 12,
                                 marginTop: 15,
-                                justifyContent: 'flex-start',
+                                justifyContent: 'space-between',
                                 borderRadius: 15,
                                 padding: 10,
                             }}
@@ -376,8 +390,8 @@ function FeaturedArticle({ navigation }) {
                                         ...FONTS.body5,
                                     }}
                                 >
-                                    {item.content.length > 22
-                                        ? `${item.content.slice(0, 22)}...`
+                                    {item.content.length > 15
+                                        ? `${item.content.slice(0, 15)}...`
                                         : item.content}
                                 </Text>
                                 <Text
@@ -386,7 +400,7 @@ function FeaturedArticle({ navigation }) {
                                         fontSize: 13,
                                     }}
                                 >
-                                    Tạo bởi{' '}
+                                    Đang diễn ra:{' '}
                                     <Text
                                         style={{
                                             marginLeft: 12,
@@ -395,29 +409,9 @@ function FeaturedArticle({ navigation }) {
                                             color: COLORS.primary,
                                         }}
                                     >
-                                        {item.ownerDisplayname}
+                                        24-11-2023
                                     </Text>
                                 </Text>
-                                <View
-                                    style={{
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginTop: 12,
-                                    }}
-                                >
-                                    <Progress.Bar
-                                        progress={
-                                            item.totalUserJoin /
-                                            item.participants
-                                        }
-                                        color="#FF493C"
-                                        height={8}
-                                        width={screenWidth - 167}
-                                        unfilledColor="#cccc"
-                                        borderColor="#cccc"
-                                        borderRadius={25}
-                                    />
-                                </View>
                                 <View
                                     style={{
                                         marginTop: 8,
@@ -437,10 +431,9 @@ function FeaturedArticle({ navigation }) {
                                             style={{
                                                 color: COLORS.black,
                                                 fontSize: 14,
-                                                marginLeft: 5,
                                             }}
                                         >
-                                            Đã tham gia:{' '}
+                                            Đã điểm danh:{' '}
                                             <Text
                                                 style={{
                                                     color: COLORS.primary,
@@ -453,35 +446,43 @@ function FeaturedArticle({ navigation }) {
                                             </Text>
                                         </Text>
                                     </View>
-                                    <TouchableOpacity
-                                        activeOpacity={0.8}
-                                        style={{
-                                            flexDirection: 'row',
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: COLORS.primary,
-                                                fontSize: 14,
-                                                marginLeft: 10,
-                                            }}
-                                        >
-                                            {(
-                                                (item.totalUserJoin /
-                                                    item.participants) *
-                                                100
-                                            ).toFixed(0)}{' '}
-                                            %
-                                        </Text>
-                                    </TouchableOpacity>
                                 </View>
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginLeft:10,
+                                }}
+                            >
+                                <Text style={{ fontWeight: 'bold' }}>
+                                    Điểm danh
+                                </Text>
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    onPress={() => setModalVisible(true)}
+                                    style={{
+                                        justifyContent: 'center',
+                                        marginTop:10,
+                                        alignItems: 'center',
+                                        backgroundColor: COLORS.primary,
+                                        borderRadius:10,
+                                    }}
+                                >
+                                    <MaterialIcons
+                                        name={'qr-code-2'}
+                                        size={50}
+                                        color={COLORS.white}
+                                    />
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </TouchableOpacity>
                 )}
             />
-        </KeyboardAvoidingView>
+        </SafeAreaView>
     )
 }
 
-export default FeaturedArticle
+export default ShowQr

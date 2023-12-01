@@ -23,7 +23,7 @@ import { shareAsync } from 'expo-sharing'
 import * as MediaLibrary from 'expo-media-library'
 import * as DocumentPicker from 'expo-document-picker'
 import { styles } from './ChatDetailStyle'
-import { Image } from 'expo-image';
+import { Image } from 'expo-image'
 
 const file = '../../assets/file.png'
 const video = '../../assets/video.png'
@@ -98,6 +98,7 @@ function ChatDetail({ navigation }) {
             quality: 1,
         })
         delete result.cancelled
+        console.log(result)
         if (!result.canceled) {
             if (!selectedImages) {
                 setSelectedImage(result.assets)
@@ -131,7 +132,7 @@ function ChatDetail({ navigation }) {
         <KeyboardAvoidingView
             KeyboardAvoidingView
             style={styles.container}
-            behavior="height"
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             enabled
         >
             <View style={styles.header}>
@@ -142,30 +143,34 @@ function ChatDetail({ navigation }) {
                         color={COLORS.black}
                     />
                 </TouchableOpacity>
-                <Image source={images.friend5} style={styles.avatarDetail} />
-                <Text style={{ ...FONTS.h4, marginLeft: 10 }}>Thanh Thuận</Text>
+                <Image source={images.post5} style={styles.avatarDetail} />
+                <Text style={{ ...FONTS.h4, marginLeft: 10 }}>
+                    Quỹ thiện tâm
+                </Text>
             </View>
 
             <FlatList
                 data={messages}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
-                    <View
-                        style={
-                            item.sender === 'me'
-                                ? styles.myMessage
-                                : styles.theirMessage
-                        }
-                    >
-                        <Text
+                    <View>
+                        <View
                             style={
                                 item.sender === 'me'
-                                    ? styles.messageMyText
-                                    : styles.messageTheirText
+                                    ? styles.myMessage
+                                    : styles.theirMessage
                             }
                         >
-                            {item.text}
-                        </Text>
+                            <Text
+                                style={
+                                    item.sender === 'me'
+                                        ? styles.messageMyText
+                                        : styles.messageTheirText
+                                }
+                            >
+                                {item.text}
+                            </Text>
+                        </View>
                     </View>
                 )}
             />
@@ -209,19 +214,17 @@ function ChatDetail({ navigation }) {
                                             source={require(video)}
                                             style={styles.fileIcon}
                                         />
-                                    ) : item.mimeType === 'image/jpeg' ?
-                                     (
+                                    ) : item.mimeType === 'image/jpeg' ? (
                                         <Image
                                             source={{ uri: item.uri }}
                                             style={styles.fileIcon}
                                         />
-                                    ): (
+                                    ) : (
                                         <Image
-                                        source={require(file)}
-                                        style={styles.fileIcon}
-                                    />
-                                    )
-                                    }
+                                            source={require(file)}
+                                            style={styles.fileIcon}
+                                        />
+                                    )}
                                     <Text style={styles.fileName}>
                                         {item.name}
                                     </Text>

@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react'
 import {
-    Modal,
     Text,
     View,
     TouchableOpacity,
     FlatList,
     TextInput,
-    KeyboardAvoidingView,
+    TouchableWithoutFeedback,
 } from 'react-native'
+import Modal from 'react-native-modal'
 import { Feather, Ionicons } from '@expo/vector-icons'
 import { COLORS } from '../constants'
 import { Image } from 'expo-image'
@@ -76,10 +76,7 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
 
         try {
             const response = await axios.get(
-                API_URL.API_URL +
-                    '/post/' +
-                    postId +
-                    '/comments?page=1&limit=5'
+                API_URL.API_URL + '/post/' + postId + '/comments?page=1&limit=5'
             )
 
             if (response.data.status === 'SUCCESS') {
@@ -165,79 +162,92 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
         }
         return nestedComments
     }
+
     const renderCommentItem = ({ item }) => (
         <View style={{ paddingHorizontal: 15 }}>
             {!item.parentId ? (
                 <View
-                style={{
-                    flexDirection: 'row',
-                    marginTop: 18,
-                    marginLeft: 10,
-                }}
-            >
-                <Image
-                    source={item.ownerAvatar}
-                    style={{ width: 40, height: 40, borderRadius: 20 }}
-                />
-                <View
                     style={{
-                        flexDirection: 'column',
-                        justifyContent: 'center',
+                        flexDirection: 'row',
+                        marginTop: 18,
                         marginLeft: 10,
                     }}
                 >
-                    <Text style={{ fontWeight: '800', marginBottom: 3 }}>
-                        {item.ownerDisplayname}
-                    </Text>
-                    <Text style={{ color: '#696969' }}>{item.content}</Text>
-                    <TouchableOpacity
-                        onPress={() => {
-                            setParentId(item._id)
-                            handleButtonClick()
+                    <Image
+                        source={item.ownerAvatar}
+                        style={{ width: 40, height: 40, borderRadius: 20 }}
+                    />
+                    <View
+                        style={{
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            marginLeft: 10,
                         }}
-                        style={{ marginTop: 5 }}
                     >
-                        <Text style={{ color: '#696969', fontWeight: '500' }}>
-                            Trả lời
+                        <Text style={{ fontWeight: '800', marginBottom: 3 }}>
+                            {item.ownerDisplayname}
                         </Text>
-                    </TouchableOpacity>
+                        <Text style={{ color: '#696969' }}>{item.content}</Text>
+                        <TouchableOpacity
+                            onPress={() => {
+                                setParentId(item._id)
+                                handleButtonClick()
+                            }}
+                            style={{ marginTop: 5 }}
+                        >
+                            <Text
+                                style={{ color: '#696969', fontWeight: '500' }}
+                            >
+                                Trả lời
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
-            ) : (<View
-                style={{
-                    flexDirection: 'row',
-                    marginTop: 18,
-                    marginLeft: 40,
-                }}
-            >
-                <Image
-                    source={item.ownerAvatar}
-                    style={{ width: 30, height: 30, borderRadius: 20 }}
-                />
+            ) : (
                 <View
                     style={{
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        marginLeft: 10,
+                        flexDirection: 'row',
+                        marginTop: 18,
+                        marginLeft: 40,
                     }}
                 >
-                    <Text style={{ fontWeight: '800', marginBottom: 3, fontSize:13 }}>
-                        {item.ownerDisplayname}
-                    </Text>
-                    <Text style={{ color: '#696969' }}>{item.content}</Text>
-                    <TouchableOpacity
-                        onPress={() => {
-                            setParentId(item._id)
-                            handleButtonClick()
+                    <Image
+                        source={item.ownerAvatar}
+                        style={{ width: 30, height: 30, borderRadius: 20 }}
+                    />
+                    <View
+                        style={{
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            marginLeft: 10,
                         }}
-                        style={{ marginTop: 5 }}
                     >
-                        <Text style={{ color: '#696969', fontWeight: '500' }}>
-                            Trả lời
+                        <Text
+                            style={{
+                                fontWeight: '800',
+                                marginBottom: 3,
+                                fontSize: 13,
+                            }}
+                        >
+                            {item.ownerDisplayname}
                         </Text>
-                    </TouchableOpacity>
+                        <Text style={{ color: '#696969' }}>{item.content}</Text>
+                        {/* <TouchableOpacity
+                            onPress={() => {
+                                setParentId(item._id)
+                                handleButtonClick()
+                            }}
+                            style={{ marginTop: 5 }}
+                        >
+                            <Text
+                                style={{ color: '#696969', fontWeight: '500' }}
+                            >
+                                Trả lời
+                            </Text>
+                        </TouchableOpacity> */}
+                    </View>
                 </View>
-            </View>)}
+            )}
 
             {/* Render nested replies */}
             {item.replies && item.replies.length > 0 && (
@@ -251,134 +261,150 @@ const CommentModal = ({ visible, onRequestClose, postId }, ref) => {
             )}
         </View>
     )
-    
+    const handleScroll = (event) => {
+        // Check if the user is scrolling down
+        if (event.nativeEvent.contentOffset.y > 0) {
+            alert('hell')
+        }
+    }
+    const handleRequestClose = () => {
+        setComment([]); 
+        onRequestClose(); 
+    };
     return (
         <Modal
             animationType="slide"
             visible={visible}
-            onRequestClose={onRequestClose}
+            onRequestClose={handleRequestClose}
+            customBackdrop={
+                <TouchableWithoutFeedback onPress={handleRequestClose}>
+                    <View style={{ flex: 1 }} />
+                </TouchableWithoutFeedback>
+            }
+           
+            avoidKeyboard={true}
+            style={{
+                margin: 0,
+                justifyContent: 'flex-end',
+                flex: 1,
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                borderRadius: 25,
+            }}
         >
-            <KeyboardAvoidingView
+            <View
                 style={{
-                    flex: 1,
-                    justifyContent: 'flex-end',
-                    alignItems: 'center',
-                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    width: '100%',
+                    height: '85%',
+                    backgroundColor: '#fff',
+                    borderTopLeftRadius: 25,
+                    borderTopRightRadius: 25,
+                    paddingBottom: 30,
                 }}
-                behavior="padding"
             >
-                <View
+                <TouchableOpacity
+                    onPress={handleRequestClose}
                     style={{
-                        width: '100%',
-                        height: '85%',
-                        backgroundColor: '#fff',
-                        borderRadius: 25,
-                        paddingBottom: 30,
+                        position: 'absolute',
+                        top: 10,
+                        right: 10,
+                        zIndex: 3,
                     }}
                 >
-                    <TouchableOpacity
-                        onPress={onRequestClose}
-                        style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 10,
-                            zIndex: 3,
-                        }}
-                    >
-                        <Feather name="x" size={26} color={COLORS.black} />
-                    </TouchableOpacity>
+                    <Feather name="x" size={26} color={COLORS.black} />
+                </TouchableOpacity>
+                <View
+                    style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderBottomWidth: 1,
+                        padding: 30,
+                        borderBottomColor: '#cccc',
+                        zIndex: 2,
+                    }}
+                >
+                    <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+                        Bình luận
+                    </Text>
+                </View>
+                {comment.length === 0 ? (
                     <View
                         style={{
+                            flex: 1,
                             justifyContent: 'center',
                             alignItems: 'center',
-                            borderBottomWidth: 1,
-                            padding: 30,
-                            borderBottomColor: '#cccc',
-                            zIndex: 2,
                         }}
                     >
                         <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
-                            Bình luận
+                            Chưa có bình luận nào
                         </Text>
                     </View>
-                    {comment.length === 0 ? (
-                        <View
-                            style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
-                                Chưa có bình luận nào
-                            </Text>
-                        </View>
-                    ) : (
-                        <FlatList
-                            data={buildNestedComments(comment)}
-                            renderItem={renderCommentItem}
-                            showsVerticalScrollIndicator={false}
-                            onEndReached={fetchComment}
-                            onEndReachedThreshold={0.4}
-                        />
-                    )}
+                ) : (
+                    <FlatList
+                        data={buildNestedComments(comment)}
+                        renderItem={renderCommentItem}
+                        showsVerticalScrollIndicator={false}
+                        onEndReached={fetchComment}
+                        onEndReachedThreshold={0.1}
+                        onScrollToTop={handleScroll}
+
+                    />
+                )}
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        marginHorizontal: 8,
+                        paddingTop: 18,
+                        borderTopWidth: 1,
+                        borderTopColor: '#FFF',
+                    }}
+                >
+                    <Image
+                        source={avatar ? { uri: avatar } : ImageAvata}
+                        contentFit="contain"
+                        style={{
+                            height: 52,
+                            width: 52,
+                            borderRadius: 26,
+                        }}
+                    />
+
                     <View
                         style={{
+                            flex: 1,
+                            height: 52,
+                            borderRadius: 26,
+                            borderWidth: 1,
+                            borderColor: '#CCC',
+                            marginLeft: 12,
+                            paddingLeft: 12,
+                            justifyContent: 'space-between',
                             flexDirection: 'row',
-                            marginHorizontal: 8,
-                            paddingTop: 18,
-                            borderTopWidth: 1,
-                            borderTopColor: '#FFF',
+                            alignItems: 'center',
                         }}
                     >
-                        <Image
-                            source={avatar ? { uri: avatar } : ImageAvata}
-                            contentFit="contain"
-                            style={{
-                                height: 52,
-                                width: 52,
-                                borderRadius: 26,
-                            }}
+                        <TextInput
+                            ref={inputRef}
+                            style={{ height: '100%', width: '90%' }}
+                            placeholder={placeholderText}
+                            placeholderTextColor="#CCC"
+                            value={text}
+                            onChangeText={(text) => setText(text)}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
                         />
-
-                        <View
-                            style={{
-                                flex: 1,
-                                height: 52,
-                                borderRadius: 26,
-                                borderWidth: 1,
-                                borderColor: '#CCC',
-                                marginLeft: 12,
-                                paddingLeft: 12,
-                                justifyContent: 'space-between',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <TextInput
-                                ref={inputRef}
-                                style={{ height: '100%', width: '90%' }}
-                                placeholder={placeholderText}
-                                placeholderTextColor="#CCC"
-                                value={text}
-                                onChangeText={(text) => setText(text)}
-                                onFocus={handleFocus}
-                                onBlur={handleBlur}
-                            />
-                            {text ? (
-                                <TouchableOpacity onPress={comments}>
-                                    <Ionicons
-                                        name="send"
-                                        size={25}
-                                        color={COLORS.primary}
-                                        style={{ marginRight: 20 }}
-                                    />
-                                </TouchableOpacity>
-                            ) : null}
-                        </View>
+                        {text ? (
+                            <TouchableOpacity onPress={comments}>
+                                <Ionicons
+                                    name="send"
+                                    size={25}
+                                    color={COLORS.primary}
+                                    style={{ marginRight: 20 }}
+                                />
+                            </TouchableOpacity>
+                        ) : null}
                     </View>
                 </View>
-            </KeyboardAvoidingView>
+            </View>
         </Modal>
     )
 }

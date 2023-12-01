@@ -9,10 +9,11 @@ import {
 import { COLORS, SIZES } from '../constants/theme'
 import { Ionicons } from '@expo/vector-icons'
 
-const CustomViewInfo = ({ value, placeholder,icon, height }) => {
+const CustomViewInfo = ({ value, placeholder,icon, height, onPress }) => {
     return (
         <React.Fragment>
             <TouchableOpacity
+                onPress={onPress}
                 style={{
                     width: '100%',
                     height: height,

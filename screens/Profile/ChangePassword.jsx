@@ -33,12 +33,12 @@ const ChangePassword = ({ navigation }) => {
     const [token, setToken] = useState()
     const [ButtonPress, setButtonPress] = useState('')
     const [showWarning, setShowWarning] = useState(false)
-    const [mess, setMess] = useState()
-    const [icon, setIcon] = useState()
+    const [type, setType] = useState('')
 
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         setUserId(userStored._id)
+        setType(userStored.type)
     }
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -95,16 +95,29 @@ const ChangePassword = ({ navigation }) => {
             }
         } catch (error) {
             console.log('API Error:', error)
-            Toast.show({
-                type: 'error',
-                text1: 'Thất bại',
-                text2: 'Thay đổi mật khẩu thất bại!',
-                visibilityTime: 2500,
-                autoHide: true,
-                onHide: () => {
-                    navigation.navigate('BottomTabNavigation')
-                },
-            })
+            if (type === 'Organization') {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thất bại',
+                    text2: 'Thay đổi mật khẩu thất bại',
+                    visibilityTime: 2500,
+                    autoHide: true,
+                    onHide: () => {
+                        navigation.navigate('ProfileOrganisation')
+                    },
+                })
+            } else {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thất bại',
+                    text2: 'Thay đổi mật khẩu thất bại',
+                    visibilityTime: 2500,
+                    autoHide: true,
+                    onHide: () => {
+                        navigation.navigate('Profile')
+                    },
+                })
+            }
             setButtonPress(false)
         }
     }

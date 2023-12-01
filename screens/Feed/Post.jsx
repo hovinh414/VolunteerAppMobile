@@ -30,10 +30,11 @@ import { Image } from 'expo-image'
 import axios from 'axios'
 import ImageAvata from '../../assets/hero2.jpg'
 import AsyncStoraged from '../../services/AsyncStoraged'
-import { format } from 'date-fns';
+import { format } from 'date-fns'
 const share = '../../assets/share.png'
 const Post = ({
     posts,
+    joinedPost,
     fetchNextPage,
     refreshing,
     onRefresh,
@@ -106,11 +107,28 @@ const Post = ({
             }
         }
     }
+    
     const [postIdComment, setPostIdComment] = useState('')
     function LikeButton({ postId, likePost, unLikePost, post }) {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
+        useEffect(() => {
+            const fetchLikes = async () => {
+                try {
+                    const response = await axios.get(
+                        API_URL.API_URL + '/post/likes/' + postId
+                    )
 
+                    if (response.data.status === 'SUCCESS') {
+                        setTotalLike(response.data.data.totalLikes)
+                    }
+                } catch (error) {
+                    console.log('API Error:', error)
+                }
+            }
+
+            fetchLikes()
+        }, [])
         if (!token) {
             return
         } else {
@@ -138,25 +156,23 @@ const Post = ({
 
             useEffect(() => {
                 checkLikes()
+                // fetchLikes()
             }, [])
         }
-        const fetchLikes = async () => {
-            try {
-                const response = await axios.get(
-                    API_URL.API_URL + '/post/likes/' + postId
-                )
+        // const fetchLikes = async () => {
+        //     try {
+        //         const response = await axios.get(
+        //             API_URL.API_URL + '/post/likes/' + postId
+        //         )
 
-                if (response.data.status === 'SUCCESS') {
-                    setTotalLike(response.data.data.totalLikes)
-                }
-            } catch (error) {
-                console.log('API Error:', error)
-            }
-        }
+        //         if (response.data.status === 'SUCCESS') {
+        //             setTotalLike(response.data.data.totalLikes)
+        //         }
+        //     } catch (error) {
+        //         console.log('API Error:', error)
+        //     }
+        // }
 
-        useEffect(() => {
-            fetchLikes()
-        }, [])
         const handleLikeClick = async () => {
             try {
                 if (isLiked) {
@@ -167,7 +183,7 @@ const Post = ({
                     setIsLiked(true)
                 }
 
-                fetchLikes() // Gọi hàm này sau khi thực hiện like/unlike thành công
+                fetchLikes()
             } catch (error) {
                 console.log(error)
             }
@@ -349,7 +365,6 @@ const Post = ({
 
         // Thay thế tất cả các ký tự # bằng chuỗi trống
         const contentWithoutHashtags = content.replace(hashtagRegex, '')
-
         // Thay thế tất cả các URL bằng chuỗi trống
         const contentWithoutUrls = contentWithoutHashtags.replace(urlRegex, '')
 
@@ -361,31 +376,39 @@ const Post = ({
         return urls || []
     }
     const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        const formattedDate = new Date(dateString).toLocaleDateString('en-US', options);
-        return formattedDate;
-      };
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' }
+        const formattedDate = new Date(dateString).toLocaleDateString(
+            'en-US',
+            options
+        )
+        return formattedDate
+    }
     const sharePost = async (post) => {
         try {
             const cleanedContent = removeHashtagsAndUrlsFromContent(
                 post.content
             )
             let mediaContent = ''
-            
+
             // Duyệt qua mảng media và thêm từng URL vào nội dung chia sẻ
             post.media.forEach((mediaUrl, index) => {
                 mediaContent += `Hình ${index + 1}: ${mediaUrl}\n`
             })
-            const formattedDate = format(new Date(post.exprirationDate), 'dd-MM-yyyy');
+            const formattedDate = format(
+                new Date(post.exprirationDate),
+                'dd-MM-yyyy'
+            )
             const result = await Share.share({
                 message: `${cleanedContent} \n\nĐịa điểm: ${post.address}\nThời hạn: ${formattedDate}\nSố người tham gia: ${post.participants}`,
                 url: extractUrlsFromContent(post.content),
             })
-            if(result.action === Share.sharedAction) {
-                if(result.activityType) {
-                    console.log('Share with activity type: ', result.activityType)
-                }
-                else {
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    console.log(
+                        'Share with activity type: ',
+                        result.activityType
+                    )
+                } else {
                     console.log('shared')
                 }
             } else if (result.action === Share.dismissedAction) {
@@ -487,6 +510,7 @@ const Post = ({
                                 onCurrentImagePressed={() =>
                                     viewDetailPost(item._id)
                                 }
+                                // resizeMode={'contain'}
                             />
 
                             {/* <FlatList
@@ -519,9 +543,24 @@ const Post = ({
                                 marginVertical: 8,
                             }}
                         >
-                            <LongText maxLength={150} content={item.content} />
+                            {item.content.length > 100 ? (
+                                <LongText
+                                    maxLength={150}
+                                    content={item.content}
+                                />
+                            ) : (
+                                <Text
+                                    style={{
+                                        fontSize: 16,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {item.content}
+                                </Text>
+                            )}
                         </View>
                         <TouchableOpacity
+                            activeOpacity={0.8}
                             onPress={() => viewDetailPost(item._id)}
                         >
                             <View
@@ -673,7 +712,7 @@ const Post = ({
                                 }}
                             >
                                 {type === 'Organization' ||
-                                !type ? null : item.isJoin ? (
+                                !type ? null : joinedPost.includes(item._id) ? (
                                     <View
                                         style={{
                                             backgroundColor: '#ccc',
@@ -709,6 +748,7 @@ const Post = ({
                                     </View>
                                 ) : (
                                     <TouchableOpacity
+                                        activeOpacity={0.8}
                                         style={{
                                             backgroundColor: COLORS.primary,
                                             borderRadius: 10,

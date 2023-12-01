@@ -22,6 +22,9 @@ import ViewDetailImage from './screens/Post/ViewDetailImage'
 import ProfileUser from './screens/Profile/ProfileUser'
 import FeaturedArticle from './screens/Feed/FeaturedArticle'
 import NotificationScreen from './screens/Feed/NotificationScreen'
+import Attendance from './screens/Attendance/Attendance'
+import ShowQr from './screens/Attendance/ShowQr'
+import ScanQR from './screens/Attendance/ScanQR'
 const Stack = createNativeStackNavigator()
 
 SplashScreen.preventAutoHideAsync()
@@ -152,6 +155,27 @@ export default function App() {
                     <Stack.Screen
                         name="NotificationScreen"
                         component={NotificationScreen}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="Attendance"
+                        component={Attendance}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ShowQr"
+                        component={ShowQr}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ScanQR"
+                        component={ScanQR}
                         options={{
                             headerShown: false,
                         }}

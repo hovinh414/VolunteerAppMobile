@@ -3,19 +3,21 @@ import {
     Text,
     TouchableOpacity,
     ScrollView,
-    Modal,
     Alert,
-    KeyboardAvoidingView,
+    Dimensions,
     Image,
     FlatList,
+    Linking,
 } from 'react-native'
+import QRCode from 'react-native-qrcode-svg'
+import Modal from 'react-native-modal'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { COLORS, FONTS, SIZES } from '../../constants/theme'
 import * as Progress from 'react-native-progress'
 import {
     MaterialIcons,
-    FontAwesome5,
+    Feather,
     Ionicons,
     FontAwesome,
 } from '@expo/vector-icons'
@@ -27,16 +29,22 @@ import API_URL from '../../interfaces/config'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import { format } from 'date-fns'
 import ModalLoading from '../../components/ModalLoading'
+
 const DetailPost = ({ navigation, route }) => {
     const [items, setItems] = useState(route.params)
+    const screenWidth = Dimensions.get('window').width
     const [type, setType] = useState('')
     const [email, setEmail] = useState('')
     const [showLoading, setShowLoading] = useState(false)
+    const [orgId, setOrgId] = useState('')
+    const [isModalVisible, setModalVisible] = useState(false)
+    const [joinId, setJoinId] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
             setType(userStored.type)
             setEmail(userStored.email)
+            setOrgId(userStored._id)
         } else {
             setType(null)
         }
@@ -96,7 +104,7 @@ const DetailPost = ({ navigation, route }) => {
                         fontWeight: '500',
                     }}
                 >
-                    Đã hết hạn đăng ký
+                    Đã hết hạn
                 </Text>
             )
         } else {
@@ -127,16 +135,14 @@ const DetailPost = ({ navigation, route }) => {
 
         return (
             <View>
-                <Text
-                    style={{
-                        fontSize: 16,
-                        textAlign: 'justify',
-                    }}
-                >
-                    {displayText}
-                </Text>
                 {content.length > maxLength && (
-                    <TouchableOpacity onPress={toggleTextVisibility}>
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={toggleTextVisibility}
+                    >
+                        <Text style={{ fontSize: 16, textAlign: 'justify' }}>
+                            {displayText}
+                        </Text>
                         <Text
                             style={{ fontWeight: '500', color: COLORS.primary }}
                         >
@@ -164,13 +170,15 @@ const DetailPost = ({ navigation, route }) => {
             })
             console.log(res.data.status)
             if (res.data.status === 'SUCCESS') {
+                setShowLoading(false)
                 Toast.show({
                     type: 'joinToast',
                     text1: 'Thành công',
                     text2: 'Tham gia thành công',
                     visibilityTime: 2500,
                 })
-                setShowLoading(false)
+                
+                setJoinId(items._id)
                 refreshDetail()
             }
         } catch (error) {
@@ -374,8 +382,56 @@ const DetailPost = ({ navigation, route }) => {
         const formattedDate = format(new Date(originalDate), 'dd-MM-yyyy')
         return formattedDate
     }
+    const renderQrCodeModal = () => (
+        <Modal
+            isVisible={isModalVisible}
+            animationIn="fadeIn"
+            animationOut="fadeOut"
+        >
+            <TouchableOpacity
+                style={{ flex: 1 }}
+                activeOpacity={1}
+                onPressOut={() => setModalVisible(false)}
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <View
+                        style={{
+                            backgroundColor: COLORS.white,
+                            padding: 20,
+                            borderRadius: 20,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontWeight: 'bold',
+                                fontSize: 17,
+                                marginBottom: 10,
+                            }}
+                        >
+                            Quét mã QR này để điểm danh
+                        </Text>
+                        <QRCode value={items._id} size={250} />
+                    </View>
+                </View>
+            </TouchableOpacity>
+        </Modal>
+    )
+    const handleMap = (_address) => {
+        const mapAddress = encodeURIComponent(_address)
+        const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapAddress}`
+        Linking.openURL(googleMapsUrl)
+    }
+
     return (
-        <View>
+        <View style={{ flex: 1 }}>
             <View
                 style={{
                     zIndex: 4,
@@ -384,8 +440,9 @@ const DetailPost = ({ navigation, route }) => {
                 <Toast config={toastConfig} />
             </View>
             <ModalLoading visible={showLoading} />
+            {renderQrCodeModal()}
             <TouchableOpacity
-                onPress={() => navigation.goBack()}
+                onPress={() => navigation.navigate('Feed',  joinId)}
                 style={{
                     position: 'absolute',
                     top: 50,
@@ -507,7 +564,9 @@ const DetailPost = ({ navigation, route }) => {
                             marginBottom: 5,
                         }}
                     >
-                        <View
+                        <TouchableOpacity
+                            onPress={() => handleMap(items.address)}
+                            activeOpacity={0.8}
                             style={{
                                 flexDirection: 'row',
                                 alignItems: 'center',
@@ -528,7 +587,7 @@ const DetailPost = ({ navigation, route }) => {
                             >
                                 {items.address}
                             </Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     <View
                         style={{
@@ -722,7 +781,15 @@ const DetailPost = ({ navigation, route }) => {
                         >
                             Câu chuyện
                         </Text>
-                        <LongText maxLength={250} content={items.content} />
+                        {items.content.length > 100 ? (
+                            <LongText maxLength={250} content={items.content} />
+                        ) : (
+                            <Text
+                                style={{ fontSize: 16, textAlign: 'justify' }}
+                            >
+                                {items.content}
+                            </Text>
+                        )}
                     </View>
                     <View
                         style={{
@@ -776,15 +843,120 @@ const DetailPost = ({ navigation, route }) => {
                                 </View>
                             )}
                         />
-                        {type === 'Organization' || !type ? (
+                        {type === 'Organization' && items.isEnableQr ? (
+                            <View
+                                style={{
+                                    marginBottom: 50,
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => setModalVisible(true)}
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.primary,
+                                        width: '48%',
+                                        height: 50,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.white,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        ĐIỂM DANH
+                                    </Text>
+                                    <MaterialIcons
+                                        name={'qr-code-scanner'}
+                                        size={30}
+                                        color={COLORS.white}
+                                    />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.white,
+                                        height: 50,
+                                        borderWidth: 2,
+                                        borderColor: COLORS.primary,
+                                        width: '48%',
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.primary,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        TẠO GROUP CHAT
+                                    </Text>
+                                    <Feather
+                                        name={'users'}
+                                        size={30}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        ) : orgId === items.ownerId ? (
                             <View
                                 style={{
                                     marginBottom: 50,
                                 }}
                             >
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.white,
+                                        height: 50,
+                                        borderWidth: 2,
+                                        borderColor: COLORS.primary,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.primary,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        TẠO GROUP CHAT
+                                    </Text>
+                                    <Feather
+                                        name={'users'}
+                                        size={30}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        ) : items.isAttended ? (
+                            <View
+                                style={{
+                                    marginBottom: 50,
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
                                 <View
                                     style={{
-                                        height: 44,
+                                        backgroundColor: '#ccc',
+                                        height: 50,
+                                        width: '48%',
                                         borderRadius: 16,
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -795,19 +967,53 @@ const DetailPost = ({ navigation, route }) => {
                                             fontFamily: 'monterrat',
                                             color: '#000',
                                         }}
-                                    ></Text>
+                                    >
+                                        ĐÃ ĐIỂM DANH
+                                    </Text>
                                 </View>
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.white,
+                                        height: 50,
+                                        borderWidth: 2,
+                                        borderColor: COLORS.primary,
+                                        width: '48%',
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.primary,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        THAM GIA GROUP
+                                    </Text>
+                                    <Feather
+                                        name={'users'}
+                                        size={30}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
                             </View>
                         ) : items.isJoin ? (
                             <View
                                 style={{
                                     marginBottom: 50,
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
                                 }}
                             >
                                 <View
                                     style={{
                                         backgroundColor: '#ccc',
-                                        height: 44,
+                                        height: 50,
+                                        width: '48%',
                                         borderRadius: 16,
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -822,6 +1028,35 @@ const DetailPost = ({ navigation, route }) => {
                                         ĐÃ THAM GIA
                                     </Text>
                                 </View>
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    style={{
+                                        backgroundColor: COLORS.white,
+                                        height: 50,
+                                        borderWidth: 2,
+                                        borderColor: COLORS.primary,
+                                        width: '48%',
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'row',
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            color: COLORS.primary,
+                                            marginRight: 10,
+                                        }}
+                                    >
+                                        THAM GIA GROUP
+                                    </Text>
+                                    <Feather
+                                        name={'users'}
+                                        size={30}
+                                        color={COLORS.primary}
+                                    />
+                                </TouchableOpacity>
                             </View>
                         ) : items.isExprired ? (
                             <View
@@ -844,9 +1079,25 @@ const DetailPost = ({ navigation, route }) => {
                                             color: '#000',
                                         }}
                                     >
-                                        Đã hết hạn
+                                        ĐÃ HẾT HẠN
                                     </Text>
                                 </View>
+                            </View>
+                        ) : type === 'Organization' || !type ? (
+                            <View
+                                style={{
+                                    marginBottom: 50,
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        backgroundColor: '#fff',
+                                        height: 44,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                ></View>
                             </View>
                         ) : (
                             <View

@@ -1,7 +1,7 @@
 import {
     View,
     Text,
-    ActivityIndicator,
+    Linking,
     FlatList,
     ScrollView,
     TouchableOpacity,
@@ -307,6 +307,19 @@ const ProfileUser = ({ route }) => {
             }
         }
     }
+    const handleMap = (_address) => {
+        const mapAddress = encodeURIComponent(_address)
+        const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapAddress}`
+        Linking.openURL(googleMapsUrl)
+    }
+    const handlePhone = (_address) => {
+        const phoneUrl = `tel:${_address}`
+        Linking.openURL(phoneUrl)
+    }
+    const handleEmail = (_email) => {
+        const emailUrl = `mailto:${_email}`
+        Linking.openURL(emailUrl)
+    }
     const RenderProfileCard = () => {
         return (
             <View
@@ -387,15 +400,20 @@ const ProfileUser = ({ route }) => {
                                 size={22}
                                 color="black"
                             />
-                            <Text
-                                style={{
-                                    ...FONTS.body4,
-                                    marginLeft: 4,
-                                    textAlign: 'justify',
-                                }}
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                onPress={() => handleMap(items.address)}
                             >
-                                {items.address}
-                            </Text>
+                                <Text
+                                    style={{
+                                        ...FONTS.body4,
+                                        marginLeft: 4,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {items.address}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                         <View
                             style={{
@@ -410,15 +428,20 @@ const ProfileUser = ({ route }) => {
                                 size={20}
                                 color="black"
                             />
-                            <Text
-                                style={{
-                                    ...FONTS.body4,
-                                    marginLeft: 4,
-                                    textAlign: 'justify',
-                                }}
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                onPress={() => handleEmail(items.email)}
                             >
-                                {items.email}
-                            </Text>
+                                <Text
+                                    style={{
+                                        ...FONTS.body4,
+                                        marginLeft: 4,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {items.email}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                         <View
                             style={{
@@ -428,15 +451,20 @@ const ProfileUser = ({ route }) => {
                             }}
                         >
                             <Feather name="phone" size={20} color="black" />
-                            <Text
-                                style={{
-                                    ...FONTS.body4,
-                                    marginLeft: 4,
-                                    textAlign: 'justify',
-                                }}
+                            <TouchableOpacity
+                                onPress={() => handlePhone(items.phone)}
+                                activeOpacity={0.8}
                             >
-                                {items.phone}
-                            </Text>
+                                <Text
+                                    style={{
+                                        ...FONTS.body4,
+                                        marginLeft: 4,
+                                        textAlign: 'justify',
+                                    }}
+                                >
+                                    {items.phone}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                     <FollowButton
@@ -533,7 +561,7 @@ const ProfileUser = ({ route }) => {
                 <View
                     style={{
                         flexDirection: 'row',
-                        alignItems:'center',
+                        alignItems: 'center',
                         justifyContent: 'space-between',
                         marginHorizontal: 12,
                     }}
@@ -542,14 +570,12 @@ const ProfileUser = ({ route }) => {
                         style={{
                             color: COLORS.black,
                             fontSize: 19,
-                            fontWeight:'800'
+                            fontWeight: '800',
                         }}
                     >
                         Bài viết
                     </Text>
-                    <TouchableOpacity
-                    onPress={() => setShowFilter(true)}
-                    >
+                    <TouchableOpacity onPress={() => setShowFilter(true)}>
                         <Text
                             style={{
                                 color: COLORS.primary,
@@ -653,17 +679,20 @@ const ProfileUser = ({ route }) => {
                     left: 12,
                     zIndex: 1,
                     borderRadius: 20,
-                    backgroundColor: '#cccc',
+                    backgroundColor: '#f0f0f0',
                     zIndex: 3,
                 }}
             >
                 <MaterialIcons
                     name="keyboard-arrow-left"
-                    size={26}
+                    size={30}
                     color={COLORS.black}
                 />
             </TouchableOpacity>
-            <ModalAlert visible={showFilter} onRequestClose={() => setShowFilter(false)}/>
+            <ModalAlert
+                visible={showFilter}
+                onRequestClose={() => setShowFilter(false)}
+            />
             <Post
                 posts={posts}
                 fetchNextPage={fetchNextPage}
