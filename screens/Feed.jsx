@@ -149,14 +149,15 @@ const Feed = ({ navigation, route }) => {
                         }&limit=5`,
                         config
                     )
-                    if (response.data.status === 'SUCCESS') {
+
+                    if (response.data && response.data.status === 'SUCCESS') {
                         setPosts([...posts, ...response.data.data.posts])
                         setJoinedPost([
                             ...joinedPost,
                             ...response.data.data.joinedPost,
                         ])
                         setCurrentPage(currentPage + 1)
-                    } else {
+                    } else if (response.data) {
                         setPosts([...posts, ...response.data.data.posts])
                         setJoinedPost([
                             ...joinedPost,
@@ -194,6 +195,8 @@ const Feed = ({ navigation, route }) => {
                         text2: 'Bạn đã xem tất cả bài viết mới nhất',
                         visibilityTime: 2500,
                     })
+                } else {
+                    console.log(error)
                 }
             } finally {
                 setIsFetchingNextPage(false)

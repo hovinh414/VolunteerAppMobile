@@ -29,7 +29,7 @@ import API_URL from '../../interfaces/config'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import { format } from 'date-fns'
 import ModalLoading from '../../components/ModalLoading'
-
+import CreateGroupModal from '../../components/CreateGroupModal'
 const DetailPost = ({ navigation, route }) => {
     const [items, setItems] = useState(route.params)
     const screenWidth = Dimensions.get('window').width
@@ -38,6 +38,7 @@ const DetailPost = ({ navigation, route }) => {
     const [showLoading, setShowLoading] = useState(false)
     const [orgId, setOrgId] = useState('')
     const [isModalVisible, setModalVisible] = useState(false)
+    const [showCreate, setShowCreate] = useState(false)
     const [joinId, setJoinId] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
@@ -177,7 +178,7 @@ const DetailPost = ({ navigation, route }) => {
                     text2: 'Tham gia thành công',
                     visibilityTime: 2500,
                 })
-                
+
                 setJoinId(items._id)
                 refreshDetail()
             }
@@ -194,6 +195,7 @@ const DetailPost = ({ navigation, route }) => {
             }
         }
     }
+
     const joinActi = () => {
         Alert.alert('Thông báo', 'Bạn có muốn tham gia hoạt động', [
             {
@@ -439,10 +441,15 @@ const DetailPost = ({ navigation, route }) => {
             >
                 <Toast config={toastConfig} />
             </View>
+            <CreateGroupModal
+                onRequestClose={() => setShowCreate(false)}
+                visible={showCreate}
+                activityId={items.activityId}
+            />
             <ModalLoading visible={showLoading} />
             {renderQrCodeModal()}
             <TouchableOpacity
-                onPress={() => navigation.navigate('Feed',  joinId)}
+                onPress={() => navigation.navigate('Feed', joinId)}
                 style={{
                     position: 'absolute',
                     top: 50,
@@ -900,7 +907,7 @@ const DetailPost = ({ navigation, route }) => {
                                             marginRight: 10,
                                         }}
                                     >
-                                        TẠO GROUP CHAT
+                                        TẠO NHÓM CHAT
                                     </Text>
                                     <Feather
                                         name={'users'}
@@ -916,6 +923,7 @@ const DetailPost = ({ navigation, route }) => {
                                 }}
                             >
                                 <TouchableOpacity
+                                    onPress={() => setShowCreate(true)}
                                     activeOpacity={0.8}
                                     style={{
                                         backgroundColor: COLORS.white,
@@ -935,7 +943,7 @@ const DetailPost = ({ navigation, route }) => {
                                             marginRight: 10,
                                         }}
                                     >
-                                        TẠO GROUP CHAT
+                                        TẠO NHÓM CHAT
                                     </Text>
                                     <Feather
                                         name={'users'}
@@ -992,7 +1000,7 @@ const DetailPost = ({ navigation, route }) => {
                                             marginRight: 10,
                                         }}
                                     >
-                                        THAM GIA GROUP
+                                        THAM GIA NHÓM
                                     </Text>
                                     <Feather
                                         name={'users'}
@@ -1049,7 +1057,7 @@ const DetailPost = ({ navigation, route }) => {
                                             marginRight: 10,
                                         }}
                                     >
-                                        THAM GIA GROUP
+                                        THAM GIA NHÓM
                                     </Text>
                                     <Feather
                                         name={'users'}

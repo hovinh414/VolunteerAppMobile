@@ -109,7 +109,7 @@ const Post = ({
     }
     
     const [postIdComment, setPostIdComment] = useState('')
-    function LikeButton({ postId, likePost, unLikePost, post }) {
+    const LikeButton = ({ postId, likePost, unLikePost, post }) => {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
         useEffect(() => {
@@ -431,7 +431,7 @@ const Post = ({
                 ListHeaderComponent={headers}
                 showsVerticalScrollIndicator={false}
                 onEndReached={fetchNextPage}
-                onEndReachedThreshold={0.4}
+                onEndReachedThreshold={0.1}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
