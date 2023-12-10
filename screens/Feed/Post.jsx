@@ -107,7 +107,7 @@ const Post = ({
             }
         }
     }
-    
+
     const [postIdComment, setPostIdComment] = useState('')
     const LikeButton = ({ postId, likePost, unLikePost, post }) => {
         const [isLiked, setIsLiked] = useState(false)
@@ -712,7 +712,9 @@ const Post = ({
                                 }}
                             >
                                 {type === 'Organization' ||
-                                !type ? null : joinedPost.includes(item._id) ? (
+                                !type ? null : !joinedPost ? null : joinedPost.includes(
+                                      item._id
+                                  ) ? (
                                     <View
                                         style={{
                                             backgroundColor: '#ccc',

@@ -980,35 +980,37 @@ const DetailPost = ({ navigation, route }) => {
                                     marginBottom: 50,
                                 }}
                             >
-                                <TouchableOpacity
-                                    onPress={() => setShowCreate(true)}
-                                    activeOpacity={0.8}
-                                    style={{
-                                        backgroundColor: COLORS.white,
-                                        height: 50,
-                                        borderWidth: 2,
-                                        borderColor: COLORS.primary,
-                                        borderRadius: 16,
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: 'row',
-                                    }}
-                                >
-                                    <Text
+                                {items.groupChatId ? null : (
+                                    <TouchableOpacity
+                                        onPress={() => setShowCreate(true)}
+                                        activeOpacity={0.8}
                                         style={{
-                                            fontFamily: 'monterrat',
-                                            color: COLORS.primary,
-                                            marginRight: 10,
+                                            backgroundColor: COLORS.white,
+                                            height: 50,
+                                            borderWidth: 2,
+                                            borderColor: COLORS.primary,
+                                            borderRadius: 16,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexDirection: 'row',
                                         }}
                                     >
-                                        TẠO NHÓM CHAT
-                                    </Text>
-                                    <Feather
-                                        name={'users'}
-                                        size={30}
-                                        color={COLORS.primary}
-                                    />
-                                </TouchableOpacity>
+                                        <Text
+                                            style={{
+                                                fontFamily: 'monterrat',
+                                                color: COLORS.primary,
+                                                marginRight: 10,
+                                            }}
+                                        >
+                                            TẠO NHÓM CHAT
+                                        </Text>
+                                        <Feather
+                                            name={'users'}
+                                            size={30}
+                                            color={COLORS.primary}
+                                        />
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         ) : items.isAttended ? (
                             <View
