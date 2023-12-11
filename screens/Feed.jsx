@@ -42,7 +42,6 @@ import {
     Question,
 } from '../components/CustomContent'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
-const loading = '../assets/loading.gif'
 const Feed = ({ navigation, route }) => {
     // const { postId } = ;
     const onRefreshPost = () => {
@@ -649,10 +648,7 @@ const Feed = ({ navigation, route }) => {
                             alignItems: 'center',
                         }}
                     >
-                        <Image
-                            source={require(loading)}
-                            style={{ width: 50, height: 50 }}
-                        />
+                        <ActivityIndicator size="large" color={COLORS.black} /> 
                     </View>
                 ) : null}
             </View>

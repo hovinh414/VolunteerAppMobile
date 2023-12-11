@@ -31,6 +31,7 @@ import axios from 'axios'
 import ImageAvata from '../../assets/hero2.jpg'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import { format } from 'date-fns'
+import ModalLoading from '../../components/ModalLoading'
 const share = '../../assets/share.png'
 const Post = ({
     posts,
@@ -317,6 +318,7 @@ const Post = ({
         }
     }
     const viewDetailPost = async (_postId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -330,13 +332,16 @@ const Post = ({
             )
             if (response.data.status === 'SUCCESS') {
                 navigation.navigate('DetailPost', response.data.data)
+                setLoading(false)
             }
         } catch (error) {
             console.log('API Error:', error)
+            setLoading(false)
         }
     }
 
     const viewProfile = async (_orgId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -353,9 +358,11 @@ const Post = ({
                     'ProfileUser',
                     response.data.data.profileResult
                 )
+                setLoading(false)
             }
         } catch (error) {
             console.log('API Error:', error)
+            setLoading(false)
         }
     }
     const removeHashtagsAndUrlsFromContent = (content) => {
@@ -426,6 +433,7 @@ const Post = ({
                 onRequestClose={() => setShowComment(false)}
                 postId={postIdComment}
             />
+            <ModalLoading visible={loading} />
             <FlatList
                 data={posts}
                 ListHeaderComponent={headers}
