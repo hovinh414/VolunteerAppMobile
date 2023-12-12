@@ -8,6 +8,7 @@ import {
     Image,
     FlatList,
     Linking,
+    RefreshControl,
 } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import Modal from 'react-native-modal'
@@ -77,7 +78,13 @@ const DetailPost = ({ navigation, route }) => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
-
+    const [refreshing, setRefreshing] = React.useState(false)
+    const onRefresh = React.useCallback(() => {
+        refreshDetail()
+        setTimeout(() => {
+            setRefreshing(false)
+        }, 2000)
+    }, [])
     useEffect(() => {
         getToken()
     }, [])
@@ -522,6 +529,12 @@ const DetailPost = ({ navigation, route }) => {
                 style={{
                     backgroundColor: '#fff',
                 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
             >
                 <View style={{ zIndex: 1 }}>
                     <View style={{ flex: 1, marginBottom: 15 }}>

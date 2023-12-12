@@ -47,14 +47,17 @@ const screenOptions = {
 const BottomTabNavigation = () => {
     const [type, setType] = useState('')
     const [avatar, setAvatar] = useState('')
+    const [isActiveOrganization, setIsActiveOrganization] = useState(false)
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
             setAvatar(userStored.avatar)
             setType(userStored.type)
+            setIsActiveOrganization(userStored.isActiveOrganization)
         } else {
             setAvatar(null)
             setType(null)
+            setIsActiveOrganization(false)
         }
     }
     useEffect(() => {
@@ -124,8 +127,7 @@ const BottomTabNavigation = () => {
                     },
                 }}
             />
-
-            {type === 'Organization' ? (
+            {!isActiveOrganization ? null : type === 'Organization' ? (
                 <Tab.Screen
                     name="Create"
                     component={Create}
@@ -154,7 +156,8 @@ const BottomTabNavigation = () => {
                         },
                     }}
                 />
-            ) : type === 'User' || type === 'Admin' || type === 'user' ? (
+            ) : null}
+            {type === 'User' || type === 'Admin' || type === 'user' ? (
                 <Tab.Screen
                     name="ScanQR"
                     component={ScanQR}
@@ -187,7 +190,6 @@ const BottomTabNavigation = () => {
                     }}
                 />
             ) : null}
-
             <Tab.Screen
                 name="NotificationScreen"
                 component={NotificationScreen}

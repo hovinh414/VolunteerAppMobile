@@ -157,22 +157,22 @@ const Post = ({
 
             useEffect(() => {
                 checkLikes()
-                // fetchLikes()
+                fetchLikes()
             }, [])
         }
-        // const fetchLikes = async () => {
-        //     try {
-        //         const response = await axios.get(
-        //             API_URL.API_URL + '/post/likes/' + postId
-        //         )
+        const fetchLikes = async () => {
+            try {
+                const response = await axios.get(
+                    API_URL.API_URL + '/post/likes/' + postId
+                )
 
-        //         if (response.data.status === 'SUCCESS') {
-        //             setTotalLike(response.data.data.totalLikes)
-        //         }
-        //     } catch (error) {
-        //         console.log('API Error:', error)
-        //     }
-        // }
+                if (response.data.status === 'SUCCESS') {
+                    setTotalLike(response.data.data.totalLikes)
+                }
+            } catch (error) {
+                console.log('API Error:', error)
+            }
+        }
 
         const handleLikeClick = async () => {
             try {
@@ -650,7 +650,7 @@ const Post = ({
                             </View>
                             <View
                                 style={{
-                                    margin: 8,
+                                    margin: 12,
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                 }}
