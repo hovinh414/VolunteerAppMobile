@@ -1,4 +1,4 @@
-import io from "socket.io-client";
+import SocketIOClient from 'socket.io-client';
 import SOCKET_URL from '../interfaces/config';
 import AsyncStoraged from "../services/AsyncStoraged";
 export const IOChanel = {
@@ -25,15 +25,14 @@ export class SocketIOService {
 
   reqConnection(medataData) {
     const accessToken = AsyncStoraged.getToken();
-    return io(this.IO_SERVER_URL, {
+    return SocketIOClient('http://192.168.1.10:3200',{
       reconnectionDelayMax: this.DEFAULT_DEPLAY_RECONNECTION,
       auth: {
         token: accessToken || ''
       },
       query: {
-        room_id: medataData?.roomId || '',
-        team: medataData?.team || 'RED',
-      }
+        room_id: medataData?.roomId || ''
+       }
     });
   }
 }

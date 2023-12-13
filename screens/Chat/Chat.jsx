@@ -5,8 +5,26 @@ import { COLORS, FONTS, images } from '../../constants'
 import { MaterialIcons } from '@expo/vector-icons'
 import { styles } from './ChatStyle'
 import { Image } from 'expo-image'
+import ChatDetail from './ChatDetail'
+import { IOChanel, SocketIOService } from "../../scripts/socket";
+const ioService = new SocketIOService();
+const socket = ioService.reqConnection({ roomId: "5894c675-3e5a-4d25-83d2-eb8eb76946ff" });
 
 const Chat = ({ navigation }) => {
+    const [room, setRoom] = useState("");
+    const [username, setUsername] = useState("");
+    const [showChat, setShowChat] = useState(false);
+    const joinRoom = () => {
+        // if (username !== "" && room !== "") {
+        socket.emit("join_room", "5894c675-3e5a-4d25-83d2-eb8eb76946ff");
+        setShowChat(true);
+        navigation.navigate('ChatDetail', {
+            socket: socket,
+            room: "5894c675-3e5a-4d25-83d2-eb8eb76946ff",
+        });
+        // }
+    };
+
     const chat = [
         {
             id: '1',
@@ -54,133 +72,125 @@ const Chat = ({ navigation }) => {
     }
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <MaterialIcons
-                        name="keyboard-arrow-left"
-                        size={24}
-                        color={COLORS.black}
-                    />
-                </TouchableOpacity>
-
-                <Text style={{ ...FONTS.h4, marginLeft: 8 }}>Tin nhắn</Text>
-            </View>
-            <View style={styles.searchInput}>
-                <MaterialIcons
-                    name="search"
-                    size={20}
-                    color={'#ccc'}
-                    style={{ marginRight: 8 }} // Tạo khoảng cách giữa icon và TextInput
-                />
-                <TextInput
-                    style={styles.searchText} // Để TextInput mở rộng theo chiều ngang
-                    placeholder="Tìm kiếm..."
-                    value={searchText}
-                    onChangeText={(searchText) =>
-                        handleSearchTextChange(searchText)
-                    }
-                />
-            </View>
-            <FlatList
-                data={filteredChat}
-                renderItem={({ item, index }) => (
-                    <TouchableOpacity
-                        style={styles.chat}
-                        key={index}
-                        onPress={() => navigation.navigate('ChatDetail')}
-                    >
-                        <View style={styles.viewChat}>
-                            <Image source={item.image} style={styles.avatar} />
-                            {item.isSeen ? (
-                                <View style={{ marginLeft: 12 }}>
-                                    <Text
-                                        style={{
-                                            ...FONTS.h3,
-                                            fontSize: 16,
-                                            marginBottom: 6,
-                                        }}
-                                    >
-                                        {' '}
-                                        {item.name}{' '}
-                                    </Text>
-                                    <Text style={{ fontSize: 14 }}>
-                                        {' '}
-                                        {item.lastMessage.length > 28
-                                            ? `${item.lastMessage.slice(
-                                                  0,
-                                                  28
-                                              )}...`
-                                            : item.lastMessage}
-                                    </Text>
-                                </View>
-                            ) : (
-                                <View style={{ marginLeft: 12 }}>
-                                    <Text
-                                        style={{
-                                            ...FONTS.h3,
-                                            fontSize: 16,
-                                            fontWeight: 'bold',
-                                            marginBottom: 6,
-                                        }}
-                                    >
-                                        {' '}
-                                        {item.name}{' '}
-                                    </Text>
-                                    <Text
-                                        style={{
-                                            fontSize: 14,
-                                            fontWeight: 'bold',
-                                        }}
-                                    >
-                                        {' '}
-                                        {item.lastMessage.length > 28
-                                            ? `${item.lastMessage.slice(
-                                                  0,
-                                                  28
-                                              )}...`
-                                            : item.lastMessage}
-                                    </Text>
-                                </View>
-                            )}
-                        </View>
-                        <View
-                            style={{
-                                flexDirection: 'column',
-                                alignItems: 'flex-end',
-                                justifyContent: 'space-between',
-                            }}
-                        >
-                            <Text style={{ fontSize: 13, color: '#777' }}>
-                                {' '}
-                                {item.lastMessageTime}{' '}
-                            </Text>
-                            {item.isSeen ? (
-                                <Text
-                                    style={{
-                                        fontSize: 30,
-                                        color: 'white',
-                                        marginRight: 5,
-                                    }}
-                                >
-                                    •
-                                </Text>
-                            ) : (
-                                <Text
-                                    style={{
-                                        fontSize: 35,
-                                        color: '#FF493C',
-                                        marginRight: 5,
-                                    }}
-                                >
-                                    •
-                                </Text>
-                            )}
-                        </View>
+            <>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => setShowChat(true)}>
+                        <MaterialIcons
+                            name="keyboard-arrow-left"
+                            size={24}
+                            color={COLORS.black}
+                        />
                     </TouchableOpacity>
-                )}
-            />
+                    <Text style={{ ...FONTS.h4, marginLeft: 8 }}>Tin nhắn</Text>
+                </View>
+                <View style={styles.searchInput}>
+                    <MaterialIcons
+                        name="search"
+                        size={20}
+                        color={'#ccc'}
+                        style={{ marginRight: 8 }}
+                    />
+                    <TextInput
+                        style={styles.searchText}
+                        placeholder="Tìm kiếm..."
+                        value={searchText}
+                        onChangeText={handleSearchTextChange}
+                    />
+                </View>
+                <FlatList
+                    data={filteredChat}
+                    renderItem={({ item, index }) => (
+                        <TouchableOpacity
+                            style={styles.chat}
+                            key={index}
+                            onPress={() => joinRoom()}
+                        >
+                            <View style={styles.viewChat}>
+                                <Image source={item.image} style={styles.avatar} />
+                                {item.isSeen ? (
+                                    <View style={{ marginLeft: 12 }}>
+                                        <Text
+                                            style={{
+                                                ...FONTS.h3,
+                                                fontSize: 16,
+                                                marginBottom: 6,
+                                            }}
+                                        >
+                                            {' '}
+                                            {item.name}{' '}
+                                        </Text>
+                                        <Text style={{ fontSize: 14 }}>
+                                            {' '}
+                                            {item.lastMessage.length > 28
+                                                ? `${item.lastMessage.slice(0, 28)}...`
+                                                : item.lastMessage}
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <View style={{ marginLeft: 12 }}>
+                                        <Text
+                                            style={{
+                                                ...FONTS.h3,
+                                                fontSize: 16,
+                                                fontWeight: 'bold',
+                                                marginBottom: 6,
+                                            }}
+                                        >
+                                            {' '}
+                                            {item.name}{' '}
+                                        </Text>
+                                        <Text
+                                            style={{
+                                                fontSize: 14,
+                                                fontWeight: 'bold',
+                                            }}
+                                        >
+                                            {' '}
+                                            {item.lastMessage.length > 28
+                                                ? `${item.lastMessage.slice(0, 28)}...`
+                                                : item.lastMessage}
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-end',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
+                                <Text style={{ fontSize: 13, color: '#777' }}>
+                                    {' '}
+                                    {item.lastMessageTime}{' '}
+                                </Text>
+                                {item.isSeen ? (
+                                    <Text
+                                        style={{
+                                            fontSize: 30,
+                                            color: 'white',
+                                            marginRight: 5,
+                                        }}
+                                    >
+                                        •
+                                    </Text>
+                                ) : (
+                                    <Text
+                                        style={{
+                                            fontSize: 35,
+                                            color: '#FF493C',
+                                            marginRight: 5,
+                                        }}
+                                    >
+                                        •
+                                    </Text>
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                />
+            </>
         </SafeAreaView>
-    )
+    );
 }
-
 export default Chat
