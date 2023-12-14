@@ -1,4 +1,11 @@
-import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
+import {
+    View,
+    Text,
+    FlatList,
+    TextInput,
+    TouchableOpacity,
+    ActivityIndicator,
+} from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, images } from '../../constants'
@@ -10,15 +17,17 @@ import AsyncStoraged from '../../services/AsyncStoraged'
 import { IOChanel, SocketIOService } from '../../scripts/socket'
 import API_URL from '../../interfaces/config'
 const ioService = new SocketIOService()
-const socket = ioService.reqConnection({
-    roomId: '5894c675-3e5a-4d25-83d2-eb8eb76946ff',
-})
 
 const Chat = ({ navigation }) => {
+    const [roomId, setRoomId] = useState('')
+
     const [isLoading, setIsLoading] = useState(true)
-    const [showChat, setShowChat] = useState(false);
+    const [showChat, setShowChat] = useState(false)
     const joinRoom = (item) => {
         // if (username !== "" && room !== "") {
+        const socket = ioService.reqConnection({
+            roomId: item.groupid,
+        })
         socket.emit('join_room', item.groupid)
         setShowChat(true)
         navigation.navigate('ChatDetail', {
@@ -65,7 +74,7 @@ const Chat = ({ navigation }) => {
             }
         } catch (error) {
             console.log('API Error get group:', error)
-        } 
+        }
     }
     useEffect(() => {
         getGroupChats()

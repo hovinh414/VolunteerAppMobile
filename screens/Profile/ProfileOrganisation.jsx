@@ -940,6 +940,7 @@ const ProfileOrganisation = ({ navigation, route }) => {
             style={{
                 flex: 1,
                 backgroundColor: '#fff',
+                marginTop:30
             }}
         >
             <View>

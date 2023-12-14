@@ -28,7 +28,7 @@ export const styles = StyleSheet.create({
     myMessage: {
         backgroundColor: COLORS.primary,
         alignSelf: 'flex-end',
-        padding: 10,
+        padding: 5,
         borderRadius: 10,
         marginRight: 15,
     },
