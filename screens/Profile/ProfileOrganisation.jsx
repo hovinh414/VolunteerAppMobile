@@ -133,13 +133,27 @@ const PostsRoute = () => {
                 flex: 1,
             }}
         >
-            {/* <Post
-                posts={posts}
-                fetchNextPage={fetchNextPage}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                footer={RenderLoader}
-            /> */}
+            {posts.length === 0 ? (
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+                        Chưa có bài viết nào!
+                    </Text>
+                </View>
+            ) : (
+                <Post
+                    posts={posts}
+                    fetchNextPage={fetchNextPage}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    footer={RenderLoader}
+                />
+            )}
         </View>
     )
 }

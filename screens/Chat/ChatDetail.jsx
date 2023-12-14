@@ -24,7 +24,6 @@ import * as MediaLibrary from 'expo-media-library'
 import * as DocumentPicker from 'expo-document-picker'
 import { styles } from './ChatDetailStyle'
 import { Image } from 'expo-image'
-
 import AsyncStoraged from '../../services/AsyncStoraged'
 import { io } from 'socket.io-client'
 
@@ -33,28 +32,27 @@ const video = '../../assets/video.png'
 // const socket = SocketIOClient('http://192.168.1.10:3200', {
 //   transports: ['websocket'] // you need to explicitly tell it to use websockets
 // });
-function ChatDetail({ route, navigation}) {
+function ChatDetail({ route, navigation }) {
     const [message, setMessage] = useState('')
     const [messages, setMessages] = useState([])
     const [token, setToken] = useState('')
     const [avatar, setAvatar] = useState('')
     const [fullname, setFullname] = useState('')
-    const [userId, setUserId] = useState();
+    const [userId, setUserId] = useState()
     const [selectedImages, setSelectedImage] = useState([])
     let cameraRef = useRef()
     const [hasCameraPermission, setHasCameraPermission] = useState()
     const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState()
     const [photo, setPhoto] = useState([])
     const [selectedFiles, setSelectedFiles] = useState([])
-    const { socket, room } = route.params;
-    // const ioService = new SocketIOService();
-    // const socket = ioService.reqConnection({ roomId: "5894c675-3e5a-4d25-83d2-eb8eb76946ff" });
+    const { socket, room, data } = route.params
+    const flatListRef = useRef()
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
     useEffect(() => {
-        getToken();
+        getToken()
         console.log(`socket: ${socket}`)
         console.log(`room: ${room}`)
     }, [])
@@ -62,45 +60,11 @@ function ChatDetail({ route, navigation}) {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
         setFullname(userStored.fullname)
-        setUserId(userStored._id);
+        setUserId(userStored._id)
     }
     useEffect(() => {
         getUserStored()
     }, [])
-    // useEffect(() => {
-    //     // const ioService = new SocketIOService();
-    //     // const socket = ioService.reqConnection({ roomId: 21 });
-    //     socket.on(IOChanel.JOIN_CHAT, (response) => {
-    //         if (response?.metadata?.username) {
-    //           addViewerIfNotExists(response.metadata.username);
-    //           console.error(`response from be: ${response}`)
-    //         }
-    //         sender= response.metadata.username;
-    //       });
-    // })
-    // useEffect(() => {
-    //     ;(async () => {
-    //         const cameraPermission =
-    //             await Camera.requestCameraPermissionsAsync()
-    //         const mediaLibraryPermission =
-    //             await MediaLibrary.requestPermissionsAsync()
-    //         setHasCameraPermission(cameraPermission.status === 'granted')
-    //         setHasMediaLibraryPermission(
-    //             mediaLibraryPermission.status === 'granted'
-    //         )
-    //     })()
-    // }, [])
-
-    // if (hasCameraPermission === undefined) {
-    //     return <Text>Requesting permissions...</Text>
-    // } else if (!hasCameraPermission) {
-    //     return (
-    //         <Text>
-    //             Permission for camera not granted. Please change this in
-    //             settings.
-    //         </Text>
-    //     )
-    // }
 
     let takePic = async () => {
         let options = {
@@ -109,13 +73,12 @@ function ChatDetail({ route, navigation}) {
             exif: false,
         }
 
-        // let result = await ImagePicker.launchCameraAsync({
-        //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        //     allowsMultipleSelection: true,
-        //     aspect: [5, 5],
-        //     quality: 1,
-        // })
-
+        let result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsMultipleSelection: true,
+            aspect: [5, 5],
+            quality: 1,
+        })
         delete result.cancelled
         if (!result.canceled) {
             if (!photo) {
@@ -126,32 +89,33 @@ function ChatDetail({ route, navigation}) {
         }
     }
     const handleSendMessage = async () => {
-        if (message !== "") {
+        if (message !== '') {
             const messageData = {
-            //   room: room,
-              avatar: avatar,
-              fullname: fullname,
-              message: message,
-              time: new Date(),
-              userId: userId
-            };
-      
-            await socket.emit("send_message", messageData);
-            setMessages((list) => [...list, messageData]);
-            setMessage("");
-          }
+                //   room: room,
+                avatar: avatar,
+                fullname: fullname,
+                message: message,
+                time: new Date(),
+                userId: userId,
+            }
+
+            await socket.emit('send_message', messageData)
+            setMessages((list) => [...list, messageData])
+            setMessage('')
+        }
+        console.log(messages)
     }
 
     useEffect(() => {
-        socket.on("receive_message", (data) => {
+        socket.on('receive_message', (data) => {
             try {
-                setMessages((list) => [...list, data]);
-                console.log(`Received data: ${JSON.stringify(data)}`);
+                setMessages((list) => [...list, data])
+                console.log(`Received data: ${JSON.stringify(data)}`)
             } catch (error) {
-                console.error('Error handling received message:', error);
+                console.error('Error handling received message:', error)
             }
-        });
-    }, []);
+        })
+    }, [])
     const handleImageSelection = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -189,7 +153,13 @@ function ChatDetail({ route, navigation}) {
         } else {
         }
     }
-
+    useEffect(() => {
+        // Auto scroll to bottom when component mounts or messages change
+        flatListRef.current.scrollToEnd({ animated: true })
+    }, [messages])
+    const handleScrollToTop = () => {
+        flatListRef.current.scrollToOffset({ animated: true, offset: 0 })
+    }
     return (
         <KeyboardAvoidingView
             KeyboardAvoidingView
@@ -205,38 +175,75 @@ function ChatDetail({ route, navigation}) {
                         color={COLORS.black}
                     />
                 </TouchableOpacity>
-                <Image source={images.post5} style={styles.avatarDetail} />
-                <Text style={{ ...FONTS.h4, marginLeft: 10 }}>
-                    Quỹ thiện tâm
-                </Text>
+                <Image source={data.avatar} style={styles.avatarDetail} />
+                <Text style={{ ...FONTS.h4, marginLeft: 10 }}>{data.name}</Text>
             </View>
 
             <FlatList
+                ref={flatListRef}
+                showsVerticalScrollIndicator={false}
+                onLayout={() => {
+                    flatListRef.current.scrollToEnd({ animated: true })
+                }}
                 data={messages}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
                     <View>
-                        <View
-                            style={
-                                item.userId === userId
-                                    ? styles.myMessage
-                                    : styles.theirMessage
-                            }
-                        >
-                            <Text
-                                style={
-                                    item.userId === userId
-                                        ? styles.messageMyText
-                                        : styles.messageTheirText
-                                }
+                        {item.userId === userId ? (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-end',
+                                    alignItems: 'center',
+                                    marginHorizontal: 12,
+                                    marginTop: 3,
+                                }}
                             >
-                                {item.message}
-                            </Text>
-                        </View>
+                                <View style={styles.myMessage}>
+                                    <Text style={styles.messageMyText}>
+                                        {item.message}
+                                    </Text>
+                                </View>
+                            </View>
+                        ) : (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-start',
+                                    alignItems: 'center',
+                                    marginHorizontal: 12,
+                                    marginTop: 3,
+                                }}
+                            >
+                                <Image
+                                    source={item.avatar}
+                                    style={{
+                                        width: 30,
+                                        height: 30,
+                                        borderRadius: 20,
+                                    }}
+                                />
+                                <View style={styles.theirMessage}>
+                                    <Text style={styles.messageTheirText}>
+                                        {item.message}
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
                     </View>
                 )}
+                onContentSizeChange={() =>
+                    flatListRef.current.scrollToEnd({ animated: true })
+                }
             />
-
+            {/* <GiftedChat
+                messages={messages}
+                // onSend={text => onSendMessage(text)}
+                user={{
+                    _id: 1,
+                }}
+                renderComposer={renderComposer}
+            /> */}
             <View style={styles.viewIcon}>
                 <View style={styles.viewListImage}>
                     <FlatList
