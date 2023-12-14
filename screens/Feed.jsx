@@ -42,6 +42,7 @@ import {
     Question,
 } from '../components/CustomContent'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
+
 const Feed = ({ navigation, route }) => {
     // const { postId } = ;
     const onRefreshPost = () => {
@@ -78,6 +79,7 @@ const Feed = ({ navigation, route }) => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
+   
     useEffect(() => {
         setJoinedPost((prevJoinedPost) => [...prevJoinedPost, route.params])
     }, [route.params])

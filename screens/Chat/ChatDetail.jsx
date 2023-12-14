@@ -25,41 +25,82 @@ import * as DocumentPicker from 'expo-document-picker'
 import { styles } from './ChatDetailStyle'
 import { Image } from 'expo-image'
 
+import AsyncStoraged from '../../services/AsyncStoraged'
+import { io } from 'socket.io-client'
+
 const file = '../../assets/file.png'
 const video = '../../assets/video.png'
-function ChatDetail({ navigation }) {
+// const socket = SocketIOClient('http://192.168.1.10:3200', {
+//   transports: ['websocket'] // you need to explicitly tell it to use websockets
+// });
+function ChatDetail({ route, navigation}) {
     const [message, setMessage] = useState('')
     const [messages, setMessages] = useState([])
+    const [token, setToken] = useState('')
+    const [avatar, setAvatar] = useState('')
+    const [fullname, setFullname] = useState('')
+    const [userId, setUserId] = useState();
     const [selectedImages, setSelectedImage] = useState([])
     let cameraRef = useRef()
     const [hasCameraPermission, setHasCameraPermission] = useState()
     const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState()
     const [photo, setPhoto] = useState([])
     const [selectedFiles, setSelectedFiles] = useState([])
-
-    useEffect(() => {
-        ;(async () => {
-            const cameraPermission =
-                await Camera.requestCameraPermissionsAsync()
-            const mediaLibraryPermission =
-                await MediaLibrary.requestPermissionsAsync()
-            setHasCameraPermission(cameraPermission.status === 'granted')
-            setHasMediaLibraryPermission(
-                mediaLibraryPermission.status === 'granted'
-            )
-        })()
-    }, [])
-
-    if (hasCameraPermission === undefined) {
-        return <Text>Requesting permissions...</Text>
-    } else if (!hasCameraPermission) {
-        return (
-            <Text>
-                Permission for camera not granted. Please change this in
-                settings.
-            </Text>
-        )
+    const { socket, room } = route.params;
+    // const ioService = new SocketIOService();
+    // const socket = ioService.reqConnection({ roomId: "5894c675-3e5a-4d25-83d2-eb8eb76946ff" });
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
     }
+    useEffect(() => {
+        getToken();
+        console.log(`socket: ${socket}`)
+        console.log(`room: ${room}`)
+    }, [])
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setAvatar(userStored.avatar)
+        setFullname(userStored.fullname)
+        setUserId(userStored._id);
+    }
+    useEffect(() => {
+        getUserStored()
+    }, [])
+    // useEffect(() => {
+    //     // const ioService = new SocketIOService();
+    //     // const socket = ioService.reqConnection({ roomId: 21 });
+    //     socket.on(IOChanel.JOIN_CHAT, (response) => {
+    //         if (response?.metadata?.username) {
+    //           addViewerIfNotExists(response.metadata.username);
+    //           console.error(`response from be: ${response}`)
+    //         }
+    //         sender= response.metadata.username;
+    //       });
+    // })
+    // useEffect(() => {
+    //     ;(async () => {
+    //         const cameraPermission =
+    //             await Camera.requestCameraPermissionsAsync()
+    //         const mediaLibraryPermission =
+    //             await MediaLibrary.requestPermissionsAsync()
+    //         setHasCameraPermission(cameraPermission.status === 'granted')
+    //         setHasMediaLibraryPermission(
+    //             mediaLibraryPermission.status === 'granted'
+    //         )
+    //     })()
+    // }, [])
+
+    // if (hasCameraPermission === undefined) {
+    //     return <Text>Requesting permissions...</Text>
+    // } else if (!hasCameraPermission) {
+    //     return (
+    //         <Text>
+    //             Permission for camera not granted. Please change this in
+    //             settings.
+    //         </Text>
+    //     )
+    // }
 
     let takePic = async () => {
         let options = {
@@ -68,12 +109,12 @@ function ChatDetail({ navigation }) {
             exif: false,
         }
 
-        let result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsMultipleSelection: true,
-            aspect: [5, 5],
-            quality: 1,
-        })
+        // let result = await ImagePicker.launchCameraAsync({
+        //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        //     allowsMultipleSelection: true,
+        //     aspect: [5, 5],
+        //     quality: 1,
+        // })
 
         delete result.cancelled
         if (!result.canceled) {
@@ -84,12 +125,33 @@ function ChatDetail({ navigation }) {
             }
         }
     }
-    const handleSendMessage = () => {
-        if (message) {
-            setMessages([...messages, { text: message, sender: 'me' }])
-            setMessage('')
-        }
+    const handleSendMessage = async () => {
+        if (message !== "") {
+            const messageData = {
+            //   room: room,
+              avatar: avatar,
+              fullname: fullname,
+              message: message,
+              time: new Date(),
+              userId: userId
+            };
+      
+            await socket.emit("send_message", messageData);
+            setMessages((list) => [...list, messageData]);
+            setMessage("");
+          }
     }
+
+    useEffect(() => {
+        socket.on("receive_message", (data) => {
+            try {
+                setMessages((list) => [...list, data]);
+                console.log(`Received data: ${JSON.stringify(data)}`);
+            } catch (error) {
+                console.error('Error handling received message:', error);
+            }
+        });
+    }, []);
     const handleImageSelection = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -156,19 +218,19 @@ function ChatDetail({ navigation }) {
                     <View>
                         <View
                             style={
-                                item.sender === 'me'
+                                item.userId === userId
                                     ? styles.myMessage
                                     : styles.theirMessage
                             }
                         >
                             <Text
                                 style={
-                                    item.sender === 'me'
+                                    item.userId === userId
                                         ? styles.messageMyText
                                         : styles.messageTheirText
                                 }
                             >
-                                {item.text}
+                                {item.message}
                             </Text>
                         </View>
                     </View>
