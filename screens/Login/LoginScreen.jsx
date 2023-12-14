@@ -316,7 +316,7 @@ const LoginScreen = ({ navigation }) => {
                     />
                 </View>
 
-                <View
+                {/* <View
                     style={{
                         flexDirection: 'row',
                         marginVertical: 6,
@@ -331,7 +331,7 @@ const LoginScreen = ({ navigation }) => {
                     />
 
                     <Text>Remember Me</Text>
-                </View>
+                </View> */}
 
                 <CustomButton onPress={() => handleLogin()} title="ĐĂNG NHẬP" />
 

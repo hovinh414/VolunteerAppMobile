@@ -160,6 +160,19 @@ function ChatDetail({ route, navigation }) {
     const handleScrollToTop = () => {
         flatListRef.current.scrollToOffset({ animated: true, offset: 0 })
     }
+    function extractNameFromFullname(fullname) {
+        const lastSpaceIndex = fullname.lastIndexOf(' ')
+        return lastSpaceIndex !== -1
+            ? fullname.slice(lastSpaceIndex + 1)
+            : fullname
+    }
+    function formatTimeFromISOString(ISOString) {
+        const date = new Date(ISOString)
+        const hours = date.getHours().toString().padStart(2, '0')
+        const minutes = date.getMinutes().toString().padStart(2, '0')
+
+        return `${hours}:${minutes}`
+    }
     return (
         <KeyboardAvoidingView
             KeyboardAvoidingView
@@ -203,6 +216,15 @@ function ChatDetail({ route, navigation }) {
                                     <Text style={styles.messageMyText}>
                                         {item.message}
                                     </Text>
+                                    <Text
+                                        style={{
+                                            fontSize: 10,
+                                            color: COLORS.white,
+                                            paddingHorizontal: 3,
+                                        }}
+                                    >
+                                        {formatTimeFromISOString(item.time)}
+                                    </Text>
                                 </View>
                             </View>
                         ) : (
@@ -223,10 +245,29 @@ function ChatDetail({ route, navigation }) {
                                         borderRadius: 20,
                                     }}
                                 />
-                                <View style={styles.theirMessage}>
-                                    <Text style={styles.messageTheirText}>
-                                        {item.message}
+                                <View style={{ marginLeft: 15 }}>
+                                    <Text
+                                        style={{
+                                            fontSize: 13,
+                                            marginBottom: 2,
+                                        }}
+                                    >
+                                        {extractNameFromFullname(item.fullname)}
                                     </Text>
+                                    <View style={styles.theirMessage}>
+                                        <Text style={styles.messageTheirText}>
+                                            {item.message}
+                                        </Text>
+                                        <Text
+                                            style={{
+                                                fontSize: 10,
+                                                color: COLORS.black,
+                                                paddingHorizontal: 3,
+                                            }}
+                                        >
+                                            {formatTimeFromISOString(item.time)}
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
                         )}

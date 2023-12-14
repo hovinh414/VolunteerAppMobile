@@ -38,7 +38,7 @@ const screenOptions = {
         right: 0,
         left: 0,
         elevation: 0,
-        height: 80,
+        padding: 5,
         backgroundColor: '#fff',
         // borderTopLeftRadius: 20,
         // borderTopRightRadius: 20,
@@ -81,9 +81,7 @@ const BottomTabNavigation = () => {
                                 style={{
                                     paddingVertical: 8,
                                     paddingHorizontal: 20,
-                                    backgroundColor: focused
-                                        ? '#ffdccc'
-                                        : COLORS.white,
+                                    backgroundColor: COLORS.white,
                                     borderRadius: 8,
                                 }}
                             >
@@ -109,9 +107,7 @@ const BottomTabNavigation = () => {
                                 style={{
                                     paddingVertical: 8,
                                     paddingHorizontal: 20,
-                                    backgroundColor: focused
-                                        ? '#ffdccc'
-                                        : COLORS.white,
+                                    backgroundColor: COLORS.white,
                                     borderRadius: 8,
                                 }}
                             >
@@ -143,7 +139,7 @@ const BottomTabNavigation = () => {
                                         height: Platform.OS == 'ios' ? 50 : 60,
                                         borderRadius: 22,
                                         borderColor: '#fff',
-                                        borderWidth: 4,
+                                        borderWidth: 3,
                                     }}
                                 >
                                     <Feather
@@ -173,7 +169,7 @@ const BottomTabNavigation = () => {
                                         height: Platform.OS == 'ios' ? 50 : 60,
                                         borderRadius: 22,
                                         borderColor: '#fff',
-                                        borderWidth: 4,
+                                        borderWidth: 6,
                                     }}
                                 >
                                     <Image
@@ -200,9 +196,7 @@ const BottomTabNavigation = () => {
                                 style={{
                                     paddingVertical: 8,
                                     paddingHorizontal: 20,
-                                    backgroundColor: focused
-                                        ? '#ffdccc'
-                                        : COLORS.white,
+                                    backgroundColor: COLORS.white,
                                     borderRadius: 8,
                                 }}
                             >
@@ -229,9 +223,7 @@ const BottomTabNavigation = () => {
                                     style={{
                                         paddingVertical: 8,
                                         paddingHorizontal: 20,
-                                        backgroundColor: focused
-                                            ? '#ffdccc'
-                                            : COLORS.white,
+                                        backgroundColor: COLORS.white,
                                         borderRadius: 8,
                                     }}
                                 >
@@ -267,9 +259,7 @@ const BottomTabNavigation = () => {
                                     style={{
                                         paddingVertical: 8,
                                         paddingHorizontal: 20,
-                                        backgroundColor: focused
-                                            ? '#ffdccc'
-                                            : COLORS.white,
+                                        backgroundColor: COLORS.white,
                                         borderRadius: 8,
                                     }}
                                 >
@@ -305,9 +295,7 @@ const BottomTabNavigation = () => {
                                     style={{
                                         paddingVertical: 8,
                                         paddingHorizontal: 20,
-                                        backgroundColor: focused
-                                            ? '#ffdccc'
-                                            : COLORS.white,
+                                        backgroundColor: COLORS.white,
                                         borderRadius: 8,
                                     }}
                                 >

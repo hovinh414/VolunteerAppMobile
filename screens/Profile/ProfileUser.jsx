@@ -26,6 +26,7 @@ import { Image } from 'expo-image'
 import { useNavigation } from '@react-navigation/native'
 import Post from '../Feed/Post'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
+import ReportModal from '../../components/ReportModal'
 const loading = '../../assets/loading.gif'
 const cover = '../../assets/cover.jpg'
 const ProfileUser = ({ route }) => {
@@ -34,6 +35,7 @@ const ProfileUser = ({ route }) => {
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
     const [showFilter, setShowFilter] = useState(false)
+    const [showReport, setShowReport] = useState(false)
     const [totalFollows, setTotalFollow] = useState(items.followers)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -170,6 +172,7 @@ const ProfileUser = ({ route }) => {
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
+                        onPress={() => setShowReport(true)}
                         style={{
                             width: 36,
                             height: 36,
@@ -180,8 +183,8 @@ const ProfileUser = ({ route }) => {
                             marginRight: 5,
                         }}
                     >
-                        <Feather
-                            name="more-horizontal"
+                        <AntDesign
+                            name="warning"
                             size={20}
                             color={COLORS.primary}
                         />
@@ -249,8 +252,9 @@ const ProfileUser = ({ route }) => {
             } catch (error) {
                 setIsLoading(false)
                 Toast.show({
-                    type: 'warning',
-                    text1: 'Chưa có bài viết mới!',
+                    type: 'noPost',
+                    text1: 'Bạn đã xem hết rồi',
+                    text2: 'Bạn đã xem tất cả bài viết mới nhất',
                     visibilityTime: 2500,
                 })
                 console.log('API Error:', error)
@@ -637,6 +641,76 @@ const ProfileUser = ({ route }) => {
                 renderLeadingIcon={WarningToast}
             />
         ),
+        noPost: ({ text1, text2, email }) => (
+            <View
+                style={{
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    width: '95%',
+                    height: 'auto',
+                    borderLeftColor: '#E0E0E0',
+                    backgroundColor: '#E0E0E0',
+                    borderRadius: 12,
+                    padding: 10,
+                    justifyContent: 'center',
+                }}
+            >
+                <View
+                    style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: 5,
+                    }}
+                >
+                    <Ionicons
+                        name="checkmark-circle-outline"
+                        size={70}
+                        color={COLORS.black}
+                    />
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: 5,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontSize: 18,
+                            fontWeight: '700',
+                            color: COLORS.black,
+                        }}
+                    >
+                        {text1}
+                    </Text>
+                    <Text
+                        style={{
+                            fontSize: 16,
+                            color: COLORS.black,
+                            marginTop: 5,
+                            marginRight: 5,
+                        }}
+                    >
+                        {text2}
+                    </Text>
+                    <TouchableOpacity onPress={onRefreshPost}>
+                        <Text
+                            style={{
+                                fontSize: 16,
+                                color: COLORS.blue,
+                                fontWeight: 'bold',
+                                marginTop: 5,
+                                marginRight: 5,
+                            }}
+                        >
+                            Làm mới lại trang chủ
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        ),
     }
     const WarningToast = () => {
         // Your component logic here
@@ -671,6 +745,12 @@ const ProfileUser = ({ route }) => {
             >
                 <Toast config={toastConfig} />
             </View>
+            <ReportModal
+                onRequestClose={() => {
+                    setShowReport(false)
+                }}
+                visible={showReport}
+            />
             <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={{

@@ -28,16 +28,15 @@ export const styles = StyleSheet.create({
     myMessage: {
         backgroundColor: COLORS.primary,
         alignSelf: 'flex-end',
+        alignItems:"flex-end",
         padding: 5,
         borderRadius: 10,
-        marginRight: 15,
     },
     theirMessage: {
         backgroundColor: '#D3D3D3',
         alignSelf: 'flex-start',
         padding: 5,
         borderRadius: 10,
-        marginLeft: 15,
     },
     messageMyText: {
         padding: 3,
