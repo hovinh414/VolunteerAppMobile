@@ -1,10 +1,7 @@
 import React, { useRef, useState } from 'react'
-import { Modal, Image, View, TouchableOpacity } from 'react-native'
+import { Modal, Image, View, ActivityIndicator } from 'react-native'
 import { Feather, Ionicons } from '@expo/vector-icons'
 import { COLORS } from '../constants'
-
-
-const loading = '../assets/loading.gif'
 const ModalLoading = ({ visible, onRequestClose }) => {
     return (
         <Modal
@@ -21,7 +18,9 @@ const ModalLoading = ({ visible, onRequestClose }) => {
                     backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 }}
             >
-                <Image source={require(loading)} style={{width:70, height:70}}/>
+                {visible ? (
+                    <ActivityIndicator size="large" color={COLORS.white} />
+                ) : null}
             </View>
         </Modal>
     )

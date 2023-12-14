@@ -31,6 +31,7 @@ import axios from 'axios'
 import ImageAvata from '../../assets/hero2.jpg'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import { format } from 'date-fns'
+import ModalLoading from '../../components/ModalLoading'
 const share = '../../assets/share.png'
 const Post = ({
     posts,
@@ -107,7 +108,7 @@ const Post = ({
             }
         }
     }
-    
+
     const [postIdComment, setPostIdComment] = useState('')
     const LikeButton = ({ postId, likePost, unLikePost, post }) => {
         const [isLiked, setIsLiked] = useState(false)
@@ -156,22 +157,22 @@ const Post = ({
 
             useEffect(() => {
                 checkLikes()
-                // fetchLikes()
+                fetchLikes()
             }, [])
         }
-        // const fetchLikes = async () => {
-        //     try {
-        //         const response = await axios.get(
-        //             API_URL.API_URL + '/post/likes/' + postId
-        //         )
+        const fetchLikes = async () => {
+            try {
+                const response = await axios.get(
+                    API_URL.API_URL + '/post/likes/' + postId
+                )
 
-        //         if (response.data.status === 'SUCCESS') {
-        //             setTotalLike(response.data.data.totalLikes)
-        //         }
-        //     } catch (error) {
-        //         console.log('API Error:', error)
-        //     }
-        // }
+                if (response.data.status === 'SUCCESS') {
+                    setTotalLike(response.data.data.totalLikes)
+                }
+            } catch (error) {
+                console.log('API Error:', error)
+            }
+        }
 
         const handleLikeClick = async () => {
             try {
@@ -317,6 +318,7 @@ const Post = ({
         }
     }
     const viewDetailPost = async (_postId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -330,13 +332,16 @@ const Post = ({
             )
             if (response.data.status === 'SUCCESS') {
                 navigation.navigate('DetailPost', response.data.data)
+                setLoading(false)
             }
         } catch (error) {
             console.log('API Error:', error)
+            setLoading(false)
         }
     }
 
     const viewProfile = async (_orgId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -353,9 +358,11 @@ const Post = ({
                     'ProfileUser',
                     response.data.data.profileResult
                 )
+                setLoading(false)
             }
         } catch (error) {
             console.log('API Error:', error)
+            setLoading(false)
         }
     }
     const removeHashtagsAndUrlsFromContent = (content) => {
@@ -426,6 +433,7 @@ const Post = ({
                 onRequestClose={() => setShowComment(false)}
                 postId={postIdComment}
             />
+            <ModalLoading visible={loading} />
             <FlatList
                 data={posts}
                 ListHeaderComponent={headers}
@@ -642,7 +650,7 @@ const Post = ({
                             </View>
                             <View
                                 style={{
-                                    margin: 8,
+                                    margin: 12,
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                 }}
@@ -712,7 +720,9 @@ const Post = ({
                                 }}
                             >
                                 {type === 'Organization' ||
-                                !type ? null : joinedPost.includes(item._id) ? (
+                                !type ? null : !joinedPost ? null : joinedPost.includes(
+                                      item._id
+                                  ) ? (
                                     <View
                                         style={{
                                             backgroundColor: '#ccc',

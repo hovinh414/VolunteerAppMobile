@@ -2,7 +2,7 @@ import {
     View,
     Text,
     TouchableOpacity,
-    ScrollView,
+    Dimensions,
     FlatList,
     StyleSheet,
     ActivityIndicator,
@@ -42,8 +42,6 @@ import {
     Question,
 } from '../components/CustomContent'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
-const loading = '../assets/loading.gif'
-
 
 const Feed = ({ navigation, route }) => {
     // const { postId } = ;
@@ -67,6 +65,7 @@ const Feed = ({ navigation, route }) => {
             }}
         />
     )
+    const windowWidth = Dimensions.get('window').width;
     const [posts, setPosts] = useState([])
     const [joinedPost, setJoinedPost] = useState([])
     const [token, setToken] = useState('')
@@ -187,10 +186,7 @@ const Feed = ({ navigation, route }) => {
                     }
                 }
             } catch (error) {
-                if (
-                    error.response.status === 400 ||
-                    error.response.status === 500
-                ) {
+                if (error.response.status === 400) {
                     setIsLoading(false)
                     Toast.show({
                         type: 'noPost',
@@ -652,10 +648,7 @@ const Feed = ({ navigation, route }) => {
                             alignItems: 'center',
                         }}
                     >
-                        <Image
-                            source={require(loading)}
-                            style={{ width: 50, height: 50 }}
-                        />
+                        <ActivityIndicator size="large" color={COLORS.black} />
                     </View>
                 ) : null}
             </View>
@@ -802,21 +795,25 @@ const Feed = ({ navigation, route }) => {
                 <MenuProvider skipInstanceCheck>
                     <Menu>
                         <MenuTrigger>
-                            <Text
+                            <View
                                 style={{
-                                    ...FONTS.body2,
+                                    flexDirection: 'row',
+                                    alightItems: 'center',
                                 }}
                             >
-                                Việc Tử Tế{' '}
+                                <Text
+                                    style={{
+                                        ...FONTS.body2,
+                                    }}
+                                >
+                                    Việc Tử Tế{' '}
+                                </Text>
                                 <Feather
                                     name="chevron-down"
-                                    size={30}
+                                    size={22}
                                     color={COLORS.black}
-                                    style={{
-                                        marginTop: 10,
-                                    }}
                                 />
-                            </Text>
+                            </View>
                         </MenuTrigger>
 
                         <MenuOptions
