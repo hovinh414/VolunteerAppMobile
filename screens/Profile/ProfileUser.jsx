@@ -597,7 +597,11 @@ const ProfileUser = ({ route }) => {
     const [type, setType] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
-        setType(userStored.type)
+        if (userStored) {
+            setType(userStored.type)
+        } else {
+            setType(null)
+        }
     }
     useEffect(() => {
         getUserStored()

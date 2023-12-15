@@ -65,7 +65,7 @@ const Feed = ({ navigation, route }) => {
             }}
         />
     )
-    const windowWidth = Dimensions.get('window').width;
+    const windowWidth = Dimensions.get('window').width
     const [posts, setPosts] = useState([])
     const [joinedPost, setJoinedPost] = useState([])
     const [token, setToken] = useState('')
@@ -79,7 +79,7 @@ const Feed = ({ navigation, route }) => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
-   
+
     useEffect(() => {
         setJoinedPost((prevJoinedPost) => [...prevJoinedPost, route.params])
     }, [route.params])
@@ -561,8 +561,8 @@ const Feed = ({ navigation, route }) => {
                                             marginHorizontal: 10,
                                         }}
                                     >
-                                        {type === 'Organization' ||
-                                        !type ? null : joinedPost.includes(
+                                        {type !==
+                                        'User' ? null : !joinedPost ? null : joinedPost.includes(
                                               item._id
                                           ) ? (
                                             <View

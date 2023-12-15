@@ -20,7 +20,6 @@ const ioService = new SocketIOService()
 
 const Chat = ({ navigation }) => {
     const [roomId, setRoomId] = useState('')
-
     const [isLoading, setIsLoading] = useState(true)
     const [showChat, setShowChat] = useState(false)
     const joinRoom = (item) => {

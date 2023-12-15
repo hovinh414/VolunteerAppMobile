@@ -43,7 +43,7 @@ const Post = ({
     footer,
 }) => {
     const [token, setToken] = useState('')
-    const [avatar, setAvatar] = useState()
+    const [orgId, setOrgId] = useState('')
     const [typePost, setTypePost] = useState('normal')
     const [type, setType] = useState()
     const navigation = useNavigation()
@@ -60,11 +60,11 @@ const Post = ({
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
-            setAvatar(userStored.avatar)
             setType(userStored.type)
+            setOrgId(userStored._id)
         } else {
-            setAvatar(null)
             setType(null)
+            setOrgId(null)
         }
     }
     useEffect(() => {
@@ -110,26 +110,10 @@ const Post = ({
     }
 
     const [postIdComment, setPostIdComment] = useState('')
-    const LikeButton = ({ postId, likePost, unLikePost, post }) => {
+    function LikeButton({ postId, likePost, unLikePost, post }) {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
-        useEffect(() => {
-            const fetchLikes = async () => {
-                try {
-                    const response = await axios.get(
-                        API_URL.API_URL + '/post/likes/' + postId
-                    )
 
-                    if (response.data.status === 'SUCCESS') {
-                        setTotalLike(response.data.data.totalLikes)
-                    }
-                } catch (error) {
-                    console.log('API Error:', error)
-                }
-            }
-
-            fetchLikes()
-        }, [])
         if (!token) {
             return
         } else {
@@ -157,7 +141,6 @@ const Post = ({
 
             useEffect(() => {
                 checkLikes()
-                fetchLikes()
             }, [])
         }
         const fetchLikes = async () => {
@@ -174,6 +157,9 @@ const Post = ({
             }
         }
 
+        useEffect(() => {
+            fetchLikes()
+        }, [])
         const handleLikeClick = async () => {
             try {
                 if (isLiked) {
@@ -184,7 +170,7 @@ const Post = ({
                     setIsLiked(true)
                 }
 
-                fetchLikes()
+                fetchLikes() // Gọi hàm này sau khi thực hiện like/unlike thành công
             } catch (error) {
                 console.log(error)
             }
@@ -477,7 +463,14 @@ const Post = ({
                                     alignItems: 'center',
                                     marginHorizontal: 8,
                                 }}
-                                onPress={() => viewProfile(item.ownerId)}
+                                onPress={
+                                    item.ownerId === orgId
+                                        ? () =>
+                                              navigation.navigate(
+                                                  'ProfileOrganisation'
+                                              )
+                                        : () => viewProfile(item.ownerId)
+                                }
                             >
                                 <Image
                                     source={item.ownerAvatar}
@@ -714,13 +707,14 @@ const Post = ({
                                     post={item}
                                 />
                             </View>
+
                             <View
                                 style={{
                                     flexDirection: 'row',
                                 }}
                             >
-                                {type === 'Organization' ||
-                                !type ? null : !joinedPost ? null : joinedPost.includes(
+                                {type !==
+                                'User' ? null : !joinedPost ? null : joinedPost.includes(
                                       item._id
                                   ) ? (
                                     <View

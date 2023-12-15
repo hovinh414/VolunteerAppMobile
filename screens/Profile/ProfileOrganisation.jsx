@@ -464,6 +464,7 @@ const ProfileCard = () => {
         setIsActive(userStored.isActiveOrganization)
         setFollower(userStored.follower)
     }
+    
     const getUserStoredEdit = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)

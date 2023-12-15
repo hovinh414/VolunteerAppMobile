@@ -26,6 +26,7 @@ import { styles } from './ChatDetailStyle'
 import { Image } from 'expo-image'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import { io } from 'socket.io-client'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const file = '../../assets/file.png'
 const video = '../../assets/video.png'
@@ -53,8 +54,10 @@ function ChatDetail({ route, navigation }) {
     }
     useEffect(() => {
         getToken()
+        getUserStored()
         console.log(`socket: ${socket}`)
         console.log(`room: ${room}`)
+        fetchChatData()
     }, [])
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
@@ -62,10 +65,6 @@ function ChatDetail({ route, navigation }) {
         setFullname(userStored.fullname)
         setUserId(userStored._id)
     }
-    useEffect(() => {
-        getUserStored()
-    }, [])
-
     let takePic = async () => {
         let options = {
             quality: 1,
@@ -88,10 +87,68 @@ function ChatDetail({ route, navigation }) {
             }
         }
     }
+    const fetchChatData = async () => {
+        try {
+            const storedChatData = await AsyncStorage.getItem('chatData')
+            if (storedChatData) {
+                const parsedChatData = JSON.parse(storedChatData)
+
+                // Tìm xem có group chat có groupId tương ứng không
+                const groupChat = parsedChatData.find(
+                    (item) => item.groupId === room
+                )
+
+                if (groupChat) {
+                    setMessages(groupChat.messages)
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching chatData from AsyncStorage:', error)
+        }
+    }
+    const updateMessages = (newMessage) => {
+        setMessages((list) => [...list, newMessage])
+    }
+
+    const updateChatData = async () => {
+        try {
+            const storedChatData = await AsyncStorage.getItem('chatData')
+            let chatDataArray = storedChatData ? JSON.parse(storedChatData) : []
+
+            // Kiểm tra và khởi tạo mảng nếu cần
+            if (!Array.isArray(chatDataArray)) {
+                chatDataArray = []
+            }
+
+            // Tìm xem có group chat có groupId tương ứng không
+            const existingGroupIndex = chatDataArray.findIndex(
+                (item) => item.groupId === room
+            )
+
+            const updatedChatData = {
+                groupId: room || '',
+                messages: messages,
+            }
+
+            // Nếu tồn tại group chat, cập nhật thông tin, ngược lại thêm mới
+            if (existingGroupIndex !== -1) {
+                chatDataArray[existingGroupIndex] = updatedChatData
+            } else {
+                chatDataArray.push(updatedChatData)
+            }
+
+            const storedChatDataArray = JSON.stringify(chatDataArray)
+            await AsyncStorage.setItem('chatData', storedChatDataArray)
+
+            console.log('chatDataArray: ', storedChatDataArray)
+        } catch (error) {
+            console.error('Error updating chatDataArray:', error)
+        }
+    }
+
     const handleSendMessage = async () => {
-        if (message !== '') {
-            const messageData = {
-                //   room: room,
+        if (message !== '' && room && avatar && fullname && userId) {
+            const newMessage = {
                 avatar: avatar,
                 fullname: fullname,
                 message: message,
@@ -99,22 +156,30 @@ function ChatDetail({ route, navigation }) {
                 userId: userId,
             }
 
-            await socket.emit('send_message', messageData)
-            setMessages((list) => [...list, messageData])
+            // Gửi tin nhắn đến server qua socket
+            await socket.emit('send_message', newMessage)
+
+            // Cập nhật local state
+            setMessages((list) => [...list, newMessage])
+
+            // Đặt lại giá trị tin nhắn về rỗng
             setMessage('')
+        } else {
+            console.error('Missing required values for sending message.')
         }
     }
 
     useEffect(() => {
         socket.on('receive_message', (data) => {
             try {
-                setMessages((list) => [...list, data])
+                updateMessages(data)
                 console.log(`Received data: ${JSON.stringify(data)}`)
             } catch (error) {
                 console.error('Error handling received message:', error)
             }
         })
     }, [])
+
     const handleImageSelection = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -159,12 +224,24 @@ function ChatDetail({ route, navigation }) {
     const handleScrollToTop = () => {
         flatListRef.current.scrollToOffset({ animated: true, offset: 0 })
     }
-    function extractNameFromFullname(fullname) {
+    function extractName(fullname) {
         const lastSpaceIndex = fullname.lastIndexOf(' ')
         return lastSpaceIndex !== -1
             ? fullname.slice(lastSpaceIndex + 1)
             : fullname
     }
+    function extractNameFromFullname(fullname) {
+        const words = fullname.split(' ')
+
+        if (words.length > 2) {
+            // Lấy 3 từ cuối cùng
+            return words.slice(-3).join(' ')
+        } else {
+            // Nếu từ cuối cùng chỉ có 1 hoặc 2 từ, trả về toàn bộ fullname
+            return extractName(fullname)
+        }
+    }
+
     function formatTimeFromISOString(ISOString) {
         const date = new Date(ISOString)
         const hours = date.getHours().toString().padStart(2, '0')
@@ -180,7 +257,12 @@ function ChatDetail({ route, navigation }) {
             enabled
         >
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity
+                    onPress={() => {
+                        navigation.goBack()
+                        updateChatData()
+                    }}
+                >
                     <MaterialIcons
                         name="keyboard-arrow-left"
                         size={30}
