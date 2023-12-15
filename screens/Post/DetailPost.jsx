@@ -16,6 +16,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { COLORS, FONTS, SIZES } from '../../constants/theme'
 import * as Progress from 'react-native-progress'
+import PopupMenu from '../../components/PopupMenu'
 import {
     MaterialIcons,
     Feather,
@@ -31,9 +32,11 @@ import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import { format } from 'date-fns'
 import ModalLoading from '../../components/ModalLoading'
 import CreateGroupModal from '../../components/CreateGroupModal'
+import { getStatusBarHeight } from 'react-native-status-bar-height'
 const DetailPost = ({ navigation, route }) => {
     const [items, setItems] = useState(route.params)
     const screenWidth = Dimensions.get('window').width
+    const screenHeight = Dimensions.get('window').height
     const [type, setType] = useState('')
     const [email, setEmail] = useState('')
     const [showLoading, setShowLoading] = useState(false)
@@ -73,6 +76,28 @@ const DetailPost = ({ navigation, route }) => {
             console.log('API Error:', error)
         }
     }
+    const [statusBarHeight, setStatusBarHeight] = useState(0)
+    const options = [
+        {
+            title: 'Thống kê hoạt động',
+            icon: 'bar-chart-outline',
+            action: () => navigation.navigate('Statistical', items.activityId),
+        },
+        {
+            title: 'Sao kê hoạt động',
+            icon: 'wallet-outline',
+            action: () => alert('Thống kê'),
+        },
+        {
+            title: 'Chi tiết',
+            icon: 'reader-outline',
+            action: () => alert('Thống kê'),
+        },
+    ]
+    useEffect(() => {
+        const height = getStatusBarHeight()
+        setStatusBarHeight(height)
+    }, [])
     const [token, setToken] = useState('')
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -512,11 +537,15 @@ const DetailPost = ({ navigation, route }) => {
                 onPress={() => navigation.navigate('Feed', joinId)}
                 style={{
                     position: 'absolute',
-                    top: 50,
+                    bottom:
+                        Platform.OS == 'ios'
+                            ? screenHeight - statusBarHeight - 50
+                            : screenHeight - 50,
                     left: 20,
                     borderRadius: 50,
                     backgroundColor: '#cccc',
                     zIndex: 3,
+                    padding: 4,
                 }}
             >
                 <MaterialIcons
@@ -525,6 +554,10 @@ const DetailPost = ({ navigation, route }) => {
                     color={COLORS.black}
                 />
             </TouchableOpacity>
+            {items.ownerId === orgId ? (
+                <PopupMenu options={options} />
+            ) : null}
+
             <ScrollView
                 style={{
                     backgroundColor: '#fff',

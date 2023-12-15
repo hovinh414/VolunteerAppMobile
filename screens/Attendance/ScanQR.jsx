@@ -18,7 +18,6 @@ import { BarCodeScanner } from 'expo-barcode-scanner'
 import Modal from 'react-native-modal'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import ModalLoading from '../../components/ModalLoading'
-import { da } from 'date-fns/locale'
 const loading = '../../assets/loading.gif'
 const ScanQR = ({ navigation, route }) => {
     const screenWidth = Dimensions.get('window').width
@@ -82,21 +81,7 @@ const ScanQR = ({ navigation, route }) => {
             }
         }
     }
-    const renderLoading = () => (
-        <Modal
-            isVisible={showLoading}
-            animationIn="fadeIn"
-            animationOut="fadeOut"
-            style={{ margin: 0 }}
-        >
-            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <Image
-                    source={require(loading)}
-                    style={{ width: 70, height: 70 }}
-                />
-            </View>
-        </Modal>
-    )
+   
     const toastConfig = {
         success: (props) => (
             <BaseToast
@@ -289,7 +274,7 @@ const ScanQR = ({ navigation, route }) => {
                     backgroundColor: '#fec4b6',
                 }}
             >
-                {renderLoading()}
+                <ModalLoading visible={showLoading} />
                 <TouchableOpacity
                     onPress={() => navigation.goBack()}
                     style={{

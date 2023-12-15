@@ -103,7 +103,6 @@ function ChatDetail({ route, navigation }) {
             setMessages((list) => [...list, messageData])
             setMessage('')
         }
-        console.log(messages)
     }
 
     useEffect(() => {

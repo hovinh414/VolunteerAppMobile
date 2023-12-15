@@ -25,6 +25,7 @@ import NotificationScreen from './screens/Feed/NotificationScreen'
 import Attendance from './screens/Attendance/Attendance'
 import ShowQr from './screens/Attendance/ShowQr'
 import ScanQR from './screens/Attendance/ScanQR'
+import Statistical from './screens/Post/Statistical'
 const Stack = createNativeStackNavigator()
 
 SplashScreen.preventAutoHideAsync()
@@ -148,6 +149,13 @@ export default function App() {
                     <Stack.Screen
                         name="FeaturedArticle"
                         component={FeaturedArticle}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="Statistical"
+                        component={Statistical}
                         options={{
                             headerShown: false,
                         }}
