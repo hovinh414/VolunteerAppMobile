@@ -766,12 +766,21 @@ const Feed = ({ navigation, route }) => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <TouchableOpacity
-                style={{ position: 'absolute', right: 12, top: 55 }}
-                onPress={() => navigation.navigate('Chat')}
-            >
-                <AntDesign name="message1" size={23} color={COLORS.black} />
-            </TouchableOpacity>
+            {token ? (
+                <TouchableOpacity
+                    style={{ position: 'absolute', right: 12, top: 55 }}
+                    onPress={() => navigation.navigate('Chat')}
+                >
+                    <AntDesign name="message1" size={23} color={COLORS.black} />
+                </TouchableOpacity>
+            ) : (
+                <TouchableOpacity
+                    style={{ position: 'absolute', right: 12, top: 55 }}
+                    onPress={() => navigation.navigate('LoginScreen')}
+                >
+                    <AntDesign name="message1" size={23} color={COLORS.black} />
+                </TouchableOpacity>
+            )}
             <TouchableOpacity
                 style={{ position: 'absolute', right: 48, top: 55 }}
                 onPress={() => navigation.navigate('NotificationScreen')}

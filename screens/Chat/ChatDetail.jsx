@@ -55,6 +55,7 @@ function ChatDetail({ route, navigation }) {
     useEffect(() => {
         getToken()
         getUserStored()
+        // AsyncStorage.clear();
         console.log(`socket: ${socket}`)
         console.log(`room: ${room}`)
         fetchChatData()

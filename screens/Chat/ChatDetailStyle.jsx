@@ -4,7 +4,7 @@ export const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingTop:40,
+        paddingTop: 40,
     },
     header: {
         flexDirection: 'row',
@@ -23,20 +23,22 @@ export const styles = StyleSheet.create({
         borderTopWidth: 0.5,
         borderColor: '#ccc',
         flexDirection: 'column',
-        marginTop:10,
+        marginTop: 10,
     },
     myMessage: {
         backgroundColor: COLORS.primary,
         alignSelf: 'flex-end',
-        alignItems:"flex-end",
+        alignItems: 'flex-end',
         padding: 5,
         borderRadius: 10,
+        marginLeft: 24,
     },
     theirMessage: {
         backgroundColor: '#D3D3D3',
         alignSelf: 'flex-start',
         padding: 5,
         borderRadius: 10,
+        marginRight: 24,
     },
     messageMyText: {
         padding: 3,
