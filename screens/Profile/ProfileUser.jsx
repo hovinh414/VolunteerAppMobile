@@ -5,7 +5,7 @@ import {
     FlatList,
     ScrollView,
     TouchableOpacity,
-    RefreshControl,
+    ActivityIndicator,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -52,7 +52,7 @@ const ProfileUser = ({ route }) => {
         return unsubscribe
     }, [navigation])
     const onRefreshPost = () => {
-        setCurrentPage(0)
+        setCurrentPage(1)
         setPosts([])
         getPosts()
     }
@@ -225,7 +225,7 @@ const ProfileUser = ({ route }) => {
         })
     }
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
-    const [currentPage, setCurrentPage] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1)
     const fetchNextPage = async () => {
         if (!isFetchingNextPage && currentPage < 10) {
             setIsLoading(true)
@@ -617,10 +617,7 @@ const ProfileUser = ({ route }) => {
                             alignItems: 'center',
                         }}
                     >
-                        <Image
-                            source={require(loading)}
-                            style={{ width: 50, height: 50 }}
-                        />
+                        <ActivityIndicator size="large" color={COLORS.black} />
                     </View>
                 ) : null}
             </View>

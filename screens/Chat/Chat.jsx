@@ -16,12 +16,18 @@ import axios from 'axios'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import { IOChanel, SocketIOService } from '../../scripts/socket'
 import API_URL from '../../interfaces/config'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useFocusEffect } from '@react-navigation/native'
 const ioService = new SocketIOService()
 
 const Chat = ({ navigation }) => {
-    const [roomId, setRoomId] = useState('')
     const [isLoading, setIsLoading] = useState(true)
     const [showChat, setShowChat] = useState(false)
+    useFocusEffect(
+        React.useCallback(() => {
+            getGroupChats()
+        }, [])
+    )
     const joinRoom = (item) => {
         // if (username !== "" && room !== "") {
         const socket = ioService.reqConnection({
@@ -39,6 +45,12 @@ const Chat = ({ navigation }) => {
     const [token, setToken] = useState('')
     const [filteredChat, setFilteredChat] = useState([])
     const [searchText, setSearchText] = useState('')
+    const [latestMessages, setLatestMessages] = useState([])
+    const [userId, setUserId] = useState()
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setUserId(userStored._id)
+    }
     const handleSearchTextChange = (text) => {
         setSearchText(text)
         // Lọc danh sách chat dựa trên tên tìm kiếm
@@ -54,6 +66,7 @@ const Chat = ({ navigation }) => {
 
     useEffect(() => {
         getToken()
+        getUserStored()
     }, [])
     const getGroupChats = async () => {
         setIsLoading(true)
@@ -78,6 +91,80 @@ const Chat = ({ navigation }) => {
     useEffect(() => {
         getGroupChats()
     }, [token])
+    useEffect(() => {
+        getDataMessages()
+    }, [filteredChat, token])
+    const getLatestMessageByGroupId = async (groupId) => {
+        try {
+            const storedChatData = await AsyncStorage.getItem('chatData')
+            if (storedChatData) {
+                const parsedChatData = JSON.parse(storedChatData)
+
+                // Tìm group chat có groupId tương ứng
+                const groupChat = parsedChatData.find(
+                    (item) => item.groupId === groupId
+                )
+
+                // Kiểm tra xem groupChat có tồn tại không
+                if (groupChat) {
+                    // Nếu tìm thấy group chat, lấy tin nhắn cuối cùng
+                    const latestMessage =
+                        groupChat.messages[groupChat.messages.length - 1]
+
+                    return latestMessage
+                } else {
+                    // Xử lý khi groupChat không tồn tại (ví dụ: trả về giá trị mặc định)
+                    return null
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching chatData from AsyncStorage:', error)
+        }
+
+        return null // Trả về null nếu không tìm thấy tin nhắn
+    }
+
+    const getDataMessages = async () => {
+        try {
+            const messagesPromises = filteredChat.map(async (item) => {
+                const latestMessage = await getLatestMessageByGroupId(
+                    item.groupid
+                )
+                return { group: item, latestMessage }
+            })
+
+            const messages = await Promise.all(messagesPromises)
+
+            // Cập nhật state với thông tin tin nhắn cuối cùng
+            setLatestMessages(messages)
+        } catch (error) {
+            console.error('Error fetching chatData from AsyncStorage:', error)
+        }
+    }
+    function extractName(fullname) {
+        const lastSpaceIndex = fullname.lastIndexOf(' ')
+        return lastSpaceIndex !== -1
+            ? fullname.slice(lastSpaceIndex + 1)
+            : fullname
+    }
+    function extractNameFromFullname(fullname) {
+        const words = fullname.split(' ')
+
+        if (words.length > 2) {
+            // Lấy 3 từ cuối cùng
+            return words.slice(-3).join(' ')
+        } else {
+            // Nếu từ cuối cùng chỉ có 1 hoặc 2 từ, trả về toàn bộ fullname
+            return extractName(fullname)
+        }
+    }
+    function formatTimeFromISOString(ISOString) {
+        const date = new Date(ISOString)
+        const hours = date.getHours().toString().padStart(2, '0')
+        const minutes = date.getMinutes().toString().padStart(2, '0')
+
+        return `${hours}:${minutes}`
+    }
     return (
         <SafeAreaView style={styles.container}>
             <>
@@ -106,23 +193,41 @@ const Chat = ({ navigation }) => {
                     />
                 </View>
                 {filteredChat.length === 0 ? (
-                    <ActivityIndicator size={'large'} visible={isLoading} />
+                    <View
+                        style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+                            Bạn chưa tham gia nhóm trò chuyện nào!
+                        </Text>
+                    </View>
                 ) : (
                     <FlatList
                         data={filteredChat}
-                        renderItem={({ item, index }) => (
-                            <TouchableOpacity
-                                style={styles.chat}
-                                key={index}
-                                onPress={() => joinRoom(item)}
-                            >
-                                <View style={styles.viewChat}>
-                                    <Image
-                                        source={item.avatar}
-                                        style={styles.avatar}
-                                    />
-                                    {token ? (
-                                        <View style={{ marginLeft: 12 }}>
+                        renderItem={({ item, index }) => {
+                            // Tìm tin nhắn cuối cùng tương ứng với groupid
+                            const lastMessageItem = latestMessages.find(
+                                (mess) => mess.group.groupid === item.groupid
+                            )
+                            return (
+                                <TouchableOpacity
+                                    style={styles.chat}
+                                    key={index}
+                                    onPress={() => joinRoom(item)}
+                                >
+                                    <View style={styles.viewChat}>
+                                        <Image
+                                            source={item.avatar}
+                                            style={styles.avatar}
+                                        />
+                                        <View
+                                            style={{
+                                                marginLeft: 12,
+                                            }}
+                                        >
                                             <Text
                                                 style={{
                                                     ...FONTS.h3,
@@ -133,81 +238,78 @@ const Chat = ({ navigation }) => {
                                                 {' '}
                                                 {item.name}{' '}
                                             </Text>
-                                            {/* <Text style={{ fontSize: 14 }}>
-                                            {' '}
-                                            {item.lastMessage.length > 28
-                                                ? `${item.lastMessage.slice(
-                                                      0,
-                                                      28
-                                                  )}...`
-                                                : item.lastMessage}
-                                        </Text> */}
+                                            {!lastMessageItem ||
+                                            !lastMessageItem.latestMessage ? null : (
+                                                <View
+                                                    style={{
+                                                        flexDirection: 'row',
+                                                        justifyContent:
+                                                            'space-between',
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{ fontSize: 14 }}
+                                                        numberOfLines={1}
+                                                        ellipsizeMode="tail"
+                                                    >
+                                                        {!lastMessageItem
+                                                            ? 'Chưa có tin nhắn nào gần đây'
+                                                            : lastMessageItem
+                                                                  .latestMessage
+                                                                  .userId ===
+                                                              userId
+                                                            ? `Bạn: ${lastMessageItem.latestMessage.message.slice(
+                                                                  0,
+                                                                  30
+                                                              )}${
+                                                                  lastMessageItem
+                                                                      .latestMessage
+                                                                      .message
+                                                                      .length >
+                                                                  30
+                                                                      ? '...'
+                                                                      : ''
+                                                              }`
+                                                            : `${extractNameFromFullname(
+                                                                  lastMessageItem
+                                                                      .latestMessage
+                                                                      .fullname
+                                                              )}: ${lastMessageItem.latestMessage.message.slice(
+                                                                  0,
+                                                                  30
+                                                              )}${
+                                                                  lastMessageItem
+                                                                      .latestMessage
+                                                                      .message
+                                                                      .length >
+                                                                  30
+                                                                      ? '...'
+                                                                      : ''
+                                                              }`}
+                                                    </Text>
+                                                </View>
+                                            )}
                                         </View>
-                                    ) : (
-                                        <View style={{ marginLeft: 12 }}>
-                                            <Text
-                                                style={{
-                                                    ...FONTS.h3,
-                                                    fontSize: 16,
-                                                    fontWeight: 'bold',
-                                                    marginBottom: 6,
-                                                }}
-                                            >
-                                                {' '}
-                                                {item.name}{' '}
-                                            </Text>
-                                            <Text
-                                                style={{
-                                                    fontSize: 14,
-                                                    fontWeight: 'bold',
-                                                }}
-                                            >
-                                                {' '}
-                                                {item.lastMessage.length > 28
-                                                    ? `${item.lastMessage.slice(
-                                                          0,
-                                                          28
-                                                      )}...`
-                                                    : item.lastMessage}
-                                            </Text>
-                                        </View>
-                                    )}
-                                </View>
-                                {/* <View
-                                style={{
-                                    flexDirection: 'column',
-                                    alignItems: 'flex-end',
-                                    justifyContent: 'space-between',
-                                }}
-                            >
-                                <Text style={{ fontSize: 13, color: '#777' }}>
-                                    {' '}
-                                    {item.lastMessageTime}{' '}
-                                </Text>
-                                {item.isSeen ? (
-                                    <Text
+                                    </View>
+                                    <View
                                         style={{
-                                            fontSize: 30,
-                                            color: 'white',
-                                            marginRight: 5,
+                                            flexDirection: 'column',
+                                            alignItems: 'flex-start',
                                         }}
                                     >
-                                        •
-                                    </Text>
-                                ) : (
-                                    <Text
-                                        style={{
-                                            fontSize: 35,
-                                            color: '#FF493C',
-                                            marginRight: 5,
-                                        }}
-                                    >
-                                        •
-                                    </Text>
-                                )}
-                            </View> */}
-                            </TouchableOpacity>
-                        )}
+                                        {!lastMessageItem ||
+                                        !lastMessageItem.latestMessage ? null : (
+                                            <Text style={{ fontSize: 14 }}>
+                                                {formatTimeFromISOString(
+                                                    lastMessageItem
+                                                        .latestMessage.time
+                                                )}
+                                            </Text>
+                                        )}
+                                    </View>
+                                </TouchableOpacity>
+                            )
+                        }}
                     />
                 )}
             </>

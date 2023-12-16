@@ -109,7 +109,7 @@ const JoinedUser = ({ activityId, setUserJoin }) => {
                 </View>
             ) : (
                 <FlatList
-                    numColumns={2}
+                    numColumns={3}
                     data={usersJoin}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
@@ -125,16 +125,16 @@ const JoinedUser = ({ activityId, setUserJoin }) => {
                                 flex: 1,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                marginHorizontal: 20,
+                                marginHorizontal: 12,
                             }}
                         >
                             <View
                                 style={{
                                     flexDirection: 'column',
                                     backgroundColor: '#F0F0F0',
-                                    width: screenWidth / 2 - 40,
-                                    height: screenWidth / 2 - 40,
-                                    margin: 10,
+                                    width: screenWidth / 3 - 24,
+                                    height: screenWidth / 3 - 24,
+                                    margin: 6,
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     borderRadius: 15,
@@ -144,8 +144,8 @@ const JoinedUser = ({ activityId, setUserJoin }) => {
                                     source={item.avatar}
                                     style={{
                                         marginTop: 10,
-                                        width: screenWidth / 2 - 80,
-                                        height: screenWidth / 2 - 80,
+                                        width: screenWidth / 3 - 64,
+                                        height: screenWidth / 3 - 64,
                                         borderRadius: 20,
                                     }}
                                 />
@@ -273,21 +273,20 @@ const AttendanceUser = ({ activityId, setUserAttendance }) => {
                                 style={{
                                     flexDirection: 'column',
                                     backgroundColor: '#F0F0F0',
-                                    width: screenWidth / 2 - 40,
-                                    height: screenWidth / 2 - 40,
-                                    margin: 10,
+                                    width: screenWidth / 3 - 24,
+                                    height: screenWidth / 3 - 24,
+                                    margin: 6,
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     borderRadius: 15,
-                                    padding: 10,
                                 }}
                             >
                                 <Image
                                     source={item.avatar}
                                     style={{
                                         marginTop: 10,
-                                        width: screenWidth / 2 - 80,
-                                        height: screenWidth / 2 - 80,
+                                        width: screenWidth / 3 - 64,
+                                        height: screenWidth / 3 - 64,
                                         borderRadius: 20,
                                     }}
                                 />

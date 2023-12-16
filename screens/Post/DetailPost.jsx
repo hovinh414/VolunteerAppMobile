@@ -1087,7 +1087,7 @@ const DetailPost = ({ navigation, route }) => {
                                         ĐÃ ĐIỂM DANH
                                     </Text>
                                 </View>
-                                {!items.isJoinGroupChat ? (
+                                {!items.isJoinGroupChat && items.groupChatId ? (
                                     <TouchableOpacity
                                         onPress={joinGr}
                                         activeOpacity={0.8}
@@ -1132,7 +1132,7 @@ const DetailPost = ({ navigation, route }) => {
                                     style={{
                                         backgroundColor: '#ccc',
                                         height: 50,
-                                        width: items.isJoinGroupChat
+                                        width: items.isJoinGroupChat || !items.groupChatId
                                             ? '100%'
                                             : '48%',
                                         borderRadius: 16,
@@ -1149,7 +1149,7 @@ const DetailPost = ({ navigation, route }) => {
                                         ĐÃ THAM GIA
                                     </Text>
                                 </View>
-                                {!items.isJoinGroupChat ? (
+                                {!items.isJoinGroupChat && items.groupChatId ? (
                                     <TouchableOpacity
                                         onPress={joinGr}
                                         activeOpacity={0.8}

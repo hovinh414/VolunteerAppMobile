@@ -6,6 +6,8 @@ import {
     FlatList,
     StyleSheet,
     ActivityIndicator,
+    Animated,
+    Easing,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
 import React, { useState, useEffect } from 'react'
@@ -15,7 +17,7 @@ import {
     AntDesign,
     Ionicons,
     Feather,
-    FontAwesome,
+    MaterialIcons,
     MaterialCommunityIcons,
     Entypo,
 } from '@expo/vector-icons'
@@ -24,23 +26,9 @@ import axios from 'axios'
 import API_URL from '../interfaces/config'
 import { Image } from 'expo-image'
 import AsyncStoraged from '../services/AsyncStoraged'
-import { useFocusEffect } from '@react-navigation/native'
-
+import ModalLoading from '../components/ModalLoading'
+import MenuFeed from '../components/MenuFeed'
 import Post from './Feed/Post'
-import {
-    Menu,
-    MenuProvider,
-    MenuOptions,
-    MenuOption,
-    MenuTrigger,
-} from 'react-native-popup-menu'
-import {
-    MyActivity,
-    PostOngoing,
-    Follow,
-    JoinActivity,
-    Question,
-} from '../components/CustomContent'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 
 const Feed = ({ navigation, route }) => {
@@ -69,12 +57,15 @@ const Feed = ({ navigation, route }) => {
     const [posts, setPosts] = useState([])
     const [joinedPost, setJoinedPost] = useState([])
     const [token, setToken] = useState('')
-    const [avatar, setAvatar] = useState()
+    const [orgId, setOrgId] = useState()
     const [typePost, setTypePost] = useState('normal')
     const [type, setType] = useState()
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
     const [currentPage, setCurrentPage] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [menuVisible, setMenuVisible] = useState(false)
+
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
@@ -89,10 +80,10 @@ const Feed = ({ navigation, route }) => {
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
-            setAvatar(userStored.avatar)
+            setOrgId(userStored._id)
             setType(userStored.type)
         } else {
-            setAvatar(null)
+            setOrgId(null)
             setType(null)
         }
     }
@@ -132,7 +123,23 @@ const Feed = ({ navigation, route }) => {
             setRefreshing(false)
         })
     }
-
+    const options = [
+        {
+            title: 'Đang theo dõi',
+            icon: 'people-outline',
+            action: () => getPostsFollow(),
+        },
+        {
+            title: 'Đã tham gia',
+            icon: 'heart-outline',
+            action: () => alert('Đã tham gia'),
+        },
+        {
+            title: 'Sắp diễn ra',
+            icon: 'reader-outline',
+            action: () => alert('Sắp diễn ra'),
+        },
+    ]
     const fetchNextPage = async () => {
         if (!isFetchingNextPage) {
             setIsFetchingNextPage(true)
@@ -204,6 +211,7 @@ const Feed = ({ navigation, route }) => {
     }
 
     const getPostsFollow = async () => {
+        setLoading(true)
         try {
             const res = await axios({
                 method: 'post',
@@ -220,9 +228,12 @@ const Feed = ({ navigation, route }) => {
             }
         } catch (error) {
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
     const viewDetailPost = async (_postId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -239,9 +250,12 @@ const Feed = ({ navigation, route }) => {
             }
         } catch (error) {
             console.log('API Error:', error)
+        } finally {
+            setLoading(false)
         }
     }
     const viewProfile = async (_orgId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -261,6 +275,8 @@ const Feed = ({ navigation, route }) => {
             }
         } catch (error) {
             console.log('API Error:', error)
+        } finally {
+            setLoading(false)
         }
     }
     const RenderSuggestionsContainer = () => {
@@ -272,7 +288,7 @@ const Feed = ({ navigation, route }) => {
                     borderBottomColor: '#fff',
                 }}
             >
-                <View style={{ marginVertical: 8 }}></View>
+                <ModalLoading visible={loading} />
 
                 <FlatList
                     horizontal={true}
@@ -289,7 +305,14 @@ const Feed = ({ navigation, route }) => {
                             }}
                         >
                             <TouchableOpacity
-                                onPress={() => viewProfile(item.ownerId)}
+                                onPress={
+                                    item.ownerId === orgId
+                                        ? () =>
+                                              navigation.navigate(
+                                                  'ProfileOrganisation'
+                                              )
+                                        : () => viewProfile(item.ownerId)
+                                }
                                 style={{
                                     paddingVertical: 4,
                                     marginLeft: 12,
@@ -764,93 +787,112 @@ const Feed = ({ navigation, route }) => {
         )
     }
 
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            {token ? (
-                <TouchableOpacity
-                    style={{ position: 'absolute', right: 12, top: 55 }}
-                    onPress={() => navigation.navigate('Chat')}
-                >
-                    <AntDesign name="message1" size={23} color={COLORS.black} />
-                </TouchableOpacity>
-            ) : (
-                <TouchableOpacity
-                    style={{ position: 'absolute', right: 12, top: 55 }}
-                    onPress={() => navigation.navigate('LoginScreen')}
-                >
-                    <AntDesign name="message1" size={23} color={COLORS.black} />
-                </TouchableOpacity>
-            )}
-            <TouchableOpacity
-                style={{ position: 'absolute', right: 48, top: 55 }}
-                onPress={() => navigation.navigate('NotificationScreen')}
-            >
-                <Ionicons
-                    name="notifications-outline"
-                    size={26}
-                    color={COLORS.black}
-                />
-            </TouchableOpacity>
+    function renderHeader() {
+        return (
             <View
                 style={{
-                    position: 'absolute',
-                    top: 50,
-                    left: 12,
-                    width: '55%',
-                    height: '10%',
-                    zIndex: 5,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                 }}
             >
-                <MenuProvider skipInstanceCheck>
-                    <Menu>
-                        <MenuTrigger>
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    alightItems: 'center',
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        ...FONTS.body2,
-                                    }}
-                                >
-                                    Việc Tử Tế{' '}
-                                </Text>
-                                <Feather
-                                    name="chevron-down"
-                                    size={22}
-                                    color={COLORS.black}
-                                />
-                            </View>
-                        </MenuTrigger>
+                <MenuFeed options={options} />
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() =>
+                            navigation.navigate('NotificationScreen')
+                        }
+                        style={{
+                            height: 45,
+                            width: 45,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#fff',
+                            shadowColor: '#18274B',
+                            shadowOffset: {
+                                width: 0,
+                                height: 4.5,
+                            },
+                            shadowOpacity: 0.12,
+                            shadowRadius: 6.5,
+                            elevation: 2,
+                            borderRadius: 22,
+                            marginRight: 10,
+                        }}
+                    >
+                        <Ionicons
+                            name="notifications-outline"
+                            size={26}
+                            color={COLORS.black}
+                        />
+                    </TouchableOpacity>
 
-                        <MenuOptions
-                            customStyles={{
-                                optionsContainer: {
-                                    borderRadius: 10,
+                    {token ? (
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('Chat')}
+                            style={{
+                                height: 45,
+                                width: 45,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#fff',
+                                shadowColor: '#18274B',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 4.5,
                                 },
+                                shadowOpacity: 0.12,
+                                shadowRadius: 6.5,
+                                elevation: 2,
+                                borderRadius: 22,
                             }}
                         >
-                            {!type ? null : (
-                                <View>
-                                    <Follow
-                                        text="Đang theo dõi"
-                                        onSelect={getPostsFollow}
-                                        iconName="users"
-                                    />
-                                    {/* <Divider />
-                                    <Question
-                                        text="Bài viết hết hạn"
-                                        value="Mute"
-                                        iconName="alert-circle"
-                                    /> */}
-                                </View>
-                            )}
-                        </MenuOptions>
-                    </Menu>
-                </MenuProvider>
+                            <AntDesign
+                                name="message1"
+                                size={23}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity
+                            style={{
+                                height: 50,
+                                width: 50,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#fff',
+                                shadowColor: '#18274B',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 4.5,
+                                },
+                                shadowOpacity: 0.12,
+                                shadowRadius: 6.5,
+                                elevation: 2,
+                                borderRadius: 22,
+                            }}
+                            onPress={() => navigation.navigate('LoginScreen')}
+                        >
+                            <AntDesign
+                                name="message1"
+                                size={23}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
+        )
+    }
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+            <View style={{ paddingHorizontal: 22 }}>{renderHeader()}</View>
+
             <View
                 style={{
                     zIndex: 10,
@@ -859,7 +901,7 @@ const Feed = ({ navigation, route }) => {
                 <Toast config={toastConfig} />
             </View>
             <View
-                style={{ flex: 1, zIndex: 1, marginTop: 50, marginBottom: 20 }}
+                style={{ flex: 1, zIndex: 1, marginTop: 15, marginBottom: 20 }}
             >
                 <Post
                     joinedPost={joinedPost}

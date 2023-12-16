@@ -194,11 +194,31 @@ const LoginScreen = ({ navigation }) => {
             })
             if (res.data.status === 'SUCCESS') {
                 if (!res.data.data.userResult) {
-                    AsyncStoraged.storeData(res.data.data.orgResult)
-                    // AsyncStoraged.setIsActive(res.data.data.orgResult.isActiveOrganization)
-                    // AsyncStoraged.setFollower(res.data.data.orgResult.follower)
+                    if (!res.data.data.orgResult.isEnable) {
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Thất bại',
+                            text2: 'Tài khoản của bạn đã bị khóa!',
+                            visibilityTime: 2500,
+                            topOffset: 10,
+                        })
+                        return
+                    } else {
+                        AsyncStoraged.storeData(res.data.data.orgResult)
+                    }
                 } else {
-                    AsyncStoraged.storeData(res.data.data.userResult)
+                    if (!res.data.data.userResult.isEnable) {
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Thất bại',
+                            text2: 'Tài khoản của bạn đã bị khóa!',
+                            visibilityTime: 2500,
+                            topOffset: 10,
+                        })
+                        return
+                    } else {
+                        AsyncStoraged.storeData(res.data.data.userResult)
+                    }
                 }
 
                 AsyncStoraged.setToken(res.data.data.refreshToken)

@@ -140,8 +140,6 @@ function ChatDetail({ route, navigation }) {
 
             const storedChatDataArray = JSON.stringify(chatDataArray)
             await AsyncStorage.setItem('chatData', storedChatDataArray)
-
-            console.log('chatDataArray: ', storedChatDataArray)
         } catch (error) {
             console.error('Error updating chatDataArray:', error)
         }
@@ -260,8 +258,8 @@ function ChatDetail({ route, navigation }) {
             <View style={styles.header}>
                 <TouchableOpacity
                     onPress={() => {
-                        navigation.goBack()
                         updateChatData()
+                        navigation.navigate("Chat")
                     }}
                 >
                     <MaterialIcons
