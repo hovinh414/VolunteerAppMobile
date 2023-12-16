@@ -26,6 +26,8 @@ import Attendance from './screens/Attendance/Attendance'
 import ShowQr from './screens/Attendance/ShowQr'
 import ScanQR from './screens/Attendance/ScanQR'
 import Statistical from './screens/Post/Statistical'
+import MapScreen from './screens/Map/MapScreen'
+import ProductiveActivities from './screens/Feed/ProductiveActivities'
 const Stack = createNativeStackNavigator()
 
 SplashScreen.preventAutoHideAsync()
@@ -184,6 +186,20 @@ export default function App() {
                     <Stack.Screen
                         name="ScanQR"
                         component={ScanQR}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="MapScreen"
+                        component={MapScreen}
+                        options={{
+                            headerShown: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        name="ProductiveActivities"
+                        component={ProductiveActivities}
                         options={{
                             headerShown: false,
                         }}

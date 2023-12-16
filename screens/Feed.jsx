@@ -36,8 +36,10 @@ const Feed = ({ navigation, route }) => {
     const onRefreshPost = () => {
         setCurrentPage(0)
         setPosts([])
+        setUserProdcutive([])
         setJoinedPost([])
         getPosts()
+        getUserProductive()
         setTypePost('normal')
     }
     // useFocusEffect(
@@ -55,6 +57,7 @@ const Feed = ({ navigation, route }) => {
     )
     const windowWidth = Dimensions.get('window').width
     const [posts, setPosts] = useState([])
+    const [userProductive, setUserProdcutive] = useState([])
     const [joinedPost, setJoinedPost] = useState([])
     const [token, setToken] = useState('')
     const [orgId, setOrgId] = useState()
@@ -110,8 +113,22 @@ const Feed = ({ navigation, route }) => {
             console.log('API Error get post:', error)
         }
     }
+    const getUserProductive = async () => {
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/user/productive-activities'
+            )
+
+            if (response.data.status === 'SUCCESS') {
+                setUserProdcutive(response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error get user:', error)
+        }
+    }
     useEffect(() => {
         getPosts()
+        getUserProductive()
     }, [token])
 
     const [refreshing, setRefreshing] = useState(false)
@@ -289,11 +306,53 @@ const Feed = ({ navigation, route }) => {
                 }}
             >
                 <ModalLoading visible={loading} />
-
+                <View
+                    style={{
+                        paddingVertical: 10,
+                        paddingLeft: 15,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                    }}
+                >
+                    <View
+                        activeOpacity={0.8}
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: COLORS.black,
+                                fontWeight: '700',
+                                fontSize: 14,
+                                marginLeft: 5,
+                            }}
+                        >
+                            Tài khoản tích cực
+                        </Text>
+                    </View>
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={{ flexDirection: 'row', marginRight: 10 }}
+                        onPress={() => navigation.navigate('ProductiveActivities', userProductive)}
+                    >
+                        <Text
+                            style={{
+                                color: COLORS.primary,
+                                fontSize: 14,
+                                marginLeft: 10,
+                            }}
+                        >
+                            Xem tất cả
+                        </Text>
+                    </TouchableOpacity>
+                </View>
                 <FlatList
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
-                    data={posts}
+                    data={userProductive}
                     renderItem={({ item, index }) => (
                         <View
                             key={index}
@@ -306,30 +365,44 @@ const Feed = ({ navigation, route }) => {
                         >
                             <TouchableOpacity
                                 onPress={
-                                    item.ownerId === orgId
+                                    item.userId === orgId
                                         ? () =>
                                               navigation.navigate(
                                                   'ProfileOrganisation'
                                               )
-                                        : () => viewProfile(item.ownerId)
+                                        : () => viewProfile(item.userId)
                                 }
                                 style={{
                                     paddingVertical: 4,
                                     marginLeft: 12,
                                 }}
                             >
-                                <Image
-                                    source={item.ownerAvatar}
-                                    contentFit="contain"
+                                <View
                                     style={{
-                                        width: 80,
-                                        height: 80,
-                                        borderRadius: 80,
-                                        borderWidth: 3,
-
-                                        borderColor: '#FF493C',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        width: 90,
                                     }}
-                                />
+                                >
+                                    <Image
+                                        source={item.avatar}
+                                        style={{
+                                            width: 80,
+                                            height: 80,
+                                            borderRadius: 80,
+                                            borderWidth: 2,
+
+                                            borderColor: '#FF493C',
+                                        }}
+                                    />
+                                    <Text
+                                        style={{ fontSize: 12, marginTop: 7, }}
+                                        numberOfLines={1}
+                                    >
+                                        {item.fullName}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -787,10 +860,11 @@ const Feed = ({ navigation, route }) => {
         )
     }
 
-    function renderHeader() {
+    const renderHeader = () => {
         return (
             <View
                 style={{
+                    paddingHorizontal: 22,
                     flexDirection: 'row',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -889,10 +963,9 @@ const Feed = ({ navigation, route }) => {
             </View>
         )
     }
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <View style={{ paddingHorizontal: 22 }}>{renderHeader()}</View>
-
             <View
                 style={{
                     zIndex: 10,
@@ -900,9 +973,8 @@ const Feed = ({ navigation, route }) => {
             >
                 <Toast config={toastConfig} />
             </View>
-            <View
-                style={{ flex: 1, zIndex: 1, marginTop: 15, marginBottom: 20 }}
-            >
+            {renderHeader()}
+            <View style={{ flex: 1, marginTop: 15, marginBottom: 20 }}>
                 <Post
                     joinedPost={joinedPost}
                     posts={posts}

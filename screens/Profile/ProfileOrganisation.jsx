@@ -464,7 +464,7 @@ const ProfileCard = () => {
         setIsActive(userStored.isActiveOrganization)
         setFollower(userStored.follower)
     }
-    
+
     const getUserStoredEdit = async () => {
         const userStored = await AsyncStoraged.getData()
         setAvatar(userStored.avatar)
@@ -714,32 +714,6 @@ const ProfileCard = () => {
                                 Đang theo dõi
                             </Text>
                         </View>
-                        <View
-                            style={{
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                marginHorizontal: 10,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    fontFamily: 'monterrat',
-                                    fontSize: 16,
-                                    lineHeight: 30,
-                                    color: COLORS.black,
-                                }}
-                            >
-                                75
-                            </Text>
-                            <Text
-                                style={{
-                                    ...FONTS.body5,
-                                    color: COLORS.black,
-                                }}
-                            >
-                                Lượt ủng hộ
-                            </Text>
-                        </View>
                     </View>
                 </View>
             </View>
@@ -941,7 +915,7 @@ const ProfileOrganisation = ({ navigation, route }) => {
             style={{
                 flex: 1,
                 backgroundColor: '#fff',
-                marginTop:30
+                marginTop: 30,
             }}
         >
             <View>

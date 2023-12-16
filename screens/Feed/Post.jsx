@@ -9,7 +9,7 @@ import {
     Share,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback   } from 'react'
 import CommentModal from '../../components/CommentModal'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
 import API_URL from '../../interfaces/config'
@@ -110,12 +110,84 @@ const Post = ({
     }
 
     const [postIdComment, setPostIdComment] = useState('')
-    function LikeButton({ postId, likePost, unLikePost, post }) {
+    const LikeButton = React.memo(({ postId, likePost, unLikePost, post }) => {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
 
         if (!token) {
-            return
+            const fetchLikes = async () => {
+                try {
+                    const response = await axios.get(
+                        API_URL.API_URL + '/post/likes/' + postId
+                    )
+    
+                    if (response.data.status === 'SUCCESS') {
+                        setTotalLike(response.data.data.totalLikes)
+                    }
+                } catch (error) {
+                    console.log('API Error:', error)
+                }
+            }
+    
+            useEffect(() => {
+                fetchLikes()
+            }, [])
+            return (
+                <View style={{ flexDirection: 'column' }}>
+                    <View
+                        style={{
+                            flexDirection: 'row',
+
+                            alignItems: 'center',
+                            marginRight: SIZES.padding2,
+                        }}
+                    >
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('LoginScreen')}
+                        >
+                            <Feather
+                                name="heart"
+                                size={25}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('LoginScreen')}
+                            style={{
+                                flexDirection: 'row',
+                                marginHorizontal: 8,
+                                alignItems: 'center',
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name="message-processing-outline"
+                                size={25}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => sharePost(post)}
+                            style={{
+                                flexDirection: 'row',
+
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Feather
+                                name="share-2"
+                                size={25}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    <Text
+                        style={{ ...FONTS.body5, marginLeft: 5, marginTop: 8 }}
+                    >
+                        {totalLike} lượt thích
+                    </Text>
+                </View>
+            )
         } else {
             const checkLikes = async () => {
                 try {
@@ -160,149 +232,85 @@ const Post = ({
         useEffect(() => {
             fetchLikes()
         }, [])
-        const handleLikeClick = async () => {
+        const handleLikeClick = useCallback(async () => {
             try {
                 if (isLiked) {
-                    await unLikePost(postId)
-                    setIsLiked(false)
+                    await unLikePost(postId);
+                    setIsLiked(false);
                 } else {
-                    await likePost(postId)
-                    setIsLiked(true)
+                    await likePost(postId);
+                    setIsLiked(true);
                 }
-
-                fetchLikes() // Gọi hàm này sau khi thực hiện like/unlike thành công
+    
+                fetchLikes(); // Gọi hàm này sau khi thực hiện like/unlike thành công
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
-        }
-        if (token !== null) {
-            return (
-                <View style={{ flexDirection: 'column' }}>
-                    <View
-                        style={{
-                            flexDirection: 'row',
+        }, [isLiked, postId, unLikePost, likePost, fetchLikes]);
+        return (
+            <View style={{ flexDirection: 'column' }}>
+                <View
+                    style={{
+                        flexDirection: 'row',
 
-                            alignItems: 'center',
-                            marginRight: SIZES.padding2,
-                        }}
-                    >
-                        <TouchableOpacity onPress={handleLikeClick}>
-                            {isLiked ? (
-                                <FontAwesome
-                                    name="heart"
-                                    size={25}
-                                    color={COLORS.primary}
-                                />
-                            ) : (
-                                <Feather
-                                    name="heart"
-                                    size={25}
-                                    color={COLORS.black}
-                                />
-                            )}
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            onPress={() => {
-                                setShowComment(true)
-                                setPostIdComment(postId)
-                            }}
-                            style={{
-                                flexDirection: 'row',
-                                marginHorizontal: 8,
-                                alignItems: 'center',
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="message-processing-outline"
+                        alignItems: 'center',
+                        marginRight: SIZES.padding2,
+                    }}
+                >
+                    <TouchableOpacity onPress={handleLikeClick}>
+                        {isLiked ? (
+                            <FontAwesome
+                                name="heart"
                                 size={25}
-                                color={COLORS.black}
+                                color={COLORS.primary}
                             />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => sharePost(post)}
-                            style={{
-                                flexDirection: 'row',
-
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Feather
-                                name="share-2"
-                                size={25}
-                                color={COLORS.black}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                    <Text
-                        style={{ ...FONTS.body5, marginLeft: 5, marginTop: 8 }}
-                    >
-                        {totalLike} lượt thích
-                    </Text>
-                </View>
-            )
-        } else {
-            return (
-                <View style={{ flexDirection: 'column' }}>
-                    <View
-                        style={{
-                            flexDirection: 'row',
-
-                            alignItems: 'center',
-                            marginRight: SIZES.padding2,
-                        }}
-                    >
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate('LoginScreen')}
-                        >
+                        ) : (
                             <Feather
                                 name="heart"
                                 size={25}
                                 color={COLORS.black}
                             />
-                        </TouchableOpacity>
+                        )}
+                    </TouchableOpacity>
 
-                        <TouchableOpacity
-                            onPress={() => {
-                                setShowComment(true)
-                                setPostIdComment(item._id)
-                            }}
-                            style={{
-                                flexDirection: 'row',
-                                marginHorizontal: 8,
-                                alignItems: 'center',
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="message-processing-outline"
-                                size={25}
-                                color={COLORS.black}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => sharePost(post)}
-                            style={{
-                                flexDirection: 'row',
-
-                                alignItems: 'center',
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="message-processing-outline"
-                                size={25}
-                                color={COLORS.black}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                    <Text
-                        style={{ ...FONTS.body5, marginLeft: 5, marginTop: 8 }}
+                    <TouchableOpacity
+                        onPress={() => {
+                            setShowComment(true)
+                            setPostIdComment(postId)
+                        }}
+                        style={{
+                            flexDirection: 'row',
+                            marginHorizontal: 8,
+                            alignItems: 'center',
+                        }}
                     >
-                        {totalLike} lượt thích
-                    </Text>
+                        <MaterialCommunityIcons
+                            name="message-processing-outline"
+                            size={25}
+                            color={COLORS.black}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => sharePost(post)}
+                        style={{
+                            flexDirection: 'row',
+
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Feather
+                            name="share-2"
+                            size={25}
+                            color={COLORS.black}
+                        />
+                    </TouchableOpacity>
                 </View>
-            )
-        }
-    }
+                <Text style={{ ...FONTS.body5, marginLeft: 5, marginTop: 8 }}>
+                    {totalLike} lượt thích
+                </Text>
+            </View>
+        )
+    });
     const viewDetailPost = async (_postId) => {
         setLoading(true)
         const config = {
@@ -700,12 +708,12 @@ const Post = ({
                                     flexDirection: 'row',
                                 }}
                             >
-                                <LikeButton
+                                {/* <LikeButton
                                     postId={item._id}
                                     unLikePost={unLikePost}
                                     likePost={likePost}
                                     post={item}
-                                />
+                                /> */}
                             </View>
 
                             <View

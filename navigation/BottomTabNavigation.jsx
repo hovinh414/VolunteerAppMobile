@@ -2,16 +2,16 @@ import { View, Text, Platform } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import {
     Feather,
-    Ionicons,
+    Octicons,
     FontAwesome,
-    FontAwesome5,
+    Ionicons,
 } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { COLORS } from '../constants'
 import {
     Search,
     LoginScreen,
-    Notifications,
+    MapScreen,
     Profile,
     Settings,
     ScanQR,
@@ -85,7 +85,7 @@ const BottomTabNavigation = () => {
                                     borderRadius: 8,
                                 }}
                             >
-                                <Feather
+                                <Octicons
                                     name="home"
                                     size={25}
                                     color={
@@ -187,8 +187,8 @@ const BottomTabNavigation = () => {
                 />
             ) : null}
             <Tab.Screen
-                name="NotificationScreen"
-                component={NotificationScreen}
+                name="MapScreen"
+                component={MapScreen}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return (
@@ -200,8 +200,8 @@ const BottomTabNavigation = () => {
                                     borderRadius: 8,
                                 }}
                             >
-                                <FontAwesome5
-                                    name="heart"
+                                <Ionicons
+                                    name="map-outline"
                                     size={25}
                                     color={
                                         focused ? COLORS.primary : COLORS.black

@@ -22,6 +22,8 @@ import Attendance from './Attendance/Attendance'
 import ShowQr from './Attendance/ShowQr'
 import ScanQR from './Attendance/ScanQR'
 import Statistical from './Post/Statistical'
+import MapScreen from './Map/MapScreen'
+import ProductiveActivities from './Feed/ProductiveActivities'
 export {
     Feed,
     Create,
@@ -47,4 +49,6 @@ export {
     ProfileUser,
     NotificationScreen,
     ScanQR,
+    MapScreen,
+    ProductiveActivities,
 }
