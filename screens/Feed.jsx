@@ -6,12 +6,11 @@ import {
     FlatList,
     StyleSheet,
     ActivityIndicator,
-    Animated,
     Easing,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
-import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import React, { useState, useEffect } from 'react'
 import { COLORS, FONTS, SIZES, images } from '../constants'
 import {
     AntDesign,
@@ -37,9 +36,11 @@ const Feed = ({ navigation, route }) => {
         setCurrentPage(0)
         setPosts([])
         setUserProdcutive([])
+        setPostOutStandings([])
         setJoinedPost([])
         getPosts()
         getUserProductive()
+        getPostOutStanding()
         setTypePost('normal')
     }
     // useFocusEffect(
@@ -57,6 +58,7 @@ const Feed = ({ navigation, route }) => {
     )
     const windowWidth = Dimensions.get('window').width
     const [posts, setPosts] = useState([])
+    const [postOutStandings, setPostOutStandings] = useState([])
     const [userProductive, setUserProdcutive] = useState([])
     const [joinedPost, setJoinedPost] = useState([])
     const [token, setToken] = useState('')
@@ -126,9 +128,23 @@ const Feed = ({ navigation, route }) => {
             console.log('API Error get user:', error)
         }
     }
+    const getPostOutStanding = async () => {
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/post-top/out-standing'
+            )
+
+            if (response.data.status === 'SUCCESS') {
+                setPostOutStandings(response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error get post out standing:', error)
+        }
+    }
     useEffect(() => {
         getPosts()
         getUserProductive()
+        getPostOutStanding()
     }, [token])
 
     const [refreshing, setRefreshing] = useState(false)
@@ -336,7 +352,12 @@ const Feed = ({ navigation, route }) => {
                     <TouchableOpacity
                         activeOpacity={0.8}
                         style={{ flexDirection: 'row', marginRight: 10 }}
-                        onPress={() => navigation.navigate('ProductiveActivities', userProductive)}
+                        onPress={() =>
+                            navigation.navigate(
+                                'ProductiveActivities',
+                                userProductive
+                            )
+                        }
                     >
                         <Text
                             style={{
@@ -397,7 +418,7 @@ const Feed = ({ navigation, route }) => {
                                         }}
                                     />
                                     <Text
-                                        style={{ fontSize: 12, marginTop: 7, }}
+                                        style={{ fontSize: 12, marginTop: 7 }}
                                         numberOfLines={1}
                                     >
                                         {item.fullName}
@@ -445,7 +466,7 @@ const Feed = ({ navigation, route }) => {
                     <TouchableOpacity
                         activeOpacity={0.8}
                         style={{ flexDirection: 'row', marginRight: 10 }}
-                        onPress={() => navigation.navigate('FeaturedArticle')}
+                        onPress={() => navigation.navigate('FeaturedArticle', postOutStandings)}
                     >
                         <Text
                             style={{
@@ -460,10 +481,8 @@ const Feed = ({ navigation, route }) => {
                 </View>
                 <FlatList
                     horizontal={true}
-                    // onEndReached={fetchNextPage}
                     showsHorizontalScrollIndicator={false}
-                    onEndReachedThreshold={0.4}
-                    data={posts}
+                    data={postOutStandings}
                     renderItem={({ item, index }) => (
                         <TouchableOpacity
                             key={index}
@@ -514,7 +533,7 @@ const Feed = ({ navigation, route }) => {
                                     }}
                                 >
                                     <Image
-                                        source={item.ownerAvatar}
+                                        source={item.ownerInfo.avatar}
                                         style={{
                                             height: 48,
                                             width: 48,
@@ -536,7 +555,7 @@ const Feed = ({ navigation, route }) => {
                                                 fontWeight: '500',
                                             }}
                                         >
-                                            {item.ownerDisplayname}
+                                            {item.ownerInfo.fullName}
                                         </Text>
                                         <Text
                                             style={{
@@ -604,8 +623,10 @@ const Feed = ({ navigation, route }) => {
                                                         fontWeight: 'bold',
                                                     }}
                                                 >
-                                                    {item.totalUserJoin} /{' '}
-                                                    {item.participants}
+                                                    {
+                                                        item.numOfPeopleParticipated
+                                                    }{' '}
+                                                    / {item.participants}
                                                 </Text>
                                             </Text>
                                         </View>
@@ -624,7 +645,7 @@ const Feed = ({ navigation, route }) => {
                                                 }}
                                             >
                                                 {(
-                                                    (item.totalUserJoin /
+                                                    (item.numOfPeopleParticipated /
                                                         item.participants) *
                                                     100
                                                 ).toFixed(0)}{' '}
@@ -640,7 +661,7 @@ const Feed = ({ navigation, route }) => {
                                     >
                                         <Progress.Bar
                                             progress={
-                                                item.totalUserJoin /
+                                                item.numOfPeopleParticipated /
                                                 item.participants
                                             }
                                             color="#FF493C"
@@ -652,6 +673,36 @@ const Feed = ({ navigation, route }) => {
                                         />
                                     </View>
                                     <View
+                                        style={{
+                                            paddingVertical: 10,
+                                            marginHorizontal: 10,
+                                        }}
+                                    >
+                                        <TouchableOpacity
+                                            style={{
+                                                backgroundColor: '#F0F0F0',
+                                                borderRadius: 10,
+                                                padding: 5,
+                                                borderWidth: 2,
+                                                borderColor: COLORS.primary,
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                            }}
+                                            onPress={() =>
+                                                viewDetailPost(item._id)
+                                            }
+                                        >
+                                            <Text
+                                                style={{
+                                                    ...FONTS.body5,
+                                                    color: COLORS.primary,
+                                                }}
+                                            >
+                                                Xem chi tiết
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    {/* <View
                                         style={{
                                             paddingVertical: 10,
                                             marginHorizontal: 10,
@@ -724,7 +775,7 @@ const Feed = ({ navigation, route }) => {
                                                 </Text>
                                             </TouchableOpacity>
                                         )}
-                                    </View>
+                                    </View> */}
                                 </View>
                             </View>
                         </TouchableOpacity>

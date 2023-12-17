@@ -23,6 +23,7 @@ const ScanQR = ({ navigation, route }) => {
     const screenWidth = Dimensions.get('window').width
     const [showLoading, setShowLoading] = useState(false)
     const [scanned, setScanned] = useState(false)
+    const [hasPermission, setHasPermission] = useState()
     const [token, setToken] = useState('')
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -32,14 +33,14 @@ const ScanQR = ({ navigation, route }) => {
     useEffect(() => {
         getToken()
     }, [])
-    // useEffect(() => {
-    //     const getBarCodeScannerPermissions = async () => {
-    //         const { status } = await BarCodeScanner.requestPermissionsAsync()
-    //         setHasPermission(status === 'granted')
-    //         console.log(hasPermission)
-    //     }
-    //     getBarCodeScannerPermissions()
-    // }, [])
+    useEffect(() => {
+        const getBarCodeScannerPermissions = async () => {
+            const { status } = await BarCodeScanner.requestPermissionsAsync()
+            setHasPermission(status === 'granted')
+            console.log(hasPermission)
+        }
+        getBarCodeScannerPermissions()
+    }, [])
 
     const handleBarCodeScanned = ({ data }) => {
         setScanned(true)
@@ -81,7 +82,7 @@ const ScanQR = ({ navigation, route }) => {
             }
         }
     }
-   
+
     const toastConfig = {
         success: (props) => (
             <BaseToast

@@ -15,6 +15,7 @@ import { Image } from 'expo-image'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import axios from 'axios'
 import API_URL from '../../interfaces/config'
+import messaging from '@react-native-firebase/messaging';
 const NotificationScreen = ({ navigation }) => {
     const [token, setToken] = useState('')
     const getToken = async () => {
@@ -146,7 +147,6 @@ const NotificationScreen = ({ navigation }) => {
                         remoteMessage.notification
                     )
                 }
-                setLoading(false)
             })
         // Assume a message-notification contains a "type" property in the data payload of the screen to open
 
