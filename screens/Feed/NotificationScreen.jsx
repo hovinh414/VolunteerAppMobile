@@ -15,7 +15,7 @@ import { Image } from 'expo-image'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import axios from 'axios'
 import API_URL from '../../interfaces/config'
-import messaging from '@react-native-firebase/messaging';
+// import messaging from '@react-native-firebase/messaging';
 const NotificationScreen = ({ navigation }) => {
     const [token, setToken] = useState('')
     const getToken = async () => {

@@ -751,6 +751,7 @@ const ProfileUser = ({ route }) => {
                     setShowReport(false)
                 }}
                 visible={showReport}
+                orgId={items._id}
             />
             <TouchableOpacity
                 onPress={() => navigation.goBack()}

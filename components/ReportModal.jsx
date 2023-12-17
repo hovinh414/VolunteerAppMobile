@@ -6,6 +6,7 @@ import {
     FlatList,
     TextInput,
     TouchableWithoutFeedback,
+    Keyboard,
 } from 'react-native'
 import Modal from 'react-native-modal'
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons'
@@ -19,7 +20,7 @@ import * as ImagePicker from 'expo-image-picker'
 import ModalLoading from './ModalLoading'
 import Checkbox from 'expo-checkbox'
 import CustomButton from './CustomButton'
-const ReportModal = ({ visible, onRequestClose }, ref) => {
+const ReportModal = ({ visible, onRequestClose, orgId }, ref) => {
     const [text, setText] = useState('')
     const [showLoading, setShowLoading] = useState(false)
     const [token, setToken] = useState('')
@@ -286,274 +287,349 @@ const ReportModal = ({ visible, onRequestClose }, ref) => {
         const newList = selectedImages.filter((listItem) => listItem !== item)
         setSelectedImage(newList)
     }
+    const reportOrg = async () => {
+        setShowLoading(true)
+        Keyboard.dismiss()
+        if (!selectedImages || !text || !orgId) {
+            setShowLoading(false)
+            Toast.show({
+                type: 'warning',
+                text1: 'Cảnh báo',
+                text2: 'Vui lòng nhập đầy đủ thông tin!',
+                visibilityTime: 2500,
+            })
+            return
+        }
+        if (!isChecked) {
+            setShowLoading(false)
+            Toast.show({
+                type: 'warning',
+                text1: 'Cảnh báo',
+                text2: 'Vui lòng đồng ý với các điều khoản!',
+                visibilityTime: 2500,
+            })
+            return
+        }
+        const formData = new FormData()
+        selectedImages.forEach((images, index) => {
+            formData.append('images', {
+                uri: images.uri,
+                type: 'image/jpeg',
+                name: images.fileName,
+            })
+        })
+
+        formData.append('orgId', orgId)
+        formData.append('content', text)
+
+        axios
+            .post(API_URL.API_URL + '/user/report', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: token,
+                },
+            })
+            .then((response) => {
+                if (response.data.status === 'SUCCESS') {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Báo cáo tài khoản thành công',
+                        visibilityTime: 3500,
+                        autoHide: true,
+                        onHide: () => {
+                            onRequestClose()
+                        },
+                    })
+                    setShowLoading(false)
+                }
+            })
+            .catch((error) => {
+                console.log('API Error:', error)
+                setShowLoading(false)
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thất bại',
+                    text2: 'Báo cáo tài khoản thất bại!',
+                    visibilityTime: 2500,
+                })
+            })
+    }
     return (
-        <Modal
-            animationType="fade"
-            visible={visible}
-            onRequestClose={onRequestClose}
-            customBackdrop={
-                <TouchableWithoutFeedback onPress={onRequestClose}>
-                    <View
-                        style={{
-                            flex: 1,
-                        }}
-                    />
-                </TouchableWithoutFeedback>
-            }
-            avoidKeyboard={keyboard}
-            style={{
-                margin: 0,
-                justifyContent: 'center',
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            }}
-        >
-            <ModalLoading visible={showLoading} />
-            <View
-                style={{
-                    zIndex: 4,
-                }}
-            >
-                <Toast config={toastConfig} />
-            </View>
-            <View
-                style={{
-                    backgroundColor: '#fff',
-                    borderRadius: 25,
-                    margin: 10,
-                    paddingBottom: 30,
-                }}
-            >
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        borderBottomWidth: 1,
-                        padding: 15,
-                        borderBottomColor: '#cccc',
-                        zIndex: 2,
-                    }}
-                >
-                    <TouchableOpacity
-                        onPress={onRequestClose}
-                        activeOpacity={0.8}
-                    >
-                        <Ionicons name="chevron-back-sharp" size={20} />
-                    </TouchableOpacity>
-                    <Text style={{ fontWeight: 'bold', fontSize: 19 }}>
-                        Báo cáo tài khoản
-                    </Text>
-                    <View onPress={createGroup} activeOpacity={0.8}>
-                        <Text
-                            style={{
-                                fontWeight: '600',
-                                fontSize: 18,
-                                color: COLORS.white,
-                            }}
-                        >
-                            Gửi
-                        </Text>
-                    </View>
-                </View>
-
-                <View
-                    style={{
-                        marginTop: 15,
-                        marginHorizontal: 20,
-                    }}
-                >
-                    <TouchableOpacity
-                        onPress={handleImageSelection}
-                        activeOpacity={0.8}
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            borderWidth: 0.5,
-                            padding: 10,
-                            borderRadius: 999,
-                            borderColor: '#ccc',
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: 15,
-                                fontWeight: '500',
-                                marginRight: 10,
-                            }}
-                        >
-                            Cung cấp hình ảnh cho báo cáo của bạn
-                        </Text>
-                        <AntDesign name="upload" size={20} />
-                    </TouchableOpacity>
-                    <Text
-                        style={{
-                            fontSize: 12,
-                            marginTop: 5,
-                        }}
-                    >
-                        * Lưu ý, vui lòng cung cấp hình ảnh rõ nét và đúng sự
-                        thật
-                    </Text>
-                </View>
-                <FlatList
-                    data={selectedImages}
-                    showsHorizontalScrollIndicator={false}
-                    horizontal={true}
-                    renderItem={({ item, index }) => (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <Modal
+                animationType="fade"
+                visible={visible}
+                onRequestClose={onRequestClose}
+                customBackdrop={
+                    <TouchableWithoutFeedback onPress={onRequestClose}>
                         <View
-                            key={index}
                             style={{
-                                position: 'relative',
-                                flexDirection: 'column',
                                 flex: 1,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginTop: 10,
                             }}
-                        >
-                            <Image
-                                source={{ uri: item.uri }}
-                                style={{
-                                    paddingVertical: 4,
-                                    marginLeft: 12,
-                                    width: 120,
-                                    height: 120,
-                                    borderRadius: 12,
-                                }}
-                            />
-                            <TouchableOpacity
-                                onPress={() => removeImage(item)}
-                                style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    right: 0,
-                                }}
-                            >
-                                <AntDesign
-                                    size={18}
-                                    name="closecircle"
-                                    color={'#ccc'}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                />
+                        />
+                    </TouchableWithoutFeedback>
+                }
+                avoidKeyboard={keyboard}
+                style={{
+                    margin: 0,
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                }}
+            >
+                <ModalLoading visible={showLoading} />
                 <View
                     style={{
-                        flexDirection: 'row',
-                        marginHorizontal: 8,
-                        paddingTop: 18,
-                        borderTopWidth: 1,
-                        borderTopColor: '#FFF',
+                        zIndex: 4,
+                    }}
+                >
+                    <Toast config={toastConfig} />
+                </View>
+                <View
+                    style={{
+                        backgroundColor: '#fff',
+                        borderRadius: 25,
+                        margin: 10,
+                        paddingBottom: 30,
                     }}
                 >
                     <View
                         style={{
-                            flex: 1,
-                            height: 100,
-                            borderRadius: 15,
-                            backgroundColor: '#F0F0F0',
-                            marginHorizontal: 12,
-                            paddingHorizontal: 12,
+                            flexDirection: 'row',
                             justifyContent: 'space-between',
-                            flexDirection: 'row',
                             alignItems: 'center',
+                            borderBottomWidth: 1,
+                            padding: 15,
+                            borderBottomColor: '#cccc',
+                            zIndex: 2,
                         }}
                     >
-                        <TextInput
-                            placeholder={'Nội dung báo cáo'}
-                            placeholderTextColor="#696969"
-                            value={text}
-                            onChangeText={(text) => setText(text)}
-                            multiline={true}
-                        />
-                        {!text ? null : (
-                            <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() => setText('')}
+                        <TouchableOpacity
+                            onPress={onRequestClose}
+                            activeOpacity={0.8}
+                        >
+                            <Ionicons name="chevron-back-sharp" size={20} />
+                        </TouchableOpacity>
+                        <Text style={{ fontWeight: 'bold', fontSize: 19 }}>
+                            Báo cáo tài khoản
+                        </Text>
+                        <View onPress={createGroup} activeOpacity={0.8}>
+                            <Text
+                                style={{
+                                    fontWeight: '600',
+                                    fontSize: 18,
+                                    color: COLORS.white,
+                                }}
                             >
-                                <AntDesign
-                                    size={18}
-                                    name="closecircle"
-                                    color={'#ccc'}
-                                />
-                            </TouchableOpacity>
-                        )}
+                                Gửi
+                            </Text>
+                        </View>
                     </View>
-                </View>
-                <View
-                    style={{
-                        flexDirection: 'column',
-                        marginHorizontal: 20,
-                        marginTop: 10,
-                    }}
-                >
+
+                    <View
+                        style={{
+                            marginTop: 15,
+                            marginHorizontal: 20,
+                        }}
+                    >
+                        <TouchableOpacity
+                            onPress={handleImageSelection}
+                            activeOpacity={0.8}
+                            style={{
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderWidth: 0.5,
+                                padding: 10,
+                                borderRadius: 999,
+                                borderColor: '#ccc',
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontSize: 15,
+                                    fontWeight: '500',
+                                    marginRight: 10,
+                                }}
+                            >
+                                Cung cấp hình ảnh cho báo cáo của bạn
+                            </Text>
+                            <AntDesign name="upload" size={20} />
+                        </TouchableOpacity>
+                        <Text
+                            style={{
+                                fontSize: 12,
+                                marginTop: 5,
+                            }}
+                        >
+                            * Lưu ý, vui lòng cung cấp hình ảnh rõ nét và đúng
+                            sự thật
+                        </Text>
+                    </View>
+                    <FlatList
+                        data={selectedImages}
+                        showsHorizontalScrollIndicator={false}
+                        horizontal={true}
+                        renderItem={({ item, index }) => (
+                            <View
+                                key={index}
+                                style={{
+                                    position: 'relative',
+                                    flexDirection: 'column',
+                                    flex: 1,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    marginTop: 10,
+                                }}
+                            >
+                                <Image
+                                    source={{ uri: item.uri }}
+                                    style={{
+                                        paddingVertical: 4,
+                                        marginLeft: 12,
+                                        width: 120,
+                                        height: 120,
+                                        borderRadius: 12,
+                                    }}
+                                />
+                                <TouchableOpacity
+                                    onPress={() => removeImage(item)}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        right: 0,
+                                    }}
+                                >
+                                    <AntDesign
+                                        size={18}
+                                        name="closecircle"
+                                        color={'#ccc'}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    />
                     <View
                         style={{
                             flexDirection: 'row',
+                            marginHorizontal: 8,
+                            paddingTop: 18,
+                            borderTopWidth: 1,
+                            borderTopColor: '#FFF',
                         }}
                     >
-                        <Checkbox
-                            style={{ marginRight: 8 }}
-                            value={isChecked}
-                            onValueChange={setIsChecked}
-                            color={isChecked ? COLORS.primary : undefined}
-                        />
+                        <View
+                            style={{
+                                flex: 1,
+                                height: 100,
+                                borderRadius: 15,
+                                backgroundColor: '#F0F0F0',
+                                marginHorizontal: 12,
+                                paddingHorizontal: 12,
+                                justifyContent: 'space-between',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <TextInput
+                                placeholder={'Nội dung báo cáo'}
+                                placeholderTextColor="#696969"
+                                value={text}
+                                onChangeText={(text) => setText(text)}
+                                multiline={true}
+                            />
+                            {!text ? null : (
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    onPress={() => setText('')}
+                                >
+                                    <AntDesign
+                                        size={18}
+                                        name="closecircle"
+                                        color={'#ccc'}
+                                    />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </View>
+                    <View
+                        style={{
+                            flexDirection: 'column',
+                            marginHorizontal: 20,
+                            marginTop: 10,
+                        }}
+                    >
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                            }}
+                        >
+                            <Checkbox
+                                style={{ marginRight: 8 }}
+                                value={isChecked}
+                                onValueChange={setIsChecked}
+                                color={isChecked ? COLORS.primary : undefined}
+                            />
 
-                        <Text>Tôi đồng ý</Text>
+                            <Text>Tôi đồng ý</Text>
+                        </View>
+                        <View>
+                            <Text
+                                style={{
+                                    fontSize: 12,
+                                    color: '#696969',
+                                    marginTop: 5,
+                                }}
+                            >
+                                1. Bằng việc gửi báo cáo này, tôi xác nhận những
+                                thông tin đã cung cấp là chính xác.
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: 12,
+                                    color: '#696969',
+                                    marginTop: 5,
+                                }}
+                            >
+                                2. Tôi hiểu rằng việc cung cấp thông tin sai sự
+                                thật có thể dẫn đến việc đình chỉ hoặc tạm ngưng
+                                các dịch vụ cho tài khoản của tôi.
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: 12,
+                                    color: '#696969',
+                                    marginTop: 5,
+                                }}
+                            >
+                                3. Tôi hiểu rằng tiến độ xử lý có thể chậm trễ
+                                nếu thông tin cung cấp qua biểu mẫu không chính
+                                xác.
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: 12,
+                                    color: '#696969',
+                                    marginTop: 5,
+                                }}
+                            >
+                                4. Chúng tôi có thể chia sẻ phản hồi của bạn (
+                                bao gồm các hình ảnh và mô tả) với các bên liên
+                                quan nhằm mục đích kiểm tra báo cáo của bạn. Vui
+                                lòng không đăng tải bất kỳ thông tin cá nhân
+                                nào.
+                            </Text>
+                        </View>
                     </View>
-                    <View>
-                        <Text
-                            style={{
-                                fontSize: 12,
-                                color: '#696969',
-                                marginTop: 5,
-                            }}
-                        >
-                            1. Bằng việc gửi báo cáo này, tôi xác nhận những
-                            thông tin đã cung cấp là chính xác.
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 12,
-                                color: '#696969',
-                                marginTop: 5,
-                            }}
-                        >
-                            2. Tôi hiểu rằng việc cung cấp thông tin sai sự thật
-                            có thể dẫn đến việc đình chỉ hoặc tạm ngưng các dịch
-                            vụ cho tài khoản của tôi.
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 12,
-                                color: '#696969',
-                                marginTop: 5,
-                            }}
-                        >
-                            3. Tôi hiểu rằng tiến độ xử lý có thể chậm trễ nếu
-                            thông tin cung cấp qua biểu mẫu không chính xác.
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 12,
-                                color: '#696969',
-                                marginTop: 5,
-                            }}
-                        >
-                            4. Chúng tôi có thể chia sẻ phản hồi của bạn ( bao
-                            gồm các hình ảnh và mô tả) với các bên liên quan
-                            nhằm mục đích kiểm tra báo cáo của bạn. Vui lòng
-                            không đăng tải bất kỳ thông tin cá nhân nào.
-                        </Text>
+                    <View style={{ marginHorizontal: 20, marginTop: 10 }}>
+                        <CustomButton
+                            onPress={reportOrg}
+                            title="Gửi thông tin"
+                        />
                     </View>
                 </View>
-                <View style={{ marginHorizontal: 20, marginTop: 10 }}>
-                    <CustomButton title="Gửi thông tin" />
-                </View>
-            </View>
-        </Modal>
+            </Modal>
+        </TouchableWithoutFeedback>
     )
 }
 
