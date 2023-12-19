@@ -18,9 +18,9 @@ import { IOChanel, SocketIOService } from '../../scripts/socket'
 import API_URL from '../../interfaces/config'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native'
-const ioService = new SocketIOService()
 
-const Chat = ({ navigation }) => {
+const Chat = ({ navigation, route }) => {
+    const ioService = route.params
     const [isLoading, setIsLoading] = useState(true)
     const [showChat, setShowChat] = useState(false)
     useFocusEffect(

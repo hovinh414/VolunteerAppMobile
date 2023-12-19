@@ -24,6 +24,8 @@ import ScanQR from './Attendance/ScanQR'
 import Statistical from './Post/Statistical'
 import MapScreen from './Map/MapScreen'
 import ProductiveActivities from './Feed/ProductiveActivities'
+import VerifyRoute from './Profile/ProfileComponent/VerifyRoute'
+import InfoRoute from './Profile/ProfileComponent/InfoRoute'
 export {
     Feed,
     Create,
@@ -51,4 +53,6 @@ export {
     ScanQR,
     MapScreen,
     ProductiveActivities,
+    VerifyRoute,
+    InfoRoute,
 }

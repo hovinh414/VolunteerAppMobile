@@ -29,7 +29,8 @@ import ModalLoading from '../components/ModalLoading'
 import MenuFeed from '../components/MenuFeed'
 import Post from './Feed/Post'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
-
+import { IOChanel, SocketIOService } from '../scripts/socket'
+const ioService = new SocketIOService()
 const Feed = ({ navigation, route }) => {
     // const { postId } = ;
     const onRefreshPost = () => {
@@ -233,6 +234,8 @@ const Feed = ({ navigation, route }) => {
                         text1: 'Bạn đã xem hết rồi',
                         text2: 'Bạn đã xem tất cả bài viết mới nhất',
                         visibilityTime: 2500,
+                        position: 'bottom',
+                        bottomOffset: 70,
                     })
                 } else {
                     console.log(error)
@@ -460,13 +463,18 @@ const Feed = ({ navigation, route }) => {
                                 marginLeft: 5,
                             }}
                         >
-                            Chiến dịch gây quỹ nổi bật
+                            Hoạt động nổi bật
                         </Text>
                     </View>
                     <TouchableOpacity
                         activeOpacity={0.8}
                         style={{ flexDirection: 'row', marginRight: 10 }}
-                        onPress={() => navigation.navigate('FeaturedArticle', postOutStandings)}
+                        onPress={() =>
+                            navigation.navigate(
+                                'FeaturedArticle',
+                                postOutStandings
+                            )
+                        }
                     >
                         <Text
                             style={{
@@ -959,7 +967,7 @@ const Feed = ({ navigation, route }) => {
 
                     {token ? (
                         <TouchableOpacity
-                            onPress={() => navigation.navigate('Chat')}
+                            onPress={() => navigation.navigate('Chat', ioService)}
                             style={{
                                 height: 45,
                                 width: 45,
@@ -1017,13 +1025,6 @@ const Feed = ({ navigation, route }) => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <View
-                style={{
-                    zIndex: 10,
-                }}
-            >
-                <Toast config={toastConfig} />
-            </View>
             {renderHeader()}
             <View style={{ flex: 1, marginTop: 15, marginBottom: 20 }}>
                 <Post
@@ -1035,6 +1036,13 @@ const Feed = ({ navigation, route }) => {
                     headers={<RenderSuggestionsContainer />}
                     footer={RenderLoader}
                 />
+            </View>
+            <View
+                style={{
+                    zIndex: 10,
+                }}
+            >
+                <Toast config={toastConfig} />
             </View>
         </SafeAreaView>
     )

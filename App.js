@@ -28,6 +28,8 @@ import ScanQR from './screens/Attendance/ScanQR'
 import Statistical from './screens/Post/Statistical'
 import MapScreen from './screens/Map/MapScreen'
 import ProductiveActivities from './screens/Feed/ProductiveActivities'
+import VerifyRoute from './screens/Profile/ProfileComponent/VerifyRoute'
+import InfoRoute from './screens/Profile/ProfileComponent/InfoRoute'
 const Stack = createNativeStackNavigator()
 
 SplashScreen.preventAutoHideAsync()
@@ -207,6 +209,26 @@ export default function App() {
                     <Stack.Screen
                         name="ChangeAddress"
                         component={ChangeAddress}
+                        options={{
+                            headerShown: false,
+                            presentation: 'modal',
+                            animationTypeForReplace: 'push',
+                            animation: 'slide_from_bottom',
+                        }}
+                    />
+                    <Stack.Screen
+                        name="VerifyRoute"
+                        component={VerifyRoute}
+                        options={{
+                            headerShown: false,
+                            presentation: 'modal',
+                            animationTypeForReplace: 'push',
+                            animation: 'slide_from_bottom',
+                        }}
+                    />
+                    <Stack.Screen
+                        name="InfoRoute"
+                        component={InfoRoute}
                         options={{
                             headerShown: false,
                             presentation: 'modal',
