@@ -220,7 +220,7 @@ function FeaturedArticle({ navigation, route }) {
                                 padding: 10,
                             }}
                         >
-                            <View
+                            {/* <View
                                 style={{
                                     position: 'absolute',
                                     zIndex: 3,
@@ -246,7 +246,7 @@ function FeaturedArticle({ navigation, route }) {
                                     )}{' '}
                                     ngày
                                 </Text>
-                            </View>
+                            </View> */}
                             <Image
                                 source={item.media}
                                 style={{

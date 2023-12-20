@@ -9,7 +9,7 @@ import {
     Share,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
-import React, { useState, useEffect, useCallback   } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import CommentModal from '../../components/CommentModal'
 import { COLORS, FONTS, SIZES, images } from '../../constants'
 import API_URL from '../../interfaces/config'
@@ -110,17 +110,17 @@ const Post = ({
     }
 
     const [postIdComment, setPostIdComment] = useState('')
-    const LikeButton = React.memo(({ postId, likePost, unLikePost, post }) => {
+
+    const LikeButton = ({ postId, likePost, unLikePost, post }) => {
         const [isLiked, setIsLiked] = useState(false)
         const [totalLike, setTotalLike] = useState(0)
-
         if (!token) {
             const fetchLikes = async () => {
                 try {
                     const response = await axios.get(
                         API_URL.API_URL + '/post/likes/' + postId
                     )
-    
+
                     if (response.data.status === 'SUCCESS') {
                         setTotalLike(response.data.data.totalLikes)
                     }
@@ -128,7 +128,7 @@ const Post = ({
                     console.log('API Error:', error)
                 }
             }
-    
+
             useEffect(() => {
                 fetchLikes()
             }, [])
@@ -235,18 +235,18 @@ const Post = ({
         const handleLikeClick = useCallback(async () => {
             try {
                 if (isLiked) {
-                    await unLikePost(postId);
-                    setIsLiked(false);
+                    await unLikePost(postId)
+                    setIsLiked(false)
                 } else {
-                    await likePost(postId);
-                    setIsLiked(true);
+                    await likePost(postId)
+                    setIsLiked(true)
                 }
-    
-                fetchLikes(); // Gọi hàm này sau khi thực hiện like/unlike thành công
+
+                fetchLikes() // Gọi hàm này sau khi thực hiện like/unlike thành công
             } catch (error) {
-                console.log(error);
+                console.log(error)
             }
-        }, [isLiked, postId, unLikePost, likePost, fetchLikes]);
+        }, [isLiked, postId, unLikePost, likePost, fetchLikes])
         return (
             <View style={{ flexDirection: 'column' }}>
                 <View
@@ -310,7 +310,7 @@ const Post = ({
                 </Text>
             </View>
         )
-    });
+    }
     const viewDetailPost = async (_postId) => {
         setLoading(true)
         const config = {
@@ -708,12 +708,12 @@ const Post = ({
                                     flexDirection: 'row',
                                 }}
                             >
-                                {/* <LikeButton
+                                <LikeButton
                                     postId={item._id}
                                     unLikePost={unLikePost}
                                     likePost={likePost}
                                     post={item}
-                                /> */}
+                                />
                             </View>
 
                             <View
