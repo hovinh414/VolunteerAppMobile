@@ -32,9 +32,18 @@ import ModalLoading from '../components/ModalLoading'
 const search = '../assets/search.png'
 const screenWidth = Dimensions.get('window').width
 const AccountSearch = ({ searchQuery }) => {
+    const [token, setToken] = useState('')
     const [users, setUsers] = useState([])
     const [imageLoading, setImageLoading] = useState(true)
-
+    const [loading, setLoading] = useState(false)
+    const navigation = useNavigation()
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
+    }
+    useEffect(() => {
+        getToken()
+    }, [])
     useEffect(() => {
         const handleSearch = async () => {
             try {
@@ -66,7 +75,31 @@ const AccountSearch = ({ searchQuery }) => {
 
         handleSearch()
     }, [searchQuery])
-
+    const viewProfile = async (_orgId) => {
+        setLoading(true)
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        }
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/profile/' + _orgId,
+                config
+            )
+            if (response.data.status === 'SUCCESS') {
+                navigation.navigate(
+                    'ProfileUser',
+                    response.data.data.profileResult
+                )
+            }
+        } catch (error) {
+            console.log('API Error:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
     return (
         <View>
             <View style={{ marginTop: 25 }}>
@@ -74,6 +107,7 @@ const AccountSearch = ({ searchQuery }) => {
                     Tìm kiếm gần đây
                 </Text>
             </View>
+            <ModalLoading visible={loading} />
             {imageLoading ? (
                 <View style={{ marginTop: 150 }}>
                     <ActivityIndicator size="large" color={COLORS.black} />
@@ -94,6 +128,8 @@ const AccountSearch = ({ searchQuery }) => {
                             }}
                         >
                             <TouchableOpacity
+                                activeOpacity={0.8}
+                                onPress={() => viewProfile(item._source.id)}
                                 style={{
                                     flexDirection: 'column',
                                     width: screenWidth / 3 - 24,

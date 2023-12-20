@@ -4,20 +4,39 @@ import {
     FlatList,
     ScrollView,
     TouchableOpacity,
-    Alert,
+    RefreshControl,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, images } from '../../constants'
-import { MaterialIcons, Ionicons, FontAwesome } from '@expo/vector-icons'
+import {
+    MaterialIcons,
+    FontAwesome5,
+    MaterialCommunityIcons,
+} from '@expo/vector-icons'
 import { styles } from '../Chat/ChatStyle'
 import { Image } from 'expo-image'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import axios from 'axios'
 import API_URL from '../../interfaces/config'
 // import messaging from '@react-native-firebase/messaging';
+import { LinearGradient } from 'expo-linear-gradient'
+import ModalLoading from '../../components/ModalLoading'
 const NotificationScreen = ({ navigation }) => {
+    useEffect(() => {
+        const onFocus = () => {
+            getNotis()
+        }
+
+        const unsubscribeFocus = navigation.addListener('focus', onFocus)
+        return () => {
+            unsubscribeFocus()
+        }
+    }, [navigation])
     const [token, setToken] = useState('')
+    const [notis, setNotis] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [refreshing, setRefreshing] = React.useState(false)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
@@ -26,76 +45,30 @@ const NotificationScreen = ({ navigation }) => {
     useEffect(() => {
         getToken()
     }, [])
-
-    const organization = [
-        {
-            id: '651d0055a528879d9d06ce27',
-            image: images.user6,
-            name: 'Giày ấm',
-            isActive: true,
-            username: '@giayam',
-        },
-        {
-            id: '6544e7c4084e4b75ef3d365e',
-            image: images.user5,
-            name: 'Quỹ từ thiện tu viện Tường Vân',
-            isActive: false,
-            username: '@tuvientuongvan',
-        },
-        {
-            id: '6523fc90d176717dd38932b2',
-            image: images.user4,
-            name: 'Hội từ thiện Thiện Tâm',
-            isActive: true,
-            username: '@thientam',
-        },
-    ]
-    const noti = [
-        {
-            id: '1',
-            image: images.post4,
-            name: 'Quỹ từ thiện Việt Nam',
-            date: '30 phút trước',
-            content: 'đã thêm 1 ảnh mới',
-        },
-        {
-            id: '6523fc90d176717dd38932b2',
-            image: images.post3,
-            name: 'Hội người khuyết tật Bình Đinh',
-            date: '2 giờ trước',
-            content: 'đã thêm 3 ảnh mới',
-        },
-        {
-            id: '651d0055a528879d9d06ce27',
-            image: images.post1,
-            name: 'Hội chữ thập đỏ tỉnh Bà Rịa - Vũng Tàu',
-            date: '1 ngày trước',
-            content: 'đã thêm 5 ảnh mới',
-        },
-        {
-            id: '6544e7c4084e4b75ef3d365e',
-            image: images.post2,
-            name: 'Hội người già neo đơn',
-            date: '2 ngày trước',
-            content: 'đã thêm 3 ảnh mới',
-        },
-
-        {
-            id: '2',
-            image: images.post5,
-            name: 'Quỹ thiện tâm',
-            date: '3 ngày trước',
-            content: 'đã thêm 6 ảnh mới',
-        },
-        {
-            id: '3',
-            image: images.user7,
-            name: 'Sài gòn xanh',
-            date: '3 ngày trước',
-            content: 'đã thêm 1 ảnh mới',
-        },
-    ]
+    const viewDetailPost = async (_postId) => {
+        setLoading(true)
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        }
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/post/' + _postId,
+                config
+            )
+            if (response.data.status === 'SUCCESS') {
+                navigation.navigate('DetailPost', response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
     const viewProfile = async (_orgId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -115,64 +88,89 @@ const NotificationScreen = ({ navigation }) => {
             }
         } catch (error) {
             console.log('API Error:', error)
+        } finally {
+            setLoading(false)
         }
     }
-    const requestUserPermission = async () => {
-        const authStatus = await messaging().requestPermission()
-        const enabled =
-            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-            authStatus === messaging.AuthorizationStatus.PROVISIONAL
+    // const requestUserPermission = async () => {
+    //     const authStatus = await messaging().requestPermission()
+    //     const enabled =
+    //         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    //         authStatus === messaging.AuthorizationStatus.PROVISIONAL
 
-        if (enabled) {
-            console.log('Authorization status:', authStatus)
+    //     if (enabled) {
+    //         console.log('Authorization status:', authStatus)
+    //     }
+    // }
+    // useEffect(() => {
+    //     if (requestUserPermission()) {
+    //         messaging()
+    //             .getToken()
+    //             .then((token) => {
+    //                 console.log(token)
+    //             })
+    //     } else {
+    //         console.log('Failed token status', authStatus)
+    //     }
+
+    //     messaging()
+    //         .getInitialNotification()
+    //         .then( async (remoteMessage) => {
+    //             if (remoteMessage) {
+    //                 console.log(
+    //                     'Notification caused app to open from quit state:',
+    //                     remoteMessage.notification
+    //                 )
+    //             }
+    //         })
+    //     // Assume a message-notification contains a "type" property in the data payload of the screen to open
+
+    //     messaging().onNotificationOpenedApp((remoteMessage) => {
+    //         console.log(
+    //             'Notification caused app to open from background state:',
+    //             remoteMessage.notification
+    //         )
+    //     })
+
+    //     // Register background handler
+    //     messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+    //         console.log('Message handled in the background!', remoteMessage)
+    //     })
+
+    //     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+    //         Alert.alert(
+    //             'A new FCM message arrived!',
+    //             JSON.stringify(remoteMessage)
+    //         )
+    //     })
+
+    //     return unsubscribe
+    // }, [])
+    const getNotis = async () => {
+        const config = {
+            headers: {
+                Authorization: token,
+            },
+        }
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/noties?page=1&limit=5',
+                config
+            )
+
+            if (response.data.status === 'SUCCESS') {
+                setNotis(response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error get noti:', error)
         }
     }
     useEffect(() => {
-        if (requestUserPermission()) {
-            messaging()
-                .getToken()
-                .then((token) => {
-                    console.log(token)
-                })
-        } else {
-            console.log('Failed token status', authStatus)
-        }
-
-        messaging()
-            .getInitialNotification()
-            .then( async (remoteMessage) => {
-                if (remoteMessage) {
-                    console.log(
-                        'Notification caused app to open from quit state:',
-                        remoteMessage.notification
-                    )
-                }
-            })
-        // Assume a message-notification contains a "type" property in the data payload of the screen to open
-
-        messaging().onNotificationOpenedApp((remoteMessage) => {
-            console.log(
-                'Notification caused app to open from background state:',
-                remoteMessage.notification
-            )
-        })
-
-        // Register background handler
-        messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-            console.log('Message handled in the background!', remoteMessage)
-        })
-
-        const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-            Alert.alert(
-                'A new FCM message arrived!',
-                JSON.stringify(remoteMessage)
-            )
-        })
-
-        return unsubscribe
-    }, [])
+        getNotis()
+    }, [token])
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+            <ModalLoading visible={loading} />
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <MaterialIcons
@@ -181,27 +179,34 @@ const NotificationScreen = ({ navigation }) => {
                         color={COLORS.black}
                     />
                 </TouchableOpacity>
-                <Text style={{ ...FONTS.h4, marginLeft: 8 }}>Thông báo</Text>
+                <Text
+                    style={{ fontSize: 20, marginLeft: 8, fontWeight: 'bold' }}
+                >
+                    Thông báo
+                </Text>
             </View>
             <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => getNotis()}
+                    />
+                }
                 style={{ flex: 1, backgroundColor: '#fff', padding: 12 }}
             >
                 {/* Render notification data */}
                 <Text
                     style={{
-                        marginTop: 25,
+                        marginTop: 12,
                         color: COLORS.black,
                         fontWeight: '700',
-                        fontSize: 14,
+                        fontSize: 16,
                     }}
                 >
                     Các thông báo
                 </Text>
-                {noti.map((item, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        onPress={() => viewProfile(item.id)}
-                    >
+                {notis.map((item, index) => (
+                    <View key={index}>
                         <View
                             style={{
                                 flexDirection: 'column',
@@ -215,68 +220,114 @@ const NotificationScreen = ({ navigation }) => {
                                     justifyContent: 'space-between',
                                 }}
                             >
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Image
+                                <View style={{ flex: 1, padding: 5 }}>
+                                    <TouchableOpacity
                                         style={{
-                                            width: 50,
-                                            height: 50,
-                                            borderRadius: 25,
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
                                         }}
-                                        source={item.image}
-                                    />
-                                    <View
-                                        style={{
-                                            flexDirection: 'column',
-                                            marginLeft: 5,
-                                            justifyContent: 'space-between',
-                                        }}
+                                        activeOpacity={0.8}
+                                        onPress={() =>
+                                            viewDetailPost(item.postId)
+                                        }
                                     >
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <Text
+                                        <TouchableOpacity
+                                            activeOpacity={0.8}
+                                            onPress={() =>
+                                                viewProfile(item.senderId)
+                                            }
+                                        >
+                                            <Image
                                                 style={{
-                                                    fontWeight: '500',
-                                                    marginRight: 5,
-                                                    fontSize: 15,
+                                                    width: 60,
+                                                    height: 60,
+                                                    borderRadius: 35,
                                                 }}
-                                            >
-                                                {item.name.length > 25
-                                                    ? `${item.name.slice(
-                                                          0,
-                                                          25
-                                                      )}...`
-                                                    : item.name}
-                                            </Text>
-                                            <FontAwesome
-                                                name="check-circle"
-                                                size={15}
-                                                color={'#4EB09B'}
+                                                source={item.senderAvt}
                                             />
-                                        </View>
-                                        <Text
+                                            {item.type === 'comment' ? (
+                                                <LinearGradient
+                                                    colors={[
+                                                        '#4facfe',
+                                                        '#00f2fe',
+                                                    ]}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        bottom: -5,
+                                                        right: 0,
+                                                        borderRadius: 12, // Bo tròn góc
+                                                        padding: 5,
+                                                    }}
+                                                >
+                                                    <MaterialCommunityIcons
+                                                        name="message-text"
+                                                        color={COLORS.white}
+                                                        size={18}
+                                                    />
+                                                </LinearGradient>
+                                            ) : (
+                                                <LinearGradient
+                                                    colors={[
+                                                        '#fa709a',
+                                                        '#fee140',
+                                                    ]}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        bottom: -5,
+                                                        right: 0,
+                                                        borderRadius: 12, // Bo tròn góc
+                                                        padding: 5,
+                                                    }}
+                                                >
+                                                    <FontAwesome5
+                                                        name="user-alt"
+                                                        color={COLORS.white}
+                                                        size={18}
+                                                    />
+                                                </LinearGradient>
+                                            )}
+                                        </TouchableOpacity>
+                                        <View
                                             style={{
-                                                color: '#696969',
-                                                marginBottom: 10,
+                                                flex: 1,
+                                                flexDirection: 'row',
+                                                marginLeft: 10,
+                                                justifyContent: 'space-between',
                                             }}
                                         >
-                                            {item.date}
-                                        </Text>
-                                    </View>
-                                </View>
-                                <View>
-                                    <Text
-                                        style={{
-                                            fontWeight: '500',
-                                            fontSize: 15,
-                                        }}
-                                    >
-                                        {item.content}
-                                    </Text>
+                                            <View
+                                                style={{
+                                                    flexDirection: 'row',
+                                                }}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        fontWeight: 'bold',
+                                                        fontSize: 17,
+                                                    }}
+                                                >
+                                                    {item.senderFullname}
+                                                    <Text
+                                                        style={{
+                                                            fontWeight: '500',
+                                                            fontSize: 16,
+                                                        }}
+                                                    >
+                                                        {item.message.replace(
+                                                            item.senderFullname,
+                                                            ''
+                                                        )}
+                                                    </Text>
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
-                    </TouchableOpacity>
+                    </View>
                 ))}
-                <View
+                {/* <View
                     style={{
                         paddingVertical: 10,
                         marginTop: 30,
@@ -316,10 +367,9 @@ const NotificationScreen = ({ navigation }) => {
                             Xem tất cả
                         </Text>
                     </TouchableOpacity>
-                </View>
+                </View> */}
 
-                {/* Render organization data */}
-                {organization.map((item, index) => (
+                {/* {organization.map((item, index) => (
                     <TouchableOpacity
                         key={index}
                         onPress={() => viewProfile(item.id)}
@@ -404,7 +454,7 @@ const NotificationScreen = ({ navigation }) => {
                             </View>
                         </View>
                     </TouchableOpacity>
-                ))}
+                ))} */}
             </ScrollView>
         </SafeAreaView>
     )
