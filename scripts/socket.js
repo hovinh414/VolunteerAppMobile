@@ -23,9 +23,10 @@ export class SocketIOService {
     this.DEFAULT_DEPLAY_RECONNECTION = 10000;
   }
   //192.168.9.15
+  //172.20.10.6
   reqConnection(medataData) {
     const accessToken = AsyncStoraged.getToken();
-    return SocketIOClient('http://192.168.9.15:3200',{
+    return SocketIOClient('http://172.20.10.6:3200',{
       reconnectionDelayMax: this.DEFAULT_DEPLAY_RECONNECTION,
       auth: {
         token: accessToken || ''

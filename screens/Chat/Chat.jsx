@@ -9,7 +9,7 @@ import {
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS, FONTS, images } from '../../constants'
-import { MaterialIcons } from '@expo/vector-icons'
+import { MaterialIcons, AntDesign } from '@expo/vector-icons'
 import { styles } from './ChatStyle'
 import { Image } from 'expo-image'
 import axios from 'axios'
@@ -168,6 +168,37 @@ const Chat = ({ navigation, route }) => {
     return (
         <SafeAreaView style={styles.container}>
             <>
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => joinRoom()}
+                    style={{
+                        zIndex: 999,
+                        position: 'absolute',
+                        bottom: 25,
+                        right: 25,
+                        width: 60,
+                        height: 60,
+                        borderRadius: 35,
+                        backgroundColor: COLORS.primary,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        shadowColor: COLORS.primary,
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.75,
+                        shadowRadius: 4,
+                        elevation: 5,
+                    }}
+                >
+                    <AntDesign
+                        name="message1"
+                        size={32}
+                        color={COLORS.white}
+                    />
+                </TouchableOpacity>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <MaterialIcons
