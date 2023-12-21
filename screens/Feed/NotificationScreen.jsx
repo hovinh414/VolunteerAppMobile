@@ -313,10 +313,15 @@ const NotificationScreen = ({ navigation }) => {
                                                             fontSize: 16,
                                                         }}
                                                     >
-                                                        {item.message.replace(
-                                                            item.senderFullname,
-                                                            ''
-                                                        )}
+                                                        {item.message
+                                                            .replace(
+                                                                item.senderFullname,
+                                                                ''
+                                                            )
+                                                            .replace(
+                                                                'comment',
+                                                                'bình luận'
+                                                            )}
                                                     </Text>
                                                 </Text>
                                             </View>

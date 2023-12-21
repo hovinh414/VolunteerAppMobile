@@ -19,7 +19,7 @@ import {
     Feather,
     FontAwesome,
     MaterialCommunityIcons,
-    Entypo,
+    Fontisto,
 } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import { friends, posts } from '../../constants/data'
@@ -110,6 +110,85 @@ const Post = ({
     }
 
     const [postIdComment, setPostIdComment] = useState('')
+    const [postLikes, setPostLikes] = useState({})
+    const [isLike, setIsLike] = useState([])
+
+    const checkLikes = async (postId) => {
+        try {
+            const res = await axios({
+                method: 'get',
+                url: API_URL.API_URL + '/post/like/' + postId,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            })
+
+            if (res.data.message === 'User not like this post before') {
+                setIsLike((prevLikes) => [
+                    ...prevLikes,
+                    { postId: postId, likeStatus: 0 },
+                ])
+            } else {
+                setIsLike((prevLikes) => [
+                    ...prevLikes,
+                    { postId: postId, likeStatus: 1 },
+                ])
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const fetchLikes = async (postId) => {
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/post/likes/' + postId
+            )
+
+            if (response.data.status === 'SUCCESS') {
+                setPostLikes((prevLikes) => ({
+                    ...prevLikes,
+                    [postId]: response.data.data.totalLikes,
+                }))
+            }
+        } catch (error) {
+            console.log('API get total like Error:', error)
+        }
+    }
+
+    const handleLikeClick = async (postId) => {
+        try {
+            if (
+                isLike.find((like) => like.postId === postId)?.likeStatus === 1
+            ) {
+                await unLikePost(postId)
+                setIsLike((prevLikes) => [
+                    ...prevLikes.filter((like) => like.postId !== postId),
+                    { postId: postId, likeStatus: 0 },
+                ])
+            } else {
+                await likePost(postId)
+                setIsLike((prevLikes) => [
+                    ...prevLikes.filter((like) => like.postId !== postId),
+                    { postId: postId, likeStatus: 1 },
+                ])
+            }
+
+            // Fetch updated likes after like/unlike
+            await fetchLikes(postId)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        // Iterate through the posts and fetch likes for each post
+        posts.forEach((post) => {
+            checkLikes(post._id)
+            fetchLikes(post._id)
+        })
+    }, [posts])
 
     const LikeButton = ({ postId, likePost, unLikePost, post }) => {
         const [isLiked, setIsLiked] = useState(false)
@@ -232,85 +311,22 @@ const Post = ({
         useEffect(() => {
             fetchLikes()
         }, [])
-        const handleLikeClick = useCallback(async () => {
-            try {
-                if (isLiked) {
-                    await unLikePost(postId)
-                    setIsLiked(false)
-                } else {
-                    await likePost(postId)
-                    setIsLiked(true)
-                }
 
-                fetchLikes() // Gọi hàm này sau khi thực hiện like/unlike thành công
-            } catch (error) {
-                console.log(error)
-            }
-        }, [isLiked, postId, unLikePost, likePost, fetchLikes])
         return (
-            <View style={{ flexDirection: 'column' }}>
-                <View
-                    style={{
-                        flexDirection: 'row',
-
-                        alignItems: 'center',
-                        marginRight: SIZES.padding2,
-                    }}
-                >
-                    <TouchableOpacity onPress={handleLikeClick}>
-                        {isLiked ? (
-                            <FontAwesome
-                                name="heart"
-                                size={25}
-                                color={COLORS.primary}
-                            />
-                        ) : (
-                            <Feather
-                                name="heart"
-                                size={25}
-                                color={COLORS.black}
-                            />
-                        )}
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={() => {
-                            setShowComment(true)
-                            setPostIdComment(postId)
-                        }}
-                        style={{
-                            flexDirection: 'row',
-                            marginHorizontal: 8,
-                            alignItems: 'center',
-                        }}
-                    >
-                        <MaterialCommunityIcons
-                            name="message-processing-outline"
-                            size={25}
-                            color={COLORS.black}
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => sharePost(post)}
-                        style={{
-                            flexDirection: 'row',
-
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Feather
-                            name="share-2"
-                            size={25}
-                            color={COLORS.black}
-                        />
-                    </TouchableOpacity>
-                </View>
-                <Text style={{ ...FONTS.body5, marginLeft: 5, marginTop: 8 }}>
-                    {totalLike} lượt thích
-                </Text>
-            </View>
+            <TouchableOpacity onPress={handleLikeClick}>
+                {isLiked ? (
+                    <FontAwesome
+                        name="heart"
+                        size={25}
+                        color={COLORS.primary}
+                    />
+                ) : (
+                    <Feather name="heart" size={25} color={COLORS.black} />
+                )}
+            </TouchableOpacity>
         )
     }
+
     const viewDetailPost = async (_postId) => {
         setLoading(true)
         const config = {
@@ -708,12 +724,79 @@ const Post = ({
                                     flexDirection: 'row',
                                 }}
                             >
-                                <LikeButton
-                                    postId={item._id}
-                                    unLikePost={unLikePost}
-                                    likePost={likePost}
-                                    post={item}
-                                />
+                                <View style={{ flexDirection: 'column' }}>
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+
+                                            alignItems: 'center',
+                                            marginRight: SIZES.padding2,
+                                        }}
+                                    >
+                                        <TouchableOpacity
+                                            onPress={() => handleLikeClick(item._id)}
+                                        >
+                                            {isLike.find(
+                                                (like) =>
+                                                    like.postId === item._id &&
+                                                    like.likeStatus === 1
+                                            ) ? (
+                                                <FontAwesome
+                                                    name="heart"
+                                                    size={28}
+                                                    color={COLORS.primary}
+                                                />
+                                            ) : (
+                                                <Feather
+                                                    name="heart"
+                                                    size={28}
+                                                    color={COLORS.black}
+                                                />
+                                            )}
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setShowComment(true)
+                                                setPostIdComment(item._id)
+                                            }}
+                                            style={{
+                                                flexDirection: 'row',
+                                                marginHorizontal: 8,
+                                                alignItems: 'center',
+                                            }}
+                                        >
+                                            <MaterialCommunityIcons
+                                                name="comment-text-outline"
+                                                size={28}
+                                                color={COLORS.black}
+                                            />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={() => sharePost(item)}
+                                            style={{
+                                                flexDirection: 'row',
+
+                                                alignItems: 'center',
+                                            }}
+                                        >
+                                            <Feather
+                                                name="send"
+                                                size={28}
+                                                color={COLORS.black}
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            marginLeft: 5,
+                                            marginTop: 8,
+                                        }}
+                                    >
+                                        {postLikes[item._id] || 0} lượt thích
+                                    </Text>
+                                </View>
                             </View>
 
                             <View
