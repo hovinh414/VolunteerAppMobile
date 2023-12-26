@@ -241,7 +241,7 @@ const VerifyRoute = ({ navigation }) => {
         <ScrollView style={{ flex: 1, marginHorizontal: 22 }}>
             <View
                 style={{
-                    zIndex: 2,
+                    zIndex: 999,
                 }}
             >
                 <Toast config={toastConfig} />

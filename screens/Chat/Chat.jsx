@@ -28,6 +28,11 @@ const Chat = ({ navigation, route }) => {
             getGroupChats()
         }, [])
     )
+    const itemTest = {
+        groupid: '00025ee3-e2da-4402-9489-186980c650e7',
+        name: 'Áo ấm cho em 2023',
+        avatar: 'https://firebasestorage.googleapis.com/v0/b/bhx-clone.appspot.com/o/compressed%2Fgroups%2Fcompressed_6563429665fafa12010524a2_IMG_9992.jpg?alt=media',
+    }
     const joinRoom = (item) => {
         // if (username !== "" && room !== "") {
         const socket = ioService.reqConnection({
@@ -170,7 +175,7 @@ const Chat = ({ navigation, route }) => {
             <>
                 <TouchableOpacity
                     activeOpacity={0.8}
-                    onPress={() => joinRoom()}
+                    onPress={() => joinRoom(itemTest)}
                     style={{
                         zIndex: 999,
                         position: 'absolute',
@@ -193,11 +198,7 @@ const Chat = ({ navigation, route }) => {
                         elevation: 5,
                     }}
                 >
-                    <AntDesign
-                        name="message1"
-                        size={32}
-                        color={COLORS.white}
-                    />
+                    <AntDesign name="message1" size={32} color={COLORS.white} />
                 </TouchableOpacity>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>

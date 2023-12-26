@@ -566,7 +566,7 @@ const ProfileUser = ({ route }) => {
                                         Đang theo dõi
                                     </Text>
                                 </View>
-                                <View
+                                {/* <View
                                     style={{
                                         flexDirection: 'column',
                                         alignItems: 'center',
@@ -591,7 +591,7 @@ const ProfileUser = ({ route }) => {
                                     >
                                         Lượt ủng hộ
                                     </Text>
-                                </View>
+                                </View> */}
                             </View>
                         </>
                     )}

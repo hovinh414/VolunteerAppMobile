@@ -44,19 +44,7 @@ const Feed = ({ navigation, route }) => {
         getPostOutStanding()
         setTypePost('normal')
     }
-    // useFocusEffect(
-    //     React.useCallback(() => {
-    //       fetchNextPage();
-    //     }, [])
-    //   );
-    const Divider = () => (
-        <View
-            style={{
-                height: StyleSheet.hairlineWidth,
-                backgroundColor: '#7F8487',
-            }}
-        />
-    )
+
     const windowWidth = Dimensions.get('window').width
     const [posts, setPosts] = useState([])
     const [postOutStandings, setPostOutStandings] = useState([])
@@ -967,7 +955,9 @@ const Feed = ({ navigation, route }) => {
 
                     {token ? (
                         <TouchableOpacity
-                            onPress={() => navigation.navigate('Chat', ioService)}
+                            onPress={() =>
+                                navigation.navigate('Chat', ioService)
+                            }
                             style={{
                                 height: 45,
                                 width: 45,
@@ -1025,6 +1015,7 @@ const Feed = ({ navigation, route }) => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+            <ModalLoading visible={loading} />
             {renderHeader()}
             <View style={{ flex: 1, marginTop: 15, marginBottom: 20 }}>
                 <Post

@@ -331,7 +331,6 @@ const ProfileOrganisation = ({ navigation }) => {
         const unsubscribe = navigation.addListener('focus', () => {
             onRefresh()
         })
-
         return unsubscribe
     }, [navigation])
     const toastConfig = {
@@ -518,6 +517,22 @@ const ProfileOrganisation = ({ navigation }) => {
             }
         }
     }
+    const RenderNoPost = () => {
+        return (
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: 35,
+                }}
+            >
+                <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+                    Chưa có bài viết nào
+                </Text>
+            </View>
+        )
+    }
     return (
         <SafeAreaView
             style={{
@@ -532,7 +547,13 @@ const ProfileOrganisation = ({ navigation }) => {
                 fetchNextPage={fetchNextPage}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                footer={RenderLoader}
+                footer={
+                    posts.length > 0 && posts ? (
+                        <RenderLoader />
+                    ) : (
+                        <RenderNoPost />
+                    )
+                }
             />
             <View>
                 <View

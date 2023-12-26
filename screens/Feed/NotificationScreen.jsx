@@ -13,9 +13,11 @@ import {
     MaterialIcons,
     FontAwesome5,
     MaterialCommunityIcons,
+    FontAwesome,
 } from '@expo/vector-icons'
 import { styles } from '../Chat/ChatStyle'
 import { Image } from 'expo-image'
+import ImageAvata from '../../assets/hero2.jpg'
 import AsyncStoraged from '../../services/AsyncStoraged'
 import axios from 'axios'
 import API_URL from '../../interfaces/config'
@@ -243,7 +245,11 @@ const NotificationScreen = ({ navigation }) => {
                                                     height: 60,
                                                     borderRadius: 35,
                                                 }}
-                                                source={item.senderAvt}
+                                                source={
+                                                    item.senderAvt
+                                                        ? item.senderAvt
+                                                        : ImageAvata
+                                                }
                                             />
                                             {item.type === 'comment' ? (
                                                 <LinearGradient
@@ -261,6 +267,26 @@ const NotificationScreen = ({ navigation }) => {
                                                 >
                                                     <MaterialCommunityIcons
                                                         name="message-text"
+                                                        color={COLORS.white}
+                                                        size={18}
+                                                    />
+                                                </LinearGradient>
+                                            ) : item.type === 'block' ? (
+                                                <LinearGradient
+                                                    colors={[
+                                                        '#FF0035',
+                                                        '#FF0035',
+                                                    ]}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        bottom: -5,
+                                                        right: 0,
+                                                        borderRadius: 12, // Bo tròn góc
+                                                        padding: 5,
+                                                    }}
+                                                >
+                                                    <FontAwesome
+                                                        name="ban"
                                                         color={COLORS.white}
                                                         size={18}
                                                     />
@@ -306,22 +332,14 @@ const NotificationScreen = ({ navigation }) => {
                                                         fontSize: 17,
                                                     }}
                                                 >
-                                                    {item.senderFullname}
+                                                    {item.senderFullname}{' '}
                                                     <Text
                                                         style={{
                                                             fontWeight: '500',
                                                             fontSize: 16,
                                                         }}
                                                     >
-                                                        {item.message
-                                                            .replace(
-                                                                item.senderFullname,
-                                                                ''
-                                                            )
-                                                            .replace(
-                                                                'comment',
-                                                                'bình luận'
-                                                            )}
+                                                        {item.message}
                                                     </Text>
                                                 </Text>
                                             </View>

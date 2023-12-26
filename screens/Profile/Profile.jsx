@@ -198,22 +198,25 @@ const PostsRoute = () => {
                                                 }}
                                             >
                                                 Ngày diễn ra:{' '}
-                                                <Text
-                                                    style={{
-                                                        color: COLORS.primary,
-                                                        fontSize: 14,
-                                                        fontWeight: 'bold',
-                                                    }}
-                                                >
-                                                    {
-                                                        (formattedDate = format(
-                                                            new Date(
-                                                                item.dateActivity
-                                                            ),
-                                                            'dd-MM-yyyy'
-                                                        ))
-                                                    }
-                                                </Text>
+                                                {item.dateActivity ? (
+                                                    <Text
+                                                        style={{
+                                                            color: COLORS.primary,
+                                                            fontSize: 14,
+                                                            fontWeight: 'bold',
+                                                        }}
+                                                    >
+                                                        {
+                                                            (formattedDate =
+                                                                format(
+                                                                    new Date(
+                                                                        item.dateActivity
+                                                                    ),
+                                                                    'dd-MM-yyyy'
+                                                                ))
+                                                        }
+                                                    </Text>
+                                                ) : null}
                                             </Text>
                                         </View>
                                     </View>
@@ -487,7 +490,7 @@ const Profile = ({ navigation, route }) => {
                                 />
                             </TouchableOpacity>
                         </View>
-                        <View
+                        {/* <View
                             style={{
                                 paddingVertical: 8,
                                 flexDirection: 'row',
@@ -546,7 +549,7 @@ const Profile = ({ navigation, route }) => {
                                     Đang theo dõi
                                 </Text>
                             </View>
-                        </View>
+                        </View> */}
                     </View>
                 </View>
             </View>

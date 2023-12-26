@@ -332,7 +332,7 @@ function ChatDetail({ route, navigation }) {
                                             marginBottom: 2,
                                         }}
                                     >
-                                        {extractNameFromFullname(item.fullname)}
+                                        {item.fullname}
                                     </Text>
                                     <View style={styles.theirMessage}>
                                         <Text style={styles.messageTheirText}>
