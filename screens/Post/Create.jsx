@@ -45,7 +45,7 @@ const Create = ({ navigation }) => {
     const [selected, setSelected] = useState('')
     const currentDate = new Date()
     const data = [
-        { key: 'activity', value: 'Hoạt động tình nguyện' },
+        { key: 'Activity', value: 'Hoạt động tình nguyện' },
         { key: 'fund', value: 'Hoạt động gây quỹ' },
     ]
     function handleChangeStartDate(propDate) {

@@ -50,26 +50,17 @@ const AccountSearch = ({ searchQuery }) => {
                 const CancelToken = axios.CancelToken
                 let cancel
                 const res = await axios({
-                    method: 'post',
-                    url: API_URL.API_URL + '/search-es',
-                    headers: {
-                        Accept: 'application/json',
-                    },
-                    data: {
-                        params: searchQuery,
-                    },
+                    method: 'get',
+                    url: API_URL.API_URL + '/search-user?text=' + searchQuery,
                     cancelToken: new CancelToken(function executor(c) {
                         cancel = c
                     }),
                 })
-                const usersData = res.data.filter(
-                    (item) => item._index === 'search-volunteer-be'
-                )
-
-                setUsers(usersData)
+                setUsers(res.data.data)
                 setImageLoading(false)
             } catch (error) {
                 console.log('Search error: ', error)
+                setImageLoading(false)
             }
         }
 
@@ -129,7 +120,7 @@ const AccountSearch = ({ searchQuery }) => {
                         >
                             <TouchableOpacity
                                 activeOpacity={0.8}
-                                onPress={() => viewProfile(item._source.id)}
+                                onPress={() => viewProfile(item._id)}
                                 style={{
                                     flexDirection: 'column',
                                     width: screenWidth / 3 - 24,
@@ -142,9 +133,7 @@ const AccountSearch = ({ searchQuery }) => {
                             >
                                 <Image
                                     source={
-                                        item._source.avatar
-                                            ? item._source.avatar
-                                            : ImageAvata
+                                        item.avatar ? item.avatar : ImageAvata
                                     }
                                     style={{
                                         marginTop: 10,
@@ -162,7 +151,7 @@ const AccountSearch = ({ searchQuery }) => {
                                         color: COLORS.black,
                                     }}
                                 >
-                                    {item._source.fullname}
+                                    {item.fullname}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -252,23 +241,14 @@ const PostSearch = ({ searchQuery }) => {
                 const CancelToken = axios.CancelToken
                 let cancel
                 const res = await axios({
-                    method: 'post',
-                    url: API_URL.API_URL + '/search-es',
-                    headers: {
-                        Accept: 'application/json',
-                    },
-                    data: {
-                        params: searchQuery,
-                    },
+                    method: 'get',
+                    url: API_URL.API_URL + '/search-post?text=' + searchQuery,
                     cancelToken: new CancelToken(function executor(c) {
                         cancel = c
                     }),
                 })
-                const postsData = res.data.filter(
-                    (item) => item._index === 'search-volunteer'
-                )
 
-                setPosts(postsData)
+                setPosts(res.data.data)
                 setImageLoading(false)
             } catch (error) {
                 console.log('Search error: ', error)
@@ -303,7 +283,7 @@ const PostSearch = ({ searchQuery }) => {
                                 justifyContent: 'center',
                             }}
                             activeOpacity={0.8}
-                            onPress={() => viewDetailPost(item._source.id)}
+                            onPress={() => viewDetailPost(item._id)}
                         >
                             <View
                                 style={{
@@ -319,7 +299,7 @@ const PostSearch = ({ searchQuery }) => {
                                 }}
                             >
                                 <Image
-                                    source={item._source.media}
+                                    source={item.media}
                                     style={{
                                         width: 110,
                                         height: 110,
@@ -341,12 +321,9 @@ const PostSearch = ({ searchQuery }) => {
                                         numberOfLines={3}
                                         ellipsizeMode="tail"
                                     >
-                                        {item._source.content.length > 100
-                                            ? `${item._source.content.slice(
-                                                  0,
-                                                  100
-                                              )}...`
-                                            : item._source.content}
+                                        {item.content.length > 100
+                                            ? `${item.content.slice(0, 100)}...`
+                                            : item.content}
                                     </Text>
                                     <Text
                                         style={{
@@ -354,7 +331,7 @@ const PostSearch = ({ searchQuery }) => {
                                             fontSize: 13,
                                         }}
                                     >
-                                        {item._source.type === 'activity'
+                                        {item.type === 'activity'
                                             ? 'Hoạt động tình nguyện'
                                             : 'Hoạt động quyên góp'}
                                     </Text>
@@ -407,24 +384,13 @@ const PostSearch = ({ searchQuery }) => {
 
 const Search = ({ navigation, route }) => {
     const layout = useWindowDimensions()
-    const [posts, setPosts] = useState([])
-    const [users, setUsers] = useState([])
-    const [searchQuery, setSearchQuery] = useState({
-        query_string: '',
-        default_field: '*',
-    })
+    const [searchQuery, setSearchQuery] = useState('')
     const [index, setIndex] = useState(0)
 
     const [routes] = useState([
         { key: 'first', title: 'Tài khoản', icon: 'home' },
         { key: 'second', title: 'Hoạt động', icon: 'user' },
     ])
-    const getSearchQuerry = (text) => {
-        setSearchQuery((prevQuery) => ({
-            ...prevQuery,
-            query_string: text,
-        }))
-    }
     const renderScene = SceneMap({
         first: () => <AccountSearch searchQuery={searchQuery} />,
         second: () => <PostSearch searchQuery={searchQuery} />,
@@ -480,7 +446,7 @@ const Search = ({ navigation, route }) => {
                             marginLeft: 15,
                             marginRight: 8,
                             flex: 1,
-                            padding: 7,
+                            padding: 4,
                             alignItems: 'center',
                         }}
                     >
@@ -495,9 +461,23 @@ const Search = ({ navigation, route }) => {
                             style={{
                                 marginLeft: 10,
                                 height: 40,
+                                width: '80%',
                             }}
-                            onChangeText={(text) => getSearchQuerry(text)}
+                            value={searchQuery}
+                            onChangeText={(text) => setSearchQuery(text)}
                         />
+                        {!searchQuery ? null : (
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                onPress={() => setSearchQuery('')}
+                            >
+                                <AntDesign
+                                    size={18}
+                                    name="closecircle"
+                                    color={'#ccc'}
+                                />
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
             </View>

@@ -918,6 +918,7 @@ const DetailPost = ({ navigation, route }) => {
                                 marginBottom: 15,
                             }}
                             horizontal={true}
+                            showsHorizontalScrollIndicator={false}
                             data={items.media}
                             renderItem={({ item, index }) => (
                                 <View

@@ -64,7 +64,7 @@ const MapScreen = ({ navigation }) => {
 
         try {
             const response = await axios.get(
-                API_URL.API_URL + '/posts?page=2&limit=5',
+                API_URL.API_URL + '/posts?page=1&limit=5',
                 config
             )
 
@@ -328,7 +328,7 @@ const MapScreen = ({ navigation }) => {
                                         padding: 10,
                                     }}
                                 >
-                                    <View
+                                    {/* <View
                                         style={{
                                             position: 'absolute',
                                             zIndex: 3,
@@ -354,7 +354,7 @@ const MapScreen = ({ navigation }) => {
                                             )}{' '}
                                             ngày
                                         </Text>
-                                    </View>
+                                    </View> */}
                                     <Image
                                         source={selectedPost.media}
                                         style={{
