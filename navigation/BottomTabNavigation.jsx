@@ -2,16 +2,16 @@ import { View, Text, Platform } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import {
     Feather,
-    Ionicons,
+    Octicons,
     FontAwesome,
-    FontAwesome5,
+    Ionicons,
 } from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { COLORS } from '../constants'
 import {
     Search,
     LoginScreen,
-    Notifications,
+    MapScreen,
     Profile,
     Settings,
     ScanQR,
@@ -38,7 +38,7 @@ const screenOptions = {
         right: 0,
         left: 0,
         elevation: 0,
-        height: 80,
+        padding: 5,
         backgroundColor: '#fff',
         // borderTopLeftRadius: 20,
         // borderTopRightRadius: 20,
@@ -47,14 +47,17 @@ const screenOptions = {
 const BottomTabNavigation = () => {
     const [type, setType] = useState('')
     const [avatar, setAvatar] = useState('')
+    const [isActiveOrganization, setIsActiveOrganization] = useState(false)
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
             setAvatar(userStored.avatar)
             setType(userStored.type)
+            setIsActiveOrganization(userStored.isActiveOrganization)
         } else {
             setAvatar(null)
             setType(null)
+            setIsActiveOrganization(false)
         }
     }
     useEffect(() => {
@@ -78,13 +81,11 @@ const BottomTabNavigation = () => {
                                 style={{
                                     paddingVertical: 8,
                                     paddingHorizontal: 20,
-                                    backgroundColor: focused
-                                        ? '#ffdccc'
-                                        : COLORS.white,
+                                    backgroundColor: COLORS.white,
                                     borderRadius: 8,
                                 }}
                             >
-                                <Feather
+                                <Octicons
                                     name="home"
                                     size={25}
                                     color={
@@ -106,9 +107,7 @@ const BottomTabNavigation = () => {
                                 style={{
                                     paddingVertical: 8,
                                     paddingHorizontal: 20,
-                                    backgroundColor: focused
-                                        ? '#ffdccc'
-                                        : COLORS.white,
+                                    backgroundColor: COLORS.white,
                                     borderRadius: 8,
                                 }}
                             >
@@ -124,8 +123,7 @@ const BottomTabNavigation = () => {
                     },
                 }}
             />
-
-            {type === 'Organization' ? (
+            {!isActiveOrganization ? null : type === 'Organization' ? (
                 <Tab.Screen
                     name="Create"
                     component={Create}
@@ -141,7 +139,7 @@ const BottomTabNavigation = () => {
                                         height: Platform.OS == 'ios' ? 50 : 60,
                                         borderRadius: 22,
                                         borderColor: '#fff',
-                                        borderWidth: 4,
+                                        borderWidth: 3,
                                     }}
                                 >
                                     <Feather
@@ -154,7 +152,8 @@ const BottomTabNavigation = () => {
                         },
                     }}
                 />
-            ) : type === 'User' || type === 'Admin' || type === 'user' ? (
+            ) : null}
+            {type === 'User' || type === 'Admin' || type === 'user' ? (
                 <Tab.Screen
                     name="ScanQR"
                     component={ScanQR}
@@ -170,7 +169,7 @@ const BottomTabNavigation = () => {
                                         height: Platform.OS == 'ios' ? 50 : 60,
                                         borderRadius: 22,
                                         borderColor: '#fff',
-                                        borderWidth: 4,
+                                        borderWidth: 6,
                                     }}
                                 >
                                     <Image
@@ -187,10 +186,9 @@ const BottomTabNavigation = () => {
                     }}
                 />
             ) : null}
-
             <Tab.Screen
-                name="NotificationScreen"
-                component={NotificationScreen}
+                name="MapScreen"
+                component={MapScreen}
                 options={{
                     tabBarIcon: ({ focused }) => {
                         return (
@@ -198,14 +196,12 @@ const BottomTabNavigation = () => {
                                 style={{
                                     paddingVertical: 8,
                                     paddingHorizontal: 20,
-                                    backgroundColor: focused
-                                        ? '#ffdccc'
-                                        : COLORS.white,
+                                    backgroundColor: COLORS.white,
                                     borderRadius: 8,
                                 }}
                             >
-                                <FontAwesome5
-                                    name="heart"
+                                <Ionicons
+                                    name="map-outline"
                                     size={25}
                                     color={
                                         focused ? COLORS.primary : COLORS.black
@@ -227,9 +223,7 @@ const BottomTabNavigation = () => {
                                     style={{
                                         paddingVertical: 8,
                                         paddingHorizontal: 20,
-                                        backgroundColor: focused
-                                            ? '#ffdccc'
-                                            : COLORS.white,
+                                        backgroundColor: COLORS.white,
                                         borderRadius: 8,
                                     }}
                                 >
@@ -265,9 +259,7 @@ const BottomTabNavigation = () => {
                                     style={{
                                         paddingVertical: 8,
                                         paddingHorizontal: 20,
-                                        backgroundColor: focused
-                                            ? '#ffdccc'
-                                            : COLORS.white,
+                                        backgroundColor: COLORS.white,
                                         borderRadius: 8,
                                     }}
                                 >
@@ -303,9 +295,7 @@ const BottomTabNavigation = () => {
                                     style={{
                                         paddingVertical: 8,
                                         paddingHorizontal: 20,
-                                        backgroundColor: focused
-                                            ? '#ffdccc'
-                                            : COLORS.white,
+                                        backgroundColor: COLORS.white,
                                         borderRadius: 8,
                                     }}
                                 >

@@ -10,7 +10,7 @@ import {
     SafeAreaView,
     TextInput, // Import TextInput
 } from 'react-native'
-
+import ModalLoading from '../../components/ModalLoading'
 import { MaterialIcons } from '@expo/vector-icons'
 import { COLORS, FONTS } from '../../constants'
 import AsyncStoraged from '../../services/AsyncStoraged'
@@ -19,57 +19,39 @@ import API_URL from '../../interfaces/config'
 import * as Progress from 'react-native-progress'
 import { Image } from 'expo-image'
 const loading = '../../assets/loading.gif'
-function FeaturedArticle({ navigation }) {
+function FeaturedArticle({ navigation, route }) {
     const screenWidth = Dimensions.get('window').width
-
-    const [posts, setPosts] = useState([])
+    const data = route.params
+    const [posts, setPosts] = useState(data)
     const [token, setToken] = useState('')
-    const [avatar, setAvatar] = useState(null)
-    const [type, setType] = useState(null)
-    const [typePost, setTypePost] = useState('normal')
-    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
-    const [currentPage, setCurrentPage] = useState(1)
-    const [refreshing, setRefreshing] = useState(false)
     const [showSearchInput, setShowSearchInput] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [searchText, setSearchText] = useState('')
+    function removeAccents(str) {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    }
+
     useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
-            onRefreshPost()
+        // Filter the data based on the searchText
+        const searchTextWithoutAccents = removeAccents(searchText)
+
+        const filteredResults = data.filter((item) => {
+            const contentWithoutAccents = removeAccents(item.content)
+            return contentWithoutAccents
+                .toLowerCase()
+                .includes(searchTextWithoutAccents.toLowerCase())
         })
 
-        return unsubscribe
-    }, [navigation])
-
+        setPosts(filteredResults)
+    }, [searchText])
     useEffect(() => {
         getToken()
-    }, [])
-
-    useEffect(() => {
-        getUserStored()
     }, [])
 
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
-
-    const getUserStored = async () => {
-        const userStored = await AsyncStoraged.getData()
-        if (userStored) {
-            setAvatar(userStored.avatar)
-            setType(userStored.type)
-        } else {
-            setAvatar(null)
-            setType(null)
-        }
-    }
-
-    const onRefreshPost = () => {
-        setCurrentPage(1)
-        setPosts([])
-        getPosts()
-    }
-
     const calculateDaysDifference = (exprirationDate) => {
         const currentDate = new Date()
         const targetDate = new Date(exprirationDate)
@@ -80,74 +62,8 @@ function FeaturedArticle({ navigation }) {
         return daysDifference
     }
 
-    const getPosts = async () => {
-        const config = {
-            headers: {
-                Authorization: token,
-            },
-        }
-
-        try {
-            const response = await axios.get(
-                API_URL.API_URL + '/posts?page=1&limit=6',
-                config
-            )
-
-            if (response.data.status === 'SUCCESS') {
-                setPosts(response.data.data)
-            }
-        } catch (error) {
-            console.log('API Error get post:', error)
-        }
-    }
-
-    useEffect(() => {
-        getPosts()
-    }, [token])
-
-    const onRefresh = () => {
-        setRefreshing(true)
-        setCurrentPage(1)
-        getPosts().then(() => {
-            setRefreshing(false)
-        })
-    }
-
-    const fetchNextPage = async () => {
-        if (!isFetchingNextPage) {
-            setIsFetchingNextPage(true)
-            setIsLoading(true)
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: token,
-                },
-            }
-
-            try {
-                const response = await axios.get(
-                    `${API_URL.API_URL}/posts?page=${currentPage + 1}&limit=6`,
-                    config
-                )
-
-                if (response.data.status === 'SUCCESS') {
-                    setPosts([...posts, ...response.data.data])
-                    setCurrentPage(currentPage + 1)
-                } else {
-                    setPosts([...posts, ...response.data.data])
-                }
-            } catch (error) {
-                setIsLoading(false)
-                
-                console.log('API Error:', error)
-                return;
-            } finally {
-                setIsFetchingNextPage(false)
-            }
-        }
-    }
-
     const viewDetailPost = async (_postId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -164,32 +80,15 @@ function FeaturedArticle({ navigation }) {
             }
         } catch (error) {
             console.log('API Error:', error)
+        } finally {
+            setLoading(false)
         }
     }
 
     const toggleSearchInput = () => {
         setShowSearchInput(!showSearchInput)
     }
-    const RenderLoader = () => {
-        return (
-            <View>
-                {isLoading ? (
-                    <View
-                        style={{
-                            marginBottom: 50,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Image
-                            source={require(loading)}
-                            style={{ width: 50, height: 50 }}
-                        />
-                    </View>
-                ) : null}
-            </View>
-        )
-    }
+
     return (
         <KeyboardAvoidingView
             KeyboardAvoidingView
@@ -203,6 +102,7 @@ function FeaturedArticle({ navigation }) {
             behavior="height"
             enabled
         >
+            <ModalLoading visible={loading} />
             <View
                 style={{
                     flexDirection: 'row',
@@ -275,6 +175,7 @@ function FeaturedArticle({ navigation }) {
                             style={{
                                 marginLeft: 10,
                             }}
+                            onChangeText={(value) => setSearchText(value)}
                             // Xử lý sự kiện nhập liệu, tìm kiếm, vv.
                         />
                     </View>
@@ -293,17 +194,8 @@ function FeaturedArticle({ navigation }) {
                 )}
             </View>
             <FlatList
-                onEndReached={fetchNextPage}
-                onEndReachedThreshold={0.1}
-                showsVerticalScrollIndicator= {false}
-                data={posts.posts}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                    />
-                }
-                ListFooterComponent={RenderLoader}
+                showsVerticalScrollIndicator={false}
+                data={posts}
                 renderItem={({ item, index }) => (
                     <TouchableOpacity
                         key={index}
@@ -328,7 +220,7 @@ function FeaturedArticle({ navigation }) {
                                 padding: 10,
                             }}
                         >
-                            <View
+                            {/* <View
                                 style={{
                                     position: 'absolute',
                                     zIndex: 3,
@@ -354,7 +246,7 @@ function FeaturedArticle({ navigation }) {
                                     )}{' '}
                                     ngày
                                 </Text>
-                            </View>
+                            </View> */}
                             <Image
                                 source={item.media}
                                 style={{
@@ -395,7 +287,7 @@ function FeaturedArticle({ navigation }) {
                                             color: COLORS.primary,
                                         }}
                                     >
-                                        {item.ownerDisplayname}
+                                        {item.ownerInfo.fullName}
                                     </Text>
                                 </Text>
                                 <View
@@ -407,7 +299,7 @@ function FeaturedArticle({ navigation }) {
                                 >
                                     <Progress.Bar
                                         progress={
-                                            item.totalUserJoin /
+                                            item.numOfPeopleParticipated /
                                             item.participants
                                         }
                                         color="#FF493C"
@@ -448,7 +340,7 @@ function FeaturedArticle({ navigation }) {
                                                     fontWeight: 'bold',
                                                 }}
                                             >
-                                                {item.totalUserJoin} /{' '}
+                                                {item.numOfPeopleParticipated} /{' '}
                                                 {item.participants}
                                             </Text>
                                         </Text>
@@ -467,7 +359,7 @@ function FeaturedArticle({ navigation }) {
                                             }}
                                         >
                                             {(
-                                                (item.totalUserJoin /
+                                                (item.numOfPeopleParticipated /
                                                     item.participants) *
                                                 100
                                             ).toFixed(0)}{' '}

@@ -2,20 +2,21 @@ import {
     View,
     Text,
     TouchableOpacity,
-    ScrollView,
+    Dimensions,
     FlatList,
     StyleSheet,
     ActivityIndicator,
+    Easing,
 } from 'react-native'
 import * as Progress from 'react-native-progress'
-import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import React, { useState, useEffect } from 'react'
 import { COLORS, FONTS, SIZES, images } from '../constants'
 import {
     AntDesign,
     Ionicons,
     Feather,
-    FontAwesome,
+    MaterialIcons,
     MaterialCommunityIcons,
     Entypo,
 } from '@expo/vector-icons'
@@ -24,60 +25,46 @@ import axios from 'axios'
 import API_URL from '../interfaces/config'
 import { Image } from 'expo-image'
 import AsyncStoraged from '../services/AsyncStoraged'
-import { useFocusEffect } from '@react-navigation/native'
-
+import ModalLoading from '../components/ModalLoading'
+import MenuFeed from '../components/MenuFeed'
 import Post from './Feed/Post'
-import {
-    Menu,
-    MenuProvider,
-    MenuOptions,
-    MenuOption,
-    MenuTrigger,
-} from 'react-native-popup-menu'
-import {
-    MyActivity,
-    PostOngoing,
-    Follow,
-    JoinActivity,
-    Question,
-} from '../components/CustomContent'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
-const loading = '../assets/loading.gif'
+import { IOChanel, SocketIOService } from '../scripts/socket'
+const ioService = new SocketIOService()
 const Feed = ({ navigation, route }) => {
     // const { postId } = ;
     const onRefreshPost = () => {
         setCurrentPage(0)
         setPosts([])
+        setUserProdcutive([])
+        setPostOutStandings([])
         setJoinedPost([])
         getPosts()
+        getUserProductive()
+        getPostOutStanding()
         setTypePost('normal')
     }
-    // useFocusEffect(
-    //     React.useCallback(() => {
-    //       fetchNextPage();
-    //     }, [])
-    //   );
-    const Divider = () => (
-        <View
-            style={{
-                height: StyleSheet.hairlineWidth,
-                backgroundColor: '#7F8487',
-            }}
-        />
-    )
+
+    const windowWidth = Dimensions.get('window').width
     const [posts, setPosts] = useState([])
+    const [postOutStandings, setPostOutStandings] = useState([])
+    const [userProductive, setUserProdcutive] = useState([])
     const [joinedPost, setJoinedPost] = useState([])
     const [token, setToken] = useState('')
-    const [avatar, setAvatar] = useState()
+    const [orgId, setOrgId] = useState()
     const [typePost, setTypePost] = useState('normal')
     const [type, setType] = useState()
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
     const [currentPage, setCurrentPage] = useState(0)
     const [isLoading, setIsLoading] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [menuVisible, setMenuVisible] = useState(false)
+
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
+
     useEffect(() => {
         setJoinedPost((prevJoinedPost) => [...prevJoinedPost, route.params])
     }, [route.params])
@@ -87,10 +74,10 @@ const Feed = ({ navigation, route }) => {
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
         if (userStored) {
-            setAvatar(userStored.avatar)
+            setOrgId(userStored._id)
             setType(userStored.type)
         } else {
-            setAvatar(null)
+            setOrgId(null)
             setType(null)
         }
     }
@@ -117,8 +104,36 @@ const Feed = ({ navigation, route }) => {
             console.log('API Error get post:', error)
         }
     }
+    const getUserProductive = async () => {
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/user/productive-activities'
+            )
+
+            if (response.data.status === 'SUCCESS') {
+                setUserProdcutive(response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error get user:', error)
+        }
+    }
+    const getPostOutStanding = async () => {
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/post-top/out-standing'
+            )
+
+            if (response.data.status === 'SUCCESS') {
+                setPostOutStandings(response.data.data)
+            }
+        } catch (error) {
+            console.log('API Error get post out standing:', error)
+        }
+    }
     useEffect(() => {
         getPosts()
+        getUserProductive()
+        getPostOutStanding()
     }, [token])
 
     const [refreshing, setRefreshing] = useState(false)
@@ -130,7 +145,23 @@ const Feed = ({ navigation, route }) => {
             setRefreshing(false)
         })
     }
-
+    const options = [
+        {
+            title: 'Đang theo dõi',
+            icon: 'people-outline',
+            action: () => getPostsFollow(),
+        },
+        {
+            title: 'Đã tham gia',
+            icon: 'heart-outline',
+            action: () => alert('Đã tham gia'),
+        },
+        {
+            title: 'Sắp diễn ra',
+            icon: 'reader-outline',
+            action: () => alert('Sắp diễn ra'),
+        },
+    ]
     const fetchNextPage = async () => {
         if (!isFetchingNextPage) {
             setIsFetchingNextPage(true)
@@ -149,14 +180,15 @@ const Feed = ({ navigation, route }) => {
                         }&limit=5`,
                         config
                     )
-                    if (response.data.status === 'SUCCESS') {
+
+                    if (response.data && response.data.status === 'SUCCESS') {
                         setPosts([...posts, ...response.data.data.posts])
                         setJoinedPost([
                             ...joinedPost,
                             ...response.data.data.joinedPost,
                         ])
                         setCurrentPage(currentPage + 1)
-                    } else {
+                    } else if (response.data) {
                         setPosts([...posts, ...response.data.data.posts])
                         setJoinedPost([
                             ...joinedPost,
@@ -183,17 +215,18 @@ const Feed = ({ navigation, route }) => {
                     }
                 }
             } catch (error) {
-                if (
-                    error.response.status === 400 ||
-                    error.response.status === 500
-                ) {
+                if (error.response.status === 400) {
                     setIsLoading(false)
                     Toast.show({
                         type: 'noPost',
                         text1: 'Bạn đã xem hết rồi',
                         text2: 'Bạn đã xem tất cả bài viết mới nhất',
                         visibilityTime: 2500,
+                        position: 'bottom',
+                        bottomOffset: 70,
                     })
+                } else {
+                    console.log(error)
                 }
             } finally {
                 setIsFetchingNextPage(false)
@@ -202,6 +235,7 @@ const Feed = ({ navigation, route }) => {
     }
 
     const getPostsFollow = async () => {
+        setLoading(true)
         try {
             const res = await axios({
                 method: 'post',
@@ -218,9 +252,12 @@ const Feed = ({ navigation, route }) => {
             }
         } catch (error) {
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
     const viewDetailPost = async (_postId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -237,9 +274,12 @@ const Feed = ({ navigation, route }) => {
             }
         } catch (error) {
             console.log('API Error:', error)
+        } finally {
+            setLoading(false)
         }
     }
     const viewProfile = async (_orgId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -259,6 +299,8 @@ const Feed = ({ navigation, route }) => {
             }
         } catch (error) {
             console.log('API Error:', error)
+        } finally {
+            setLoading(false)
         }
     }
     const RenderSuggestionsContainer = () => {
@@ -270,12 +312,59 @@ const Feed = ({ navigation, route }) => {
                     borderBottomColor: '#fff',
                 }}
             >
-                <View style={{ marginVertical: 8 }}></View>
-
+                <ModalLoading visible={loading} />
+                <View
+                    style={{
+                        paddingVertical: 10,
+                        paddingLeft: 15,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                    }}
+                >
+                    <View
+                        activeOpacity={0.8}
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                color: COLORS.black,
+                                fontWeight: '700',
+                                fontSize: 14,
+                                marginLeft: 5,
+                            }}
+                        >
+                            Tài khoản tích cực
+                        </Text>
+                    </View>
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={{ flexDirection: 'row', marginRight: 10 }}
+                        onPress={() =>
+                            navigation.navigate(
+                                'ProductiveActivities',
+                                userProductive
+                            )
+                        }
+                    >
+                        <Text
+                            style={{
+                                color: COLORS.primary,
+                                fontSize: 14,
+                                marginLeft: 10,
+                            }}
+                        >
+                            Xem tất cả
+                        </Text>
+                    </TouchableOpacity>
+                </View>
                 <FlatList
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
-                    data={posts}
+                    data={userProductive}
                     renderItem={({ item, index }) => (
                         <View
                             key={index}
@@ -287,24 +376,45 @@ const Feed = ({ navigation, route }) => {
                             }}
                         >
                             <TouchableOpacity
-                                onPress={() => viewProfile(item.ownerId)}
+                                onPress={
+                                    item.userId === orgId
+                                        ? () =>
+                                              navigation.navigate(
+                                                  'ProfileOrganisation'
+                                              )
+                                        : () => viewProfile(item.userId)
+                                }
                                 style={{
                                     paddingVertical: 4,
                                     marginLeft: 12,
                                 }}
                             >
-                                <Image
-                                    source={item.ownerAvatar}
-                                    contentFit="contain"
+                                <View
                                     style={{
-                                        width: 80,
-                                        height: 80,
-                                        borderRadius: 80,
-                                        borderWidth: 3,
-
-                                        borderColor: '#FF493C',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        width: 90,
                                     }}
-                                />
+                                >
+                                    <Image
+                                        source={item.avatar}
+                                        style={{
+                                            width: 80,
+                                            height: 80,
+                                            borderRadius: 80,
+                                            borderWidth: 2,
+
+                                            borderColor: '#FF493C',
+                                        }}
+                                    />
+                                    <Text
+                                        style={{ fontSize: 12, marginTop: 7 }}
+                                        numberOfLines={1}
+                                    >
+                                        {item.fullName}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -341,13 +451,18 @@ const Feed = ({ navigation, route }) => {
                                 marginLeft: 5,
                             }}
                         >
-                            Chiến dịch gây quỹ nổi bật
+                            Hoạt động nổi bật
                         </Text>
                     </View>
                     <TouchableOpacity
                         activeOpacity={0.8}
                         style={{ flexDirection: 'row', marginRight: 10 }}
-                        onPress={() => navigation.navigate('FeaturedArticle')}
+                        onPress={() =>
+                            navigation.navigate(
+                                'FeaturedArticle',
+                                postOutStandings
+                            )
+                        }
                     >
                         <Text
                             style={{
@@ -362,10 +477,8 @@ const Feed = ({ navigation, route }) => {
                 </View>
                 <FlatList
                     horizontal={true}
-                    // onEndReached={fetchNextPage}
                     showsHorizontalScrollIndicator={false}
-                    onEndReachedThreshold={0.4}
-                    data={posts}
+                    data={postOutStandings}
                     renderItem={({ item, index }) => (
                         <TouchableOpacity
                             key={index}
@@ -416,7 +529,7 @@ const Feed = ({ navigation, route }) => {
                                     }}
                                 >
                                     <Image
-                                        source={item.ownerAvatar}
+                                        source={item.ownerInfo.avatar}
                                         style={{
                                             height: 48,
                                             width: 48,
@@ -438,7 +551,7 @@ const Feed = ({ navigation, route }) => {
                                                 fontWeight: '500',
                                             }}
                                         >
-                                            {item.ownerDisplayname}
+                                            {item.ownerInfo.fullName}
                                         </Text>
                                         <Text
                                             style={{
@@ -506,8 +619,10 @@ const Feed = ({ navigation, route }) => {
                                                         fontWeight: 'bold',
                                                     }}
                                                 >
-                                                    {item.totalUserJoin} /{' '}
-                                                    {item.participants}
+                                                    {
+                                                        item.numOfPeopleParticipated
+                                                    }{' '}
+                                                    / {item.participants}
                                                 </Text>
                                             </Text>
                                         </View>
@@ -526,7 +641,7 @@ const Feed = ({ navigation, route }) => {
                                                 }}
                                             >
                                                 {(
-                                                    (item.totalUserJoin /
+                                                    (item.numOfPeopleParticipated /
                                                         item.participants) *
                                                     100
                                                 ).toFixed(0)}{' '}
@@ -542,7 +657,7 @@ const Feed = ({ navigation, route }) => {
                                     >
                                         <Progress.Bar
                                             progress={
-                                                item.totalUserJoin /
+                                                item.numOfPeopleParticipated /
                                                 item.participants
                                             }
                                             color="#FF493C"
@@ -559,8 +674,38 @@ const Feed = ({ navigation, route }) => {
                                             marginHorizontal: 10,
                                         }}
                                     >
-                                        {type === 'Organization' ||
-                                        !type ? null : joinedPost.includes(
+                                        <TouchableOpacity
+                                            style={{
+                                                backgroundColor: '#F0F0F0',
+                                                borderRadius: 10,
+                                                padding: 5,
+                                                borderWidth: 2,
+                                                borderColor: COLORS.primary,
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                            }}
+                                            onPress={() =>
+                                                viewDetailPost(item._id)
+                                            }
+                                        >
+                                            <Text
+                                                style={{
+                                                    ...FONTS.body5,
+                                                    color: COLORS.primary,
+                                                }}
+                                            >
+                                                Xem chi tiết
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    {/* <View
+                                        style={{
+                                            paddingVertical: 10,
+                                            marginHorizontal: 10,
+                                        }}
+                                    >
+                                        {type !==
+                                        'User' ? null : !joinedPost ? null : joinedPost.includes(
                                               item._id
                                           ) ? (
                                             <View
@@ -626,7 +771,7 @@ const Feed = ({ navigation, route }) => {
                                                 </Text>
                                             </TouchableOpacity>
                                         )}
-                                    </View>
+                                    </View> */}
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -646,10 +791,7 @@ const Feed = ({ navigation, route }) => {
                             alignItems: 'center',
                         }}
                     >
-                        <Image
-                            source={require(loading)}
-                            style={{ width: 50, height: 50 }}
-                        />
+                        <ActivityIndicator size="large" color={COLORS.black} />
                     </View>
                 ) : null}
             </View>
@@ -765,90 +907,117 @@ const Feed = ({ navigation, route }) => {
         )
     }
 
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <TouchableOpacity
-                style={{ position: 'absolute', right: 12, top: 55 }}
-                onPress={() => navigation.navigate('Chat')}
-            >
-                <AntDesign name="message1" size={23} color={COLORS.black} />
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={{ position: 'absolute', right: 48, top: 55 }}
-                onPress={() => navigation.navigate('NotificationScreen')}
-            >
-                <Ionicons
-                    name="notifications-outline"
-                    size={26}
-                    color={COLORS.black}
-                />
-            </TouchableOpacity>
+    const renderHeader = () => {
+        return (
             <View
                 style={{
-                    position: 'absolute',
-                    top: 50,
-                    left: 12,
-                    width: '55%',
-                    height: '10%',
-                    zIndex: 5,
+                    paddingHorizontal: 22,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                 }}
             >
-                <MenuProvider skipInstanceCheck>
-                    <Menu>
-                        <MenuTrigger>
-                            <Text
-                                style={{
-                                    ...FONTS.body2,
-                                }}
-                            >
-                                Việc Tử Tế{' '}
-                                <Feather
-                                    name="chevron-down"
-                                    size={30}
-                                    color={COLORS.black}
-                                    style={{
-                                        marginTop: 10,
-                                    }}
-                                />
-                            </Text>
-                        </MenuTrigger>
+                <MenuFeed options={options} />
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() =>
+                            navigation.navigate('NotificationScreen')
+                        }
+                        style={{
+                            height: 45,
+                            width: 45,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#fff',
+                            shadowColor: '#18274B',
+                            shadowOffset: {
+                                width: 0,
+                                height: 4.5,
+                            },
+                            shadowOpacity: 0.12,
+                            shadowRadius: 6.5,
+                            elevation: 2,
+                            borderRadius: 22,
+                            marginRight: 10,
+                        }}
+                    >
+                        <Ionicons
+                            name="notifications-outline"
+                            size={26}
+                            color={COLORS.black}
+                        />
+                    </TouchableOpacity>
 
-                        <MenuOptions
-                            customStyles={{
-                                optionsContainer: {
-                                    borderRadius: 10,
+                    {token ? (
+                        <TouchableOpacity
+                            onPress={() =>
+                                navigation.navigate('Chat', ioService)
+                            }
+                            style={{
+                                height: 45,
+                                width: 45,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#fff',
+                                shadowColor: '#18274B',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 4.5,
                                 },
+                                shadowOpacity: 0.12,
+                                shadowRadius: 6.5,
+                                elevation: 2,
+                                borderRadius: 22,
                             }}
                         >
-                            {!type ? null : (
-                                <View>
-                                    <Follow
-                                        text="Đang theo dõi"
-                                        onSelect={getPostsFollow}
-                                        iconName="users"
-                                    />
-                                    {/* <Divider />
-                                    <Question
-                                        text="Bài viết hết hạn"
-                                        value="Mute"
-                                        iconName="alert-circle"
-                                    /> */}
-                                </View>
-                            )}
-                        </MenuOptions>
-                    </Menu>
-                </MenuProvider>
+                            <AntDesign
+                                name="message1"
+                                size={23}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity
+                            style={{
+                                height: 50,
+                                width: 50,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#fff',
+                                shadowColor: '#18274B',
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 4.5,
+                                },
+                                shadowOpacity: 0.12,
+                                shadowRadius: 6.5,
+                                elevation: 2,
+                                borderRadius: 22,
+                            }}
+                            onPress={() => navigation.navigate('LoginScreen')}
+                        >
+                            <AntDesign
+                                name="message1"
+                                size={23}
+                                color={COLORS.black}
+                            />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
-            <View
-                style={{
-                    zIndex: 10,
-                }}
-            >
-                <Toast config={toastConfig} />
-            </View>
-            <View
-                style={{ flex: 1, zIndex: 1, marginTop: 50, marginBottom: 20 }}
-            >
+        )
+    }
+
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+            <ModalLoading visible={loading} />
+            {renderHeader()}
+            <View style={{ flex: 1, marginTop: 15, marginBottom: 20 }}>
                 <Post
                     joinedPost={joinedPost}
                     posts={posts}
@@ -858,6 +1027,13 @@ const Feed = ({ navigation, route }) => {
                     headers={<RenderSuggestionsContainer />}
                     footer={RenderLoader}
                 />
+            </View>
+            <View
+                style={{
+                    zIndex: 10,
+                }}
+            >
+                <Toast config={toastConfig} />
             </View>
         </SafeAreaView>
     )

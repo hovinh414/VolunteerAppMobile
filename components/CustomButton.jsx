@@ -15,6 +15,7 @@ const CustomButton = ({ onPress, title, isLoading }) => {
                 <Text style={{
                     fontFamily: 'monterrat',
                     color: '#FFF',
+                    fontSize:17,
                 }}>{title}</Text>}
         </TouchableOpacity>
     )

@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
     searchText: { flex: 1, height: 30 },
     chat: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-end',
         padding: 12,
         borderBottomWidth: 1,
         borderBottomColor: '#fff',
@@ -34,7 +34,8 @@ export const styles = StyleSheet.create({
     },
     viewChat: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
+        justifyContent:"space-between"
     },
     avatar: {
         width: 50,
@@ -45,7 +46,7 @@ export const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 30,
-        marginLeft:20,
-        marginRight:5,
-    }
+        marginLeft: 20,
+        marginRight: 5,
+    },
 })

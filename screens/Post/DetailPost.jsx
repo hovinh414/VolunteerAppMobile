@@ -8,6 +8,7 @@ import {
     Image,
     FlatList,
     Linking,
+    RefreshControl,
 } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import Modal from 'react-native-modal'
@@ -15,6 +16,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { COLORS, FONTS, SIZES } from '../../constants/theme'
 import * as Progress from 'react-native-progress'
+import PopupMenu from '../../components/PopupMenu'
 import {
     MaterialIcons,
     Feather,
@@ -29,15 +31,18 @@ import API_URL from '../../interfaces/config'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
 import { format } from 'date-fns'
 import ModalLoading from '../../components/ModalLoading'
-
+import CreateGroupModal from '../../components/CreateGroupModal'
+import { getStatusBarHeight } from 'react-native-status-bar-height'
 const DetailPost = ({ navigation, route }) => {
     const [items, setItems] = useState(route.params)
     const screenWidth = Dimensions.get('window').width
+    const screenHeight = Dimensions.get('window').height
     const [type, setType] = useState('')
     const [email, setEmail] = useState('')
     const [showLoading, setShowLoading] = useState(false)
     const [orgId, setOrgId] = useState('')
     const [isModalVisible, setModalVisible] = useState(false)
+    const [showCreate, setShowCreate] = useState(false)
     const [joinId, setJoinId] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
@@ -71,12 +76,40 @@ const DetailPost = ({ navigation, route }) => {
             console.log('API Error:', error)
         }
     }
+    const [statusBarHeight, setStatusBarHeight] = useState(0)
+    const options = [
+        {
+            title: 'Thống kê hoạt động',
+            icon: 'bar-chart-outline',
+            action: () => navigation.navigate('Statistical', items.activityId),
+        },
+        {
+            title: 'Sao kê hoạt động',
+            icon: 'wallet-outline',
+            action: () => alert('Thống kê'),
+        },
+        {
+            title: 'Chi tiết',
+            icon: 'reader-outline',
+            action: () => alert('Thống kê'),
+        },
+    ]
+    useEffect(() => {
+        const height = getStatusBarHeight()
+        setStatusBarHeight(height)
+    }, [])
     const [token, setToken] = useState('')
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
-
+    const [refreshing, setRefreshing] = React.useState(false)
+    const onRefresh = React.useCallback(() => {
+        refreshDetail()
+        setTimeout(() => {
+            setRefreshing(false)
+        }, 2000)
+    }, [])
     useEffect(() => {
         getToken()
     }, [])
@@ -177,7 +210,7 @@ const DetailPost = ({ navigation, route }) => {
                     text2: 'Tham gia thành công',
                     visibilityTime: 2500,
                 })
-                
+
                 setJoinId(items._id)
                 refreshDetail()
             }
@@ -194,6 +227,7 @@ const DetailPost = ({ navigation, route }) => {
             }
         }
     }
+
     const joinActi = () => {
         Alert.alert('Thông báo', 'Bạn có muốn tham gia hoạt động', [
             {
@@ -205,6 +239,56 @@ const DetailPost = ({ navigation, route }) => {
                 text: 'Đồng ý',
                 onPress: () => {
                     joinActivity()
+                },
+            },
+        ])
+    }
+    const joinGroup = async () => {
+        try {
+            setShowLoading(true)
+            const res = await axios({
+                method: 'post',
+                url: API_URL.API_URL + '/group/member/' + items.groupChatId,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            })
+            if (res.data.status === 'SUCCESS') {
+                setShowLoading(false)
+                Toast.show({
+                    type: 'joinToast',
+                    text1: 'Thành công',
+                    text2: 'Tham gia thành công',
+                    visibilityTime: 2500,
+                })
+                refreshDetail()
+            }
+        } catch (error) {
+            if (error) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Thất bại',
+                    text2: 'Tham gia thất bại!',
+                    visibilityTime: 2500,
+                })
+                setShowLoading(false)
+                console.log(error)
+            }
+        }
+    }
+
+    const joinGr = () => {
+        Alert.alert('Thông báo', 'Bạn có muốn tham gia nhóm trò chuyện?', [
+            {
+                text: 'Hủy',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+            },
+            {
+                text: 'Đồng ý',
+                onPress: () => {
+                    joinGroup()
                 },
             },
         ])
@@ -439,17 +523,29 @@ const DetailPost = ({ navigation, route }) => {
             >
                 <Toast config={toastConfig} />
             </View>
+            <CreateGroupModal
+                onRequestClose={() => {
+                    setShowCreate(false)
+                    refreshDetail()
+                }}
+                visible={showCreate}
+                activityId={items.activityId}
+            />
             <ModalLoading visible={showLoading} />
             {renderQrCodeModal()}
             <TouchableOpacity
-                onPress={() => navigation.navigate('Feed',  joinId)}
+                onPress={() => navigation.navigate('Feed', joinId)}
                 style={{
                     position: 'absolute',
-                    top: 50,
+                    bottom:
+                        Platform.OS == 'ios'
+                            ? screenHeight - statusBarHeight - 50
+                            : screenHeight - 50,
                     left: 20,
                     borderRadius: 50,
                     backgroundColor: '#cccc',
                     zIndex: 3,
+                    padding: 4,
                 }}
             >
                 <MaterialIcons
@@ -458,10 +554,20 @@ const DetailPost = ({ navigation, route }) => {
                     color={COLORS.black}
                 />
             </TouchableOpacity>
+            {items.ownerId === orgId ? (
+                <PopupMenu options={options} />
+            ) : null}
+
             <ScrollView
                 style={{
                     backgroundColor: '#fff',
                 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
             >
                 <View style={{ zIndex: 1 }}>
                     <View style={{ flex: 1, marginBottom: 15 }}>
@@ -812,6 +918,7 @@ const DetailPost = ({ navigation, route }) => {
                                 marginBottom: 15,
                             }}
                             horizontal={true}
+                            showsHorizontalScrollIndicator={false}
                             data={items.media}
                             renderItem={({ item, index }) => (
                                 <View
@@ -856,7 +963,9 @@ const DetailPost = ({ navigation, route }) => {
                                     activeOpacity={0.8}
                                     style={{
                                         backgroundColor: COLORS.primary,
-                                        width: '48%',
+                                        width: items.groupChatId
+                                            ? '100%'
+                                            : '48%',
                                         height: 50,
                                         borderRadius: 16,
                                         alignItems: 'center',
@@ -879,35 +988,38 @@ const DetailPost = ({ navigation, route }) => {
                                         color={COLORS.white}
                                     />
                                 </TouchableOpacity>
-                                <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    style={{
-                                        backgroundColor: COLORS.white,
-                                        height: 50,
-                                        borderWidth: 2,
-                                        borderColor: COLORS.primary,
-                                        width: '48%',
-                                        borderRadius: 16,
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: 'row',
-                                    }}
-                                >
-                                    <Text
+                                {!items.groupChatId ? (
+                                    <TouchableOpacity
+                                        onPress={() => setShowCreate(true)}
+                                        activeOpacity={0.8}
                                         style={{
-                                            fontFamily: 'monterrat',
-                                            color: COLORS.primary,
-                                            marginRight: 10,
+                                            backgroundColor: COLORS.white,
+                                            height: 50,
+                                            borderWidth: 2,
+                                            borderColor: COLORS.primary,
+                                            width: '48%',
+                                            borderRadius: 16,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexDirection: 'row',
                                         }}
                                     >
-                                        TẠO GROUP CHAT
-                                    </Text>
-                                    <Feather
-                                        name={'users'}
-                                        size={30}
-                                        color={COLORS.primary}
-                                    />
-                                </TouchableOpacity>
+                                        <Text
+                                            style={{
+                                                fontFamily: 'monterrat',
+                                                color: COLORS.primary,
+                                                marginRight: 10,
+                                            }}
+                                        >
+                                            TẠO NHÓM CHAT
+                                        </Text>
+                                        <Feather
+                                            name={'users'}
+                                            size={30}
+                                            color={COLORS.primary}
+                                        />
+                                    </TouchableOpacity>
+                                ) : null}
                             </View>
                         ) : orgId === items.ownerId ? (
                             <View
@@ -915,34 +1027,37 @@ const DetailPost = ({ navigation, route }) => {
                                     marginBottom: 50,
                                 }}
                             >
-                                <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    style={{
-                                        backgroundColor: COLORS.white,
-                                        height: 50,
-                                        borderWidth: 2,
-                                        borderColor: COLORS.primary,
-                                        borderRadius: 16,
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: 'row',
-                                    }}
-                                >
-                                    <Text
+                                {items.groupChatId ? null : (
+                                    <TouchableOpacity
+                                        onPress={() => setShowCreate(true)}
+                                        activeOpacity={0.8}
                                         style={{
-                                            fontFamily: 'monterrat',
-                                            color: COLORS.primary,
-                                            marginRight: 10,
+                                            backgroundColor: COLORS.white,
+                                            height: 50,
+                                            borderWidth: 2,
+                                            borderColor: COLORS.primary,
+                                            borderRadius: 16,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexDirection: 'row',
                                         }}
                                     >
-                                        TẠO GROUP CHAT
-                                    </Text>
-                                    <Feather
-                                        name={'users'}
-                                        size={30}
-                                        color={COLORS.primary}
-                                    />
-                                </TouchableOpacity>
+                                        <Text
+                                            style={{
+                                                fontFamily: 'monterrat',
+                                                color: COLORS.primary,
+                                                marginRight: 10,
+                                            }}
+                                        >
+                                            TẠO NHÓM CHAT
+                                        </Text>
+                                        <Feather
+                                            name={'users'}
+                                            size={30}
+                                            color={COLORS.primary}
+                                        />
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         ) : items.isAttended ? (
                             <View
@@ -956,7 +1071,9 @@ const DetailPost = ({ navigation, route }) => {
                                     style={{
                                         backgroundColor: '#ccc',
                                         height: 50,
-                                        width: '48%',
+                                        width: items.isJoinGroupChat
+                                            ? '100%'
+                                            : '48%',
                                         borderRadius: 16,
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -971,35 +1088,38 @@ const DetailPost = ({ navigation, route }) => {
                                         ĐÃ ĐIỂM DANH
                                     </Text>
                                 </View>
-                                <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    style={{
-                                        backgroundColor: COLORS.white,
-                                        height: 50,
-                                        borderWidth: 2,
-                                        borderColor: COLORS.primary,
-                                        width: '48%',
-                                        borderRadius: 16,
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: 'row',
-                                    }}
-                                >
-                                    <Text
+                                {!items.isJoinGroupChat && items.groupChatId ? (
+                                    <TouchableOpacity
+                                        onPress={joinGr}
+                                        activeOpacity={0.8}
                                         style={{
-                                            fontFamily: 'monterrat',
-                                            color: COLORS.primary,
-                                            marginRight: 10,
+                                            backgroundColor: COLORS.white,
+                                            height: 50,
+                                            borderWidth: 2,
+                                            borderColor: COLORS.primary,
+                                            width: '48%',
+                                            borderRadius: 16,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexDirection: 'row',
                                         }}
                                     >
-                                        THAM GIA GROUP
-                                    </Text>
-                                    <Feather
-                                        name={'users'}
-                                        size={30}
-                                        color={COLORS.primary}
-                                    />
-                                </TouchableOpacity>
+                                        <Text
+                                            style={{
+                                                fontFamily: 'monterrat',
+                                                color: COLORS.primary,
+                                                marginRight: 10,
+                                            }}
+                                        >
+                                            THAM GIA NHÓM
+                                        </Text>
+                                        <Feather
+                                            name={'users'}
+                                            size={30}
+                                            color={COLORS.primary}
+                                        />
+                                    </TouchableOpacity>
+                                ) : null}
                             </View>
                         ) : items.isJoin ? (
                             <View
@@ -1013,7 +1133,9 @@ const DetailPost = ({ navigation, route }) => {
                                     style={{
                                         backgroundColor: '#ccc',
                                         height: 50,
-                                        width: '48%',
+                                        width: items.isJoinGroupChat || !items.groupChatId
+                                            ? '100%'
+                                            : '48%',
                                         borderRadius: 16,
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -1028,35 +1150,38 @@ const DetailPost = ({ navigation, route }) => {
                                         ĐÃ THAM GIA
                                     </Text>
                                 </View>
-                                <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    style={{
-                                        backgroundColor: COLORS.white,
-                                        height: 50,
-                                        borderWidth: 2,
-                                        borderColor: COLORS.primary,
-                                        width: '48%',
-                                        borderRadius: 16,
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: 'row',
-                                    }}
-                                >
-                                    <Text
+                                {!items.isJoinGroupChat && items.groupChatId ? (
+                                    <TouchableOpacity
+                                        onPress={joinGr}
+                                        activeOpacity={0.8}
                                         style={{
-                                            fontFamily: 'monterrat',
-                                            color: COLORS.primary,
-                                            marginRight: 10,
+                                            backgroundColor: COLORS.white,
+                                            height: 50,
+                                            borderWidth: 2,
+                                            borderColor: COLORS.primary,
+                                            width: '48%',
+                                            borderRadius: 16,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexDirection: 'row',
                                         }}
                                     >
-                                        THAM GIA GROUP
-                                    </Text>
-                                    <Feather
-                                        name={'users'}
-                                        size={30}
-                                        color={COLORS.primary}
-                                    />
-                                </TouchableOpacity>
+                                        <Text
+                                            style={{
+                                                fontFamily: 'monterrat',
+                                                color: COLORS.primary,
+                                                marginRight: 10,
+                                            }}
+                                        >
+                                            THAM GIA NHÓM
+                                        </Text>
+                                        <Feather
+                                            name={'users'}
+                                            size={30}
+                                            color={COLORS.primary}
+                                        />
+                                    </TouchableOpacity>
+                                ) : null}
                             </View>
                         ) : items.isExprired ? (
                             <View

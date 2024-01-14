@@ -6,7 +6,7 @@ import {
     ScrollView,
     TouchableOpacity,
     Dimensions,
-    RefreshControl,
+    ActivityIndicator,
     TextInput,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
@@ -21,17 +21,76 @@ import {
     MaterialCommunityIcons,
 } from '@expo/vector-icons'
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view'
-import CustomViewInfo from '../components/CustomViewInfo'
+import { useNavigation } from '@react-navigation/native'
 import ImageAvata from '../assets/hero2.jpg'
 import { Image } from 'expo-image'
 import AsyncStoraged from '../services/AsyncStoraged'
 import axios from 'axios'
 import API_URL from '../interfaces/config'
-import { useNavigation } from '@react-navigation/native'
-import { format } from 'date-fns'
+import ModalLoading from '../components/ModalLoading'
+
 const search = '../assets/search.png'
-const loading = '../assets/loading.gif'
-const AccountSearch = () => {
+const screenWidth = Dimensions.get('window').width
+const AccountSearch = ({ searchQuery }) => {
+    const [token, setToken] = useState('')
+    const [users, setUsers] = useState([])
+    const [imageLoading, setImageLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
+    const navigation = useNavigation()
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
+    }
+    useEffect(() => {
+        getToken()
+    }, [])
+    useEffect(() => {
+        const handleSearch = async () => {
+            try {
+                const CancelToken = axios.CancelToken
+                let cancel
+                const res = await axios({
+                    method: 'get',
+                    url: API_URL.API_URL + '/search-user?text=' + searchQuery,
+                    cancelToken: new CancelToken(function executor(c) {
+                        cancel = c
+                    }),
+                })
+                setUsers(res.data.data)
+                setImageLoading(false)
+            } catch (error) {
+                console.log('Search error: ', error)
+                setImageLoading(false)
+            }
+        }
+
+        handleSearch()
+    }, [searchQuery])
+    const viewProfile = async (_orgId) => {
+        setLoading(true)
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        }
+        try {
+            const response = await axios.get(
+                API_URL.API_URL + '/profile/' + _orgId,
+                config
+            )
+            if (response.data.status === 'SUCCESS') {
+                navigation.navigate(
+                    'ProfileUser',
+                    response.data.data.profileResult
+                )
+            }
+        } catch (error) {
+            console.log('API Error:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
     return (
         <View>
             <View style={{ marginTop: 25 }}>
@@ -39,172 +98,122 @@ const AccountSearch = () => {
                     Tìm kiếm gần đây
                 </Text>
             </View>
-            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <View
-                    style={{
-                        marginTop: 25,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: 210,
-                        height: 210,
-                        backgroundColor: '#F0F0F0',
-                        borderRadius: 105,
-                    }}
-                >
-                    <Image
-                        source={require(search)}
-                        style={{ width: 180, height: 180 }}
-                    />
+            <ModalLoading visible={loading} />
+            {imageLoading ? (
+                <View style={{ marginTop: 150 }}>
+                    <ActivityIndicator size="large" color={COLORS.black} />
                 </View>
-            </View>
-            <View
-                style={{
-                    marginTop: 25,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}
-            >
-                <Text style={{ fontSize: 15, color: '#696969' }}>
-                    Không có tìm kiếm nào gần đây
-                </Text>
-            </View>
+            ) : users.length > 0 ? (
+                <FlatList
+                    numColumns={3}
+                    data={users}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({ item, index }) => (
+                        <View
+                            key={index}
+                            style={{
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginHorizontal: 12,
+                            }}
+                        >
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                onPress={() => viewProfile(item._id)}
+                                style={{
+                                    flexDirection: 'column',
+                                    width: screenWidth / 3 - 24,
+                                    height: screenWidth / 3 - 24,
+                                    margin: 6,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderRadius: 15,
+                                }}
+                            >
+                                <Image
+                                    source={
+                                        item.avatar ? item.avatar : ImageAvata
+                                    }
+                                    style={{
+                                        marginTop: 10,
+                                        width: screenWidth / 3 - 64,
+                                        height: screenWidth / 3 - 64,
+                                        borderRadius: '50%',
+                                    }}
+                                />
+                                <Text
+                                    numberOfLines={1}
+                                    style={{
+                                        fontSize: 15,
+                                        marginTop: 8,
+                                        fontWeight: '500',
+                                        color: COLORS.black,
+                                    }}
+                                >
+                                    {item.fullname}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                />
+            ) : (
+                // Hiển thị nếu không có kết quả tìm kiếm
+                <>
+                    <View
+                        style={{
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <View
+                            style={{
+                                marginTop: 25,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                width: 210,
+                                height: 210,
+                                backgroundColor: '#F0F0F0',
+                                borderRadius: 105,
+                            }}
+                        >
+                            <Image
+                                source={require(search)}
+                                style={{ width: 180, height: 180 }}
+                            />
+                        </View>
+                    </View>
+                    <View
+                        style={{
+                            marginTop: 25,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Text style={{ fontSize: 15, color: '#696969' }}>
+                            Không có tìm kiếm nào gần đây
+                        </Text>
+                    </View>
+                </>
+            )}
         </View>
     )
 }
 
-const PostSearch = ({ navigation }) => {
-    const labels = [
-        { id: '1', text: 'Người mù quáng trong tình yêu' },
-        { id: '2', text: 'Trẻ em' },
-        { id: '3', text: 'Người khuyết tật' },
-        { id: '4', text: 'Người già' },
-        { id: '5', text: 'Người nghèo' },
-        { id: '6', text: 'Bệnh hiểm nghèo' },
-        { id: '7', text: 'Thiên tai' },
-        { id: '8', text: 'Giáo dục' },
-        { id: '9', text: 'Cứu trợ khẩn cấp' },
-    ]
-    const screenWidth = Dimensions.get('window').width
-
-    const [posts, setPosts] = useState([])
+const PostSearch = ({ searchQuery }) => {
     const [token, setToken] = useState('')
-    const [avatar, setAvatar] = useState(null)
-    const [type, setType] = useState(null)
-    const [typePost, setTypePost] = useState('normal')
-    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
-    const [currentPage, setCurrentPage] = useState(1)
-    const [refreshing, setRefreshing] = useState(false)
-    const [showSearchInput, setShowSearchInput] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-
-    useEffect(() => {
-        getToken()
-    }, [])
-
-    useEffect(() => {
-        getUserStored()
-    }, [])
-
+    const [loading, setLoading] = useState(false)
+    const [imageLoading, setImageLoading] = useState(true)
+    const navigation = useNavigation()
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
         setToken(token)
     }
-
-    const getUserStored = async () => {
-        const userStored = await AsyncStoraged.getData()
-        if (userStored) {
-            setAvatar(userStored.avatar)
-            setType(userStored.type)
-        } else {
-            setAvatar(null)
-            setType(null)
-        }
-    }
-
-    const onRefreshPost = () => {
-        setCurrentPage(1)
-        setPosts([])
-        getPosts()
-    }
-
-    const calculateDaysDifference = (exprirationDate) => {
-        const currentDate = new Date()
-        const targetDate = new Date(exprirationDate)
-        const timeDifference = targetDate - currentDate
-        const daysDifference = Math.floor(
-            timeDifference / (1000 * 60 * 60 * 24)
-        )
-        return daysDifference
-    }
-
-    const getPosts = async () => {
-        const config = {
-            headers: {
-                Authorization: token,
-            },
-        }
-
-        try {
-            const response = await axios.get(
-                API_URL.API_URL + '/posts?page=1&limit=6',
-                config
-            )
-
-            if (response.data.status === 'SUCCESS') {
-                setPosts(response.data.data)
-            }
-        } catch (error) {
-            console.log('API Error get post:', error)
-        }
-    }
-
     useEffect(() => {
-        getPosts()
-    }, [token])
-
-    const onRefresh = () => {
-        setRefreshing(true)
-        setCurrentPage(1)
-        getPosts().then(() => {
-            setRefreshing(false)
-        })
-    }
-
-    const fetchNextPage = async () => {
-        if (!isFetchingNextPage) {
-            setIsFetchingNextPage(true)
-            setIsLoading(true)
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: token,
-                },
-            }
-
-            try {
-                const response = await axios.get(
-                    `${API_URL.API_URL}/posts?page=${currentPage + 1}&limit=6`,
-                    config
-                )
-
-                if (response.data.status === 'SUCCESS') {
-                    setPosts([...posts, ...response.data.data])
-                    setCurrentPage(currentPage + 1)
-                } else {
-                    setPosts([...posts, ...response.data.data])
-                }
-            } catch (error) {
-                setIsLoading(false)
-
-                console.log('API Error:', error)
-                return
-            } finally {
-                setIsFetchingNextPage(false)
-            }
-        }
-    }
-
+        getToken()
+    }, [])
     const viewDetailPost = async (_postId) => {
+        setLoading(true)
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -221,256 +230,172 @@ const PostSearch = ({ navigation }) => {
             }
         } catch (error) {
             console.log('API Error:', error)
+        } finally {
+            setLoading(false)
         }
     }
-    const RenderLoader = () => {
-        return (
-            <View>
-                {isLoading ? (
-                    <View
-                        style={{
-                            marginBottom: 50,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Image
-                            source={require(loading)}
-                            style={{ width: 50, height: 50 }}
-                        />
-                    </View>
-                ) : null}
-            </View>
-        )
-    }
+    const [posts, setPosts] = useState([])
+    useEffect(() => {
+        const handleSearch = async () => {
+            try {
+                const CancelToken = axios.CancelToken
+                let cancel
+                const res = await axios({
+                    method: 'get',
+                    url: API_URL.API_URL + '/search-post?text=' + searchQuery,
+                    cancelToken: new CancelToken(function executor(c) {
+                        cancel = c
+                    }),
+                })
 
-    const renderItem = ({ item }) => (
-        <TouchableOpacity
-            style={{
-                backgroundColor: '#F0F0F0',
-                padding: 10,
-                borderRadius: 15,
-                marginRight: 10,
-                marginTop: 25,
-            }}
-        >
-            <Text>{item.text}</Text>
-        </TouchableOpacity>
-    )
+                setPosts(res.data.data)
+                setImageLoading(false)
+            } catch (error) {
+                console.log('Search error: ', error)
+            }
+        }
+
+        handleSearch()
+    }, [searchQuery])
     return (
         <View>
-            {/* Sử dụng FlatList để hiển thị danh sách */}
-            <View style={{marginBottom:10}}>
-                <FlatList
-                    showsHorizontalScrollIndicator={false}
-                    data={labels}
-                    horizontal={true}
-                    renderItem={renderItem}
-                />
+            <View style={{ marginTop: 25 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 15 }}>
+                    Tìm kiếm gần đây
+                </Text>
             </View>
-            <FlatList
-                onEndReached={fetchNextPage}
-                onEndReachedThreshold={0.4}
-                showsVerticalScrollIndicator={false}
-                data={posts}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                    />
-                }
-                ListFooterComponent={RenderLoader}
-                renderItem={({ item, index }) => (
-                    <TouchableOpacity
-                        key={index}
-                        style={{
-                            flex: 1,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                        activeOpacity={0.8}
-                        onPress={() => viewDetailPost(item._id)}
-                    >
-                        <View
+            <ModalLoading visible={loading} />
+            {imageLoading ? (
+                // Hiển thị loader hoặc ảnh loading nếu cần
+                <View style={{ marginTop: 150 }}>
+                    <ActivityIndicator size="large" color={COLORS.black} />
+                </View>
+            ) : posts.length > 0 ? (
+                <FlatList
+                    showsVerticalScrollIndicator={false}
+                    data={posts}
+                    renderItem={({ item, index }) => (
+                        <TouchableOpacity
+                            key={index}
                             style={{
-                                flexDirection: 'row',
-                                backgroundColor: '#F0F0F0',
-                                width: screenWidth - 25,
-                                height: 130,
-                                marginHorizontal: 12,
-                                marginTop: 15,
-                                justifyContent: 'flex-start',
-                                borderRadius: 15,
-                                padding: 10,
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}
+                            activeOpacity={0.8}
+                            onPress={() => viewDetailPost(item._id)}
                         >
                             <View
                                 style={{
-                                    position: 'absolute',
-                                    zIndex: 3,
-                                    top: 30,
-                                    backgroundColor: '#EE6457',
-                                    borderBottomRightRadius: 5,
-                                    borderTopRightRadius: 5,
-                                    width: 55,
-                                    height: 24,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        color: '#fff',
-                                        fontSize: 12,
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    {calculateDaysDifference(
-                                        item.exprirationDate
-                                    )}{' '}
-                                    ngày
-                                </Text>
-                            </View>
-                            <Image
-                                source={item.media}
-                                style={{
-                                    width: 110,
-                                    height: 110,
+                                    flexDirection: 'row',
+                                    backgroundColor: '#F0F0F0',
+                                    width: screenWidth - 25,
+                                    height: 130,
+                                    marginHorizontal: 12,
+                                    marginTop: 15,
+                                    justifyContent: 'flex-start',
                                     borderRadius: 15,
-                                }}
-                            />
-                            <View
-                                style={{
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    marginLeft: 12,
+                                    padding: 10,
                                 }}
                             >
-                                <Text
+                                <Image
+                                    source={item.media}
                                     style={{
-                                        marginTop: 15,
-                                        ...FONTS.body5,
+                                        width: 110,
+                                        height: 110,
+                                        borderRadius: 15,
+                                    }}
+                                />
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        justifyContent: 'center',
+                                        marginLeft: 12,
+                                        marginRight: 110,
                                     }}
                                 >
-                                    {item.content.length > 22
-                                        ? `${item.content.slice(0, 22)}...`
-                                        : item.content}
-                                </Text>
-                                <Text
-                                    style={{
-                                        marginTop: 15,
-                                        fontSize: 13,
-                                    }}
-                                >
-                                    Tạo bởi{' '}
                                     <Text
                                         style={{
-                                            marginLeft: 12,
-                                            marginTop: 15,
-                                            fontWeight: '700',
-                                            color: COLORS.primary,
+                                            ...FONTS.body5,
                                         }}
+                                        numberOfLines={3}
+                                        ellipsizeMode="tail"
                                     >
-                                        {item.ownerDisplayname}
+                                        {item.content.length > 100
+                                            ? `${item.content.slice(0, 100)}...`
+                                            : item.content}
                                     </Text>
-                                </Text>
-                                <View
-                                    style={{
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginTop: 12,
-                                    }}
-                                >
-                                    <Progress.Bar
-                                        progress={
-                                            item.totalUserJoin /
-                                            item.participants
-                                        }
-                                        color="#FF493C"
-                                        height={8}
-                                        width={screenWidth - 167}
-                                        unfilledColor="#cccc"
-                                        borderColor="#cccc"
-                                        borderRadius={25}
-                                    />
-                                </View>
-                                <View
-                                    style={{
-                                        marginTop: 8,
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                    }}
-                                >
-                                    <View
-                                        activeOpacity={0.8}
+                                    <Text
                                         style={{
-                                            flexDirection: 'row',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
+                                            marginTop: 15,
+                                            fontSize: 13,
                                         }}
                                     >
-                                        <Text
-                                            style={{
-                                                color: COLORS.black,
-                                                fontSize: 14,
-                                                marginLeft: 5,
-                                            }}
-                                        >
-                                            Đã tham gia:{' '}
-                                            <Text
-                                                style={{
-                                                    color: COLORS.primary,
-                                                    fontSize: 14,
-                                                    fontWeight: 'bold',
-                                                }}
-                                            >
-                                                {item.totalUserJoin} /{' '}
-                                                {item.participants}
-                                            </Text>
-                                        </Text>
-                                    </View>
-                                    <TouchableOpacity
-                                        activeOpacity={0.8}
-                                        style={{
-                                            flexDirection: 'row',
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                color: COLORS.primary,
-                                                fontSize: 14,
-                                                marginLeft: 10,
-                                            }}
-                                        >
-                                            {(
-                                                (item.totalUserJoin /
-                                                    item.participants) *
-                                                100
-                                            ).toFixed(0)}{' '}
-                                            %
-                                        </Text>
-                                    </TouchableOpacity>
+                                        {item.type === 'activity'
+                                            ? 'Hoạt động tình nguyện'
+                                            : 'Hoạt động quyên góp'}
+                                    </Text>
                                 </View>
                             </View>
+                        </TouchableOpacity>
+                    )}
+                />
+            ) : (
+                <>
+                    <View
+                        style={{
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <View
+                            style={{
+                                marginTop: 25,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                width: 210,
+                                height: 210,
+                                backgroundColor: '#F0F0F0',
+                                borderRadius: 105,
+                            }}
+                        >
+                            <Image
+                                source={require(search)}
+                                style={{ width: 180, height: 180 }}
+                            />
                         </View>
-                    </TouchableOpacity>
-                )}
-            />
+                    </View>
+                    <View
+                        style={{
+                            marginTop: 25,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Text style={{ fontSize: 15, color: '#696969' }}>
+                            Không có tìm kiếm nào gần đây
+                        </Text>
+                    </View>
+                </>
+            )}
         </View>
     )
 }
 
-const renderScene = SceneMap({
-    first: AccountSearch,
-    second: PostSearch,
-})
 const Search = ({ navigation, route }) => {
     const layout = useWindowDimensions()
+    const [searchQuery, setSearchQuery] = useState('')
     const [index, setIndex] = useState(0)
+
     const [routes] = useState([
         { key: 'first', title: 'Tài khoản', icon: 'home' },
         { key: 'second', title: 'Hoạt động', icon: 'user' },
     ])
+    const renderScene = SceneMap({
+        first: () => <AccountSearch searchQuery={searchQuery} />,
+        second: () => <PostSearch searchQuery={searchQuery} />,
+    })
+    // Sử dụng useEffect để theo dõi thay đổi của searchQuery
 
     const renderTabBar = (props) => (
         <TabBar
@@ -521,7 +446,7 @@ const Search = ({ navigation, route }) => {
                             marginLeft: 15,
                             marginRight: 8,
                             flex: 1,
-                            padding: 7,
+                            padding: 4,
                             alignItems: 'center',
                         }}
                     >
@@ -536,8 +461,23 @@ const Search = ({ navigation, route }) => {
                             style={{
                                 marginLeft: 10,
                                 height: 40,
+                                width: '80%',
                             }}
+                            value={searchQuery}
+                            onChangeText={(text) => setSearchQuery(text)}
                         />
+                        {!searchQuery ? null : (
+                            <TouchableOpacity
+                                activeOpacity={0.8}
+                                onPress={() => setSearchQuery('')}
+                            >
+                                <AntDesign
+                                    size={18}
+                                    name="closecircle"
+                                    color={'#ccc'}
+                                />
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
             </View>

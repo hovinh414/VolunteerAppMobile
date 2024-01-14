@@ -5,7 +5,7 @@ import {
     FlatList,
     ScrollView,
     TouchableOpacity,
-    RefreshControl,
+    ActivityIndicator,
 } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -26,6 +26,8 @@ import { Image } from 'expo-image'
 import { useNavigation } from '@react-navigation/native'
 import Post from '../Feed/Post'
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message'
+import ReportModal from '../../components/ReportModal'
+import CustomViewInfo from '../../components/CustomViewInfo'
 const loading = '../../assets/loading.gif'
 const cover = '../../assets/cover.jpg'
 const ProfileUser = ({ route }) => {
@@ -34,6 +36,7 @@ const ProfileUser = ({ route }) => {
     const [posts, setPosts] = useState([])
     const [token, setToken] = useState('')
     const [showFilter, setShowFilter] = useState(false)
+    const [showReport, setShowReport] = useState(false)
     const [totalFollows, setTotalFollow] = useState(items.followers)
     const getToken = async () => {
         const token = await AsyncStoraged.getToken()
@@ -50,7 +53,7 @@ const ProfileUser = ({ route }) => {
         return unsubscribe
     }, [navigation])
     const onRefreshPost = () => {
-        setCurrentPage(0)
+        setCurrentPage(1)
         setPosts([])
         getPosts()
     }
@@ -170,6 +173,7 @@ const ProfileUser = ({ route }) => {
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
+                        onPress={() => setShowReport(true)}
                         style={{
                             width: 36,
                             height: 36,
@@ -180,8 +184,8 @@ const ProfileUser = ({ route }) => {
                             marginRight: 5,
                         }}
                     >
-                        <Feather
-                            name="more-horizontal"
+                        <AntDesign
+                            name="warning"
                             size={20}
                             color={COLORS.primary}
                         />
@@ -222,7 +226,7 @@ const ProfileUser = ({ route }) => {
         })
     }
     const [isFetchingNextPage, setIsFetchingNextPage] = useState(false)
-    const [currentPage, setCurrentPage] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1)
     const fetchNextPage = async () => {
         if (!isFetchingNextPage && currentPage < 10) {
             setIsLoading(true)
@@ -249,8 +253,9 @@ const ProfileUser = ({ route }) => {
             } catch (error) {
                 setIsLoading(false)
                 Toast.show({
-                    type: 'warning',
-                    text1: 'Chưa có bài viết mới!',
+                    type: 'noPost',
+                    text1: 'Bạn đã xem hết rồi',
+                    text2: 'Bạn đã xem tất cả bài viết mới nhất',
                     visibilityTime: 2500,
                 })
                 console.log('API Error:', error)
@@ -356,7 +361,7 @@ const ProfileUser = ({ route }) => {
                     >
                         {items.fullname}
                     </Text>
-                    {items.isActiveOrganization ? (
+                    {!items.type ? null : items.isActiveOrganization ? (
                         <Text
                             style={{
                                 color: '#4EB09B',
@@ -386,214 +391,253 @@ const ProfileUser = ({ route }) => {
                         </Text>
                     )}
 
-                    <View style={{ flexDirection: 'column' }}>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginVertical: 6,
-                                marginHorizontal: 100,
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Ionicons
-                                name="location-outline"
-                                size={22}
-                                color="black"
+                    {!items.type ? (
+                        <View style={{ flex: 1, marginHorizontal: 22 }}>
+                            <View style={{ paddingTop: 20 }}>
+                                <CustomViewInfo
+                                    onPress={handleMap}
+                                    value={items.address}
+                                    icon={'location-outline'}
+                                    height={70}
+                                />
+                            </View>
+                            <View style={{ paddingTop: 20 }}>
+                                <CustomViewInfo
+                                    onPress={handleEmail}
+                                    value={items.email}
+                                    icon={'mail-outline'}
+                                    height={48}
+                                />
+                            </View>
+                            <View style={{ paddingTop: 20 }}>
+                                <CustomViewInfo
+                                    onPress={handlePhone}
+                                    value={items.phone}
+                                    icon={'call-outline'}
+                                    height={48}
+                                />
+                            </View>
+                        </View>
+                    ) : (
+                        <View style={{ flexDirection: 'column' }}>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    marginVertical: 6,
+                                    marginHorizontal: 100,
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Ionicons
+                                    name="location-outline"
+                                    size={22}
+                                    color="black"
+                                />
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    onPress={() => handleMap(items.address)}
+                                >
+                                    <Text
+                                        style={{
+                                            ...FONTS.body4,
+                                            marginLeft: 4,
+                                            textAlign: 'justify',
+                                        }}
+                                    >
+                                        {items.address}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    marginBottom: 6,
+                                    marginHorizontal: 100,
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <MaterialCommunityIcons
+                                    name="email-outline"
+                                    size={20}
+                                    color="black"
+                                />
+                                <TouchableOpacity
+                                    activeOpacity={0.8}
+                                    onPress={() => handleEmail(items.email)}
+                                >
+                                    <Text
+                                        style={{
+                                            ...FONTS.body4,
+                                            marginLeft: 4,
+                                            textAlign: 'justify',
+                                        }}
+                                    >
+                                        {items.email}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    marginHorizontal: 100,
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Feather name="phone" size={20} color="black" />
+                                <TouchableOpacity
+                                    onPress={() => handlePhone(items.phone)}
+                                    activeOpacity={0.8}
+                                >
+                                    <Text
+                                        style={{
+                                            ...FONTS.body4,
+                                            marginLeft: 4,
+                                            textAlign: 'justify',
+                                        }}
+                                    >
+                                        {items.phone}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+                    {!items.type ? null : (
+                        <>
+                            <FollowButton
+                                handleFollow={handleFollow}
+                                handleUnFollow={handleUnFollow}
                             />
-                            <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() => handleMap(items.address)}
+                            <View
+                                style={{
+                                    paddingTop: 8,
+                                    flexDirection: 'row',
+                                }}
                             >
-                                <Text
+                                <View
                                     style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 4,
-                                        textAlign: 'justify',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginHorizontal: 10,
                                     }}
                                 >
-                                    {items.address}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginBottom: 6,
-                                marginHorizontal: 100,
-                                alignItems: 'center',
-                            }}
-                        >
-                            <MaterialCommunityIcons
-                                name="email-outline"
-                                size={20}
-                                color="black"
-                            />
-                            <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() => handleEmail(items.email)}
-                            >
-                                <Text
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            fontSize: 16,
+                                            lineHeight: 30,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        {totalFollows}
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        Người theo dõi
+                                    </Text>
+                                </View>
+
+                                <View
                                     style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 4,
-                                        textAlign: 'justify',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginHorizontal: 10,
                                     }}
                                 >
-                                    {items.email}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                marginHorizontal: 100,
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Feather name="phone" size={20} color="black" />
-                            <TouchableOpacity
-                                onPress={() => handlePhone(items.phone)}
-                                activeOpacity={0.8}
-                            >
-                                <Text
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            fontSize: 16,
+                                            lineHeight: 30,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        67
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        Đang theo dõi
+                                    </Text>
+                                </View>
+                                {/* <View
                                     style={{
-                                        ...FONTS.body4,
-                                        marginLeft: 4,
-                                        textAlign: 'justify',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        marginHorizontal: 10,
                                     }}
                                 >
-                                    {items.phone}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                    <FollowButton
-                        handleFollow={handleFollow}
-                        handleUnFollow={handleUnFollow}
-                    />
+                                    <Text
+                                        style={{
+                                            fontFamily: 'monterrat',
+                                            fontSize: 16,
+                                            lineHeight: 30,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        75
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            ...FONTS.body5,
+                                            color: COLORS.black,
+                                        }}
+                                    >
+                                        Lượt ủng hộ
+                                    </Text>
+                                </View> */}
+                            </View>
+                        </>
+                    )}
+                </View>
+                {!items.type ? null : (
                     <View
                         style={{
-                            paddingTop: 8,
                             flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginHorizontal: 12,
                         }}
                     >
-                        <View
-                            style={{
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                marginHorizontal: 10,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    fontFamily: 'monterrat',
-                                    fontSize: 16,
-                                    lineHeight: 30,
-                                    color: COLORS.black,
-                                }}
-                            >
-                                {totalFollows}
-                            </Text>
-                            <Text
-                                style={{
-                                    ...FONTS.body5,
-                                    color: COLORS.black,
-                                }}
-                            >
-                                Người theo dõi
-                            </Text>
-                        </View>
-
-                        <View
-                            style={{
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                marginHorizontal: 10,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    fontFamily: 'monterrat',
-                                    fontSize: 16,
-                                    lineHeight: 30,
-                                    color: COLORS.black,
-                                }}
-                            >
-                                67
-                            </Text>
-                            <Text
-                                style={{
-                                    ...FONTS.body5,
-                                    color: COLORS.black,
-                                }}
-                            >
-                                Đang theo dõi
-                            </Text>
-                        </View>
-                        <View
-                            style={{
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                marginHorizontal: 10,
-                            }}
-                        >
-                            <Text
-                                style={{
-                                    fontFamily: 'monterrat',
-                                    fontSize: 16,
-                                    lineHeight: 30,
-                                    color: COLORS.black,
-                                }}
-                            >
-                                75
-                            </Text>
-                            <Text
-                                style={{
-                                    ...FONTS.body5,
-                                    color: COLORS.black,
-                                }}
-                            >
-                                Lượt ủng hộ
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginHorizontal: 12,
-                    }}
-                >
-                    <Text
-                        style={{
-                            color: COLORS.black,
-                            fontSize: 19,
-                            fontWeight: '800',
-                        }}
-                    >
-                        Bài viết
-                    </Text>
-                    <TouchableOpacity onPress={() => setShowFilter(true)}>
                         <Text
                             style={{
-                                color: COLORS.primary,
-
-                                fontSize: 16,
+                                color: COLORS.black,
+                                fontSize: 19,
+                                fontWeight: '800',
                             }}
                         >
-                            Bộ lọc
+                            Bài viết
                         </Text>
-                    </TouchableOpacity>
-                </View>
+                        <TouchableOpacity onPress={() => setShowFilter(true)}>
+                            <Text
+                                style={{
+                                    color: COLORS.primary,
+
+                                    fontSize: 16,
+                                }}
+                            >
+                                Bộ lọc
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
         )
     }
     const [type, setType] = useState('')
     const getUserStored = async () => {
         const userStored = await AsyncStoraged.getData()
-        setType(userStored.type)
+        if (userStored) {
+            setType(userStored.type)
+        } else {
+            setType(null)
+        }
     }
     useEffect(() => {
         getUserStored()
@@ -609,10 +653,7 @@ const ProfileUser = ({ route }) => {
                             alignItems: 'center',
                         }}
                     >
-                        <Image
-                            source={require(loading)}
-                            style={{ width: 50, height: 50 }}
-                        />
+                        <ActivityIndicator size="large" color={COLORS.black} />
                     </View>
                 ) : null}
             </View>
@@ -637,6 +678,92 @@ const ProfileUser = ({ route }) => {
                 renderLeadingIcon={WarningToast}
             />
         ),
+        noPost: ({ text1, text2, email }) => (
+            <View
+                style={{
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    width: '95%',
+                    height: 'auto',
+                    borderLeftColor: '#E0E0E0',
+                    backgroundColor: '#E0E0E0',
+                    borderRadius: 12,
+                    padding: 10,
+                    justifyContent: 'center',
+                }}
+            >
+                <View
+                    style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: 5,
+                    }}
+                >
+                    <Ionicons
+                        name="checkmark-circle-outline"
+                        size={70}
+                        color={COLORS.black}
+                    />
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: 5,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontSize: 18,
+                            fontWeight: '700',
+                            color: COLORS.black,
+                        }}
+                    >
+                        {text1}
+                    </Text>
+                    <Text
+                        style={{
+                            fontSize: 16,
+                            color: COLORS.black,
+                            marginTop: 5,
+                            marginRight: 5,
+                        }}
+                    >
+                        {text2}
+                    </Text>
+                    <TouchableOpacity onPress={onRefreshPost}>
+                        <Text
+                            style={{
+                                fontSize: 16,
+                                color: COLORS.blue,
+                                fontWeight: 'bold',
+                                marginTop: 5,
+                                marginRight: 5,
+                            }}
+                        >
+                            Làm mới lại trang chủ
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        ),
+    }
+    const RenderNoPost = () => {
+        return (
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: 35,
+                }}
+            >
+                <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+                    Chưa có bài viết nào
+                </Text>
+            </View>
+        )
     }
     const WarningToast = () => {
         // Your component logic here
@@ -671,6 +798,13 @@ const ProfileUser = ({ route }) => {
             >
                 <Toast config={toastConfig} />
             </View>
+            <ReportModal
+                onRequestClose={() => {
+                    setShowReport(false)
+                }}
+                visible={showReport}
+                orgId={items._id}
+            />
             <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 style={{
@@ -689,18 +823,31 @@ const ProfileUser = ({ route }) => {
                     color={COLORS.black}
                 />
             </TouchableOpacity>
-            <ModalAlert
-                visible={showFilter}
-                onRequestClose={() => setShowFilter(false)}
-            />
-            <Post
-                posts={posts}
-                fetchNextPage={fetchNextPage}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                headers={<RenderProfileCard />}
-                footer={RenderLoader}
-            />
+            <View>
+                <ModalAlert
+                    visible={showFilter}
+                    onRequestClose={() => setShowFilter(false)}
+                />
+                {posts.length > 0 ? (
+                    <Post
+                        posts={posts}
+                        fetchNextPage={fetchNextPage}
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        headers={<RenderProfileCard />}
+                        footer={!items.type ? null : RenderLoader}
+                    />
+                ) : (
+                    <Post
+                        posts={posts}
+                        fetchNextPage={fetchNextPage}
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        headers={<RenderProfileCard />}
+                        footer={!items.type ? null : RenderNoPost}
+                    />
+                )}
+            </View>
         </SafeAreaView>
     )
 }

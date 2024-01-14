@@ -24,43 +24,48 @@ import * as MediaLibrary from 'expo-media-library'
 import * as DocumentPicker from 'expo-document-picker'
 import { styles } from './ChatDetailStyle'
 import { Image } from 'expo-image'
+import AsyncStoraged from '../../services/AsyncStoraged'
+import { io } from 'socket.io-client'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const file = '../../assets/file.png'
 const video = '../../assets/video.png'
-function ChatDetail({ navigation }) {
+// const socket = SocketIOClient('http://192.168.1.10:3200', {
+//   transports: ['websocket'] // you need to explicitly tell it to use websockets
+// });
+function ChatDetail({ route, navigation }) {
     const [message, setMessage] = useState('')
     const [messages, setMessages] = useState([])
+    const [token, setToken] = useState('')
+    const [avatar, setAvatar] = useState('')
+    const [fullname, setFullname] = useState('')
+    const [userId, setUserId] = useState()
     const [selectedImages, setSelectedImage] = useState([])
     let cameraRef = useRef()
     const [hasCameraPermission, setHasCameraPermission] = useState()
     const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState()
     const [photo, setPhoto] = useState([])
     const [selectedFiles, setSelectedFiles] = useState([])
-
-    useEffect(() => {
-        ;(async () => {
-            const cameraPermission =
-                await Camera.requestCameraPermissionsAsync()
-            const mediaLibraryPermission =
-                await MediaLibrary.requestPermissionsAsync()
-            setHasCameraPermission(cameraPermission.status === 'granted')
-            setHasMediaLibraryPermission(
-                mediaLibraryPermission.status === 'granted'
-            )
-        })()
-    }, [])
-
-    if (hasCameraPermission === undefined) {
-        return <Text>Requesting permissions...</Text>
-    } else if (!hasCameraPermission) {
-        return (
-            <Text>
-                Permission for camera not granted. Please change this in
-                settings.
-            </Text>
-        )
+    const { socket, room, data } = route.params
+    const flatListRef = useRef()
+    const getToken = async () => {
+        const token = await AsyncStoraged.getToken()
+        setToken(token)
     }
-
+    useEffect(() => {
+        getToken()
+        getUserStored()
+        // AsyncStorage.clear();
+        console.log(`socket: ${socket}`)
+        console.log(`room: ${room}`)
+        fetchChatData()
+    }, [])
+    const getUserStored = async () => {
+        const userStored = await AsyncStoraged.getData()
+        setAvatar(userStored.avatar)
+        setFullname(userStored.fullname)
+        setUserId(userStored._id)
+    }
     let takePic = async () => {
         let options = {
             quality: 1,
@@ -74,7 +79,6 @@ function ChatDetail({ navigation }) {
             aspect: [5, 5],
             quality: 1,
         })
-
         delete result.cancelled
         if (!result.canceled) {
             if (!photo) {
@@ -84,12 +88,97 @@ function ChatDetail({ navigation }) {
             }
         }
     }
-    const handleSendMessage = () => {
-        if (message) {
-            setMessages([...messages, { text: message, sender: 'me' }])
-            setMessage('')
+    const fetchChatData = async () => {
+        try {
+            const storedChatData = await AsyncStorage.getItem('chatData')
+            if (storedChatData) {
+                const parsedChatData = JSON.parse(storedChatData)
+
+                // Tìm xem có group chat có groupId tương ứng không
+                const groupChat = parsedChatData.find(
+                    (item) => item.groupId === room
+                )
+
+                if (groupChat) {
+                    setMessages(groupChat.messages)
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching chatData from AsyncStorage:', error)
         }
     }
+    const updateMessages = (newMessage) => {
+        setMessages((list) => [...list, newMessage])
+    }
+
+    const updateChatData = async () => {
+        try {
+            const storedChatData = await AsyncStorage.getItem('chatData')
+            let chatDataArray = storedChatData ? JSON.parse(storedChatData) : []
+
+            // Kiểm tra và khởi tạo mảng nếu cần
+            if (!Array.isArray(chatDataArray)) {
+                chatDataArray = []
+            }
+
+            // Tìm xem có group chat có groupId tương ứng không
+            const existingGroupIndex = chatDataArray.findIndex(
+                (item) => item.groupId === room
+            )
+
+            const updatedChatData = {
+                groupId: room || '',
+                messages: messages,
+            }
+
+            // Nếu tồn tại group chat, cập nhật thông tin, ngược lại thêm mới
+            if (existingGroupIndex !== -1) {
+                chatDataArray[existingGroupIndex] = updatedChatData
+            } else {
+                chatDataArray.push(updatedChatData)
+            }
+
+            const storedChatDataArray = JSON.stringify(chatDataArray)
+            await AsyncStorage.setItem('chatData', storedChatDataArray)
+        } catch (error) {
+            console.error('Error updating chatDataArray:', error)
+        }
+    }
+
+    const handleSendMessage = async () => {
+        if (message !== '' && room && avatar && fullname && userId) {
+            const newMessage = {
+                avatar: avatar,
+                fullname: fullname,
+                message: message,
+                time: new Date(),
+                userId: userId,
+            }
+
+            // Gửi tin nhắn đến server qua socket
+            await socket.emit('send_message', newMessage)
+
+            // Cập nhật local state
+            setMessages((list) => [...list, newMessage])
+
+            // Đặt lại giá trị tin nhắn về rỗng
+            setMessage('')
+        } else {
+            console.error('Missing required values for sending message.')
+        }
+    }
+
+    useEffect(() => {
+        socket.on('receive_message', (data) => {
+            try {
+                updateMessages(data)
+                console.log(`Received data: ${JSON.stringify(data)}`)
+            } catch (error) {
+                console.error('Error handling received message:', error)
+            }
+        })
+    }, [])
+
     const handleImageSelection = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -127,7 +216,38 @@ function ChatDetail({ navigation }) {
         } else {
         }
     }
+    useEffect(() => {
+        // Auto scroll to bottom when component mounts or messages change
+        flatListRef.current.scrollToEnd({ animated: true })
+    }, [messages])
+    const handleScrollToTop = () => {
+        flatListRef.current.scrollToOffset({ animated: true, offset: 0 })
+    }
+    function extractName(fullname) {
+        const lastSpaceIndex = fullname.lastIndexOf(' ')
+        return lastSpaceIndex !== -1
+            ? fullname.slice(lastSpaceIndex + 1)
+            : fullname
+    }
+    function extractNameFromFullname(fullname) {
+        const words = fullname.split(' ')
 
+        if (words.length > 2) {
+            // Lấy 3 từ cuối cùng
+            return words.slice(-3).join(' ')
+        } else {
+            // Nếu từ cuối cùng chỉ có 1 hoặc 2 từ, trả về toàn bộ fullname
+            return extractName(fullname)
+        }
+    }
+
+    function formatTimeFromISOString(ISOString) {
+        const date = new Date(ISOString)
+        const hours = date.getHours().toString().padStart(2, '0')
+        const minutes = date.getMinutes().toString().padStart(2, '0')
+
+        return `${hours}:${minutes}`
+    }
     return (
         <KeyboardAvoidingView
             KeyboardAvoidingView
@@ -136,45 +256,115 @@ function ChatDetail({ navigation }) {
             enabled
         >
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity
+                    onPress={() => {
+                        updateChatData()
+                        navigation.navigate("Chat")
+                    }}
+                >
                     <MaterialIcons
                         name="keyboard-arrow-left"
                         size={30}
                         color={COLORS.black}
                     />
                 </TouchableOpacity>
-                <Image source={images.post5} style={styles.avatarDetail} />
-                <Text style={{ ...FONTS.h4, marginLeft: 10 }}>
-                    Quỹ thiện tâm
-                </Text>
+                <Image source={data.avatar} style={styles.avatarDetail} />
+                <Text style={{ ...FONTS.h4, marginLeft: 10 }}>{data.name}</Text>
             </View>
 
             <FlatList
+                ref={flatListRef}
+                showsVerticalScrollIndicator={false}
+                onLayout={() => {
+                    flatListRef.current.scrollToEnd({ animated: true })
+                }}
                 data={messages}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
                     <View>
-                        <View
-                            style={
-                                item.sender === 'me'
-                                    ? styles.myMessage
-                                    : styles.theirMessage
-                            }
-                        >
-                            <Text
-                                style={
-                                    item.sender === 'me'
-                                        ? styles.messageMyText
-                                        : styles.messageTheirText
-                                }
+                        {item.userId === userId ? (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-end',
+                                    alignItems: 'center',
+                                    marginHorizontal: 12,
+                                    marginTop: 3,
+                                }}
                             >
-                                {item.text}
-                            </Text>
-                        </View>
+                                <View style={styles.myMessage}>
+                                    <Text style={styles.messageMyText}>
+                                        {item.message}
+                                    </Text>
+                                    <Text
+                                        style={{
+                                            fontSize: 10,
+                                            color: COLORS.white,
+                                            paddingHorizontal: 3,
+                                        }}
+                                    >
+                                        {formatTimeFromISOString(item.time)}
+                                    </Text>
+                                </View>
+                            </View>
+                        ) : (
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-start',
+                                    alignItems: 'center',
+                                    marginHorizontal: 12,
+                                    marginTop: 3,
+                                }}
+                            >
+                                <Image
+                                    source={item.avatar}
+                                    style={{
+                                        width: 30,
+                                        height: 30,
+                                        borderRadius: 20,
+                                    }}
+                                />
+                                <View style={{ marginLeft: 15 }}>
+                                    <Text
+                                        style={{
+                                            fontSize: 13,
+                                            marginBottom: 2,
+                                        }}
+                                    >
+                                        {item.fullname}
+                                    </Text>
+                                    <View style={styles.theirMessage}>
+                                        <Text style={styles.messageTheirText}>
+                                            {item.message}
+                                        </Text>
+                                        <Text
+                                            style={{
+                                                fontSize: 10,
+                                                color: COLORS.black,
+                                                paddingHorizontal: 3,
+                                            }}
+                                        >
+                                            {formatTimeFromISOString(item.time)}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                        )}
                     </View>
                 )}
+                onContentSizeChange={() =>
+                    flatListRef.current.scrollToEnd({ animated: true })
+                }
             />
-
+            {/* <GiftedChat
+                messages={messages}
+                // onSend={text => onSendMessage(text)}
+                user={{
+                    _id: 1,
+                }}
+                renderComposer={renderComposer}
+            /> */}
             <View style={styles.viewIcon}>
                 <View style={styles.viewListImage}>
                     <FlatList
